@@ -1,0 +1,5 @@
+/home/kamil/Dokumenty/McuXpressoIDE/sch_embedded_controller/CMSIS/core_cm33.h:2575:22:__NVIC_SetPriority	16	static
+../component/serial_mwm/serial_mwm_usart.c:45:5:mwm_rx	24	static
+../component/serial_mwm/serial_mwm_usart.c:63:5:mwm_tx	24	static
+../component/serial_mwm/serial_mwm_usart.c:80:5:mwm_port_init	8	static
+../component/serial_mwm/serial_mwm_usart.c:105:5:mwm_port_deinit	8	static

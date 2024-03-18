@@ -1,0 +1,5 @@
+../drivers/freertos/fsl_usart_freertos.c:35:13:USART_RTOS_Callback	40	static
+../drivers/freertos/fsl_usart_freertos.c:80:5:USART_RTOS_Init	48	static
+../drivers/freertos/fsl_usart_freertos.c:182:5:USART_RTOS_Deinit	16	static
+../drivers/freertos/fsl_usart_freertos.c:219:5:USART_RTOS_Send	48	static
+../drivers/freertos/fsl_usart_freertos.c:288:5:USART_RTOS_Receive	56	static
