@@ -1,0 +1,11 @@
+../source/wlan_mwm.c:21:5:wlan_get_state	16	static
+../source/wlan_mwm.c:34:6:wlan_state	64	static
+../source/wlan_mwm.c:105:6:wlan_scan	16	static
+../source/wlan_mwm.c:135:6:wlan_connect	16	static
+../source/wlan_mwm.c:164:6:wlan_disconnect	16	static
+../source/wlan_mwm.c:185:6:wlan_reboot	16	static
+../source/wlan_mwm.c:208:6:wlan_config	32	static
+../source/wlan_mwm.c:298:6:wlan_init	32	static
+../source/wlan_mwm.c:331:6:http_POST	440	static
+../source/wlan_mwm.c:401:6:http_GET	416	static
+../source/wlan_mwm.c:466:6:http_head_parser	32	static
