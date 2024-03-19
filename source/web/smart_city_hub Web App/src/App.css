@@ -38,8 +38,22 @@
   display: flex;
   justify-content: space-around;
   align-items: center;
+
 }
 
 .read-the-docs {
   color: #888;
+}
+
+.title {
+  text-align: center;
+  color: #66f6fbda;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.title:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.title.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
 }
