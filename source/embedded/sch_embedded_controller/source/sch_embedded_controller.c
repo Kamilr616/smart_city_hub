@@ -29,8 +29,8 @@ AP_SECURITY_MODE:
 4 - WPA2-PSK
 9 - WPA3-SAE
 ----------------------------------------------------------------------------*/
-#define AP_SSID "Kalinowa_2.4G"
-#define AP_PASSPHRASE "K5Alargo"
+#define AP_SSID "SSID"
+#define AP_PASSPHRASE "PASS"
 #define AP_SECURITY_MODE "4"
 /*---------------------------------------------------------------------------*/
 #define STR_BUFFER_LEN 128
