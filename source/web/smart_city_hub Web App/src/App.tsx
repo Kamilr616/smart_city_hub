@@ -4,14 +4,18 @@ import React from "react";
 import reactLogo from './assets/react.svg'
 import gitLogo from './assets/github-mark-white.svg'
 import kiLogo from './assets/ki_LOGO_w.svg'
+import SensorCharts from "./components/SensorCharts.tsx";
 
 function App() {
 
   return (
       <>
-        <div className="title" onClick={() => window.location.reload()}>
-            <h1>Smart City Hub</h1>
-        </div>
+          <div className="title" onClick={() => window.location.reload()}>
+              <h1>Smart City Hub</h1>
+          </div>
+          <div>
+              <SensorCharts/>
+          </div>
           <div>
               <Home/>
           </div>
