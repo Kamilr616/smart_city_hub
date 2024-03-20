@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 
 import {
@@ -12,6 +12,7 @@ import {
     Legend,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import {Box, Card, CardContent, Typography} from "@mui/material";
 
 ChartJS.register(
     CategoryScale,
@@ -59,7 +60,7 @@ function generateChartData(data: any[] | undefined) {
 }
 
 // @ts-ignore
-function TempChart({ EUID }) {
+function TempChart({ EUID , DName}) {
     const [chartData, setChartData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
 
@@ -93,9 +94,16 @@ function TempChart({ EUID }) {
     }, [EUID]);
 
     return (
-        <div style={{padding: 20}}>
+    <Card variant="outlined">
+    <CardContent>
+        <Typography variant="h5" component="div">
+            {DName}
+        </Typography>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, p: 1, m: 1 }}>
             {chartData && !loading ? <Line options={options} data={chartData}/> : <span>Loading...</span>}
-        </div>
+      </Box>
+    </CardContent>
+  </Card>
     );
 }
 
