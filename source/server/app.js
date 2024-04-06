@@ -1,16 +1,13 @@
-var StateController = require('./controllers/state.controller');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+var stateRouter = require('./routes/states');
+
 
 var app = express();
-
-var stateController = new StateController();
-app.use(stateController.path, stateController.router);
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -19,6 +16,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+//app.use('/users', usersRouter);
+app.use('/state', stateRouter);
 
 module.exports = app;

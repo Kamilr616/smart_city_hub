@@ -1,28 +1,30 @@
 var express = require('express');
 var Router = express.Router;
+const db = require('../db');
+const { collection, getDocs } = require('firebase/firestore/lite');
 
 class StateController {
   constructor() {
-    this.path = '/api/state';
     this.router = Router();
+    this.getLocations = this.getLocations.bind(this);
     this.initializeRoutes();
   }
 
   initializeRoutes() {
-    this.router.get(this.path, this.getState);
+    this.router.get('/locations', this.getLocations);
+    this.router.get('/outlets', this.getOutlets);
+
+  }
+  async getOutlets(req, res) {
+    const collectionRef = collection(db, 'outlets');
+    const documentSnapshot = await getDocs(collectionRef);
+    res.json(documentSnapshot.docs.map(doc => doc.data()));
   }
 
-  getState(req, res) {
-    try {
-      const posts = [
-        { id: 1, title: 'Post 1', content: 'Treść posta 1' },
-        { id: 2, title: 'Post 2', content: 'Treść posta 2' },
-      ];
-      res.json(posts);
-    } catch (error) {
-      console.error('Błąd podczas pobierania postów:', error);
-      res.status(500).json({ error: 'Wystąpił błąd podczas pobierania postów' });
-    }
+  async getLocations(req, res) {
+    const collectionRef = collection(db, 'locations');
+    const documentSnapshot = await getDocs(collectionRef);
+    res.json(documentSnapshot.docs.map(doc => doc.data()));
   }
 }
 
