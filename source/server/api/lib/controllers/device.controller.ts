@@ -3,7 +3,6 @@ import {Request, Response, NextFunction, Router} from 'express';
 import {checkIdParam} from '../middlewares/deviceIdParam.middleware';
 import DeviceService from '../modules/services/device.service';
 import Joi from 'joi';
-import {config} from "../config";
 import {IDevice} from "../modules/models/device.model";
 
 class DeviceController implements Controller {
@@ -34,7 +33,6 @@ class DeviceController implements Controller {
         response.status(200).json(allData);
     };
     private getLatestReadingsFromAllDevice = async (request: Request, response: Response, next: NextFunction) => {
-        const {id} = request.params;
         const allData = await this.deviceService.getAllLatestDeviceEntry();
         response.status(200).json(allData);
     }
@@ -56,7 +54,7 @@ class DeviceController implements Controller {
         const {location, name, description, type} = request.body;
         const {id} = request.params;
         const schema = Joi.object({
-            location: Joi.boolean().required(),
+            location: Joi.string().allow('').required(),
             name: Joi.string().allow(''), // default value if not provided
             description: Joi.string().allow(''), // optional, allows empty string
             type: Joi.string(), // default value if not provided
