@@ -3,7 +3,9 @@ import {Request, Response, NextFunction, Router} from 'express';
 import {checkIdParam} from '../middlewares/deviceIdParam.middleware';
 import DeviceStateService from '../modules/services/deviceState.service';
 import Joi from 'joi';
-
+import {admin} from '../middlewares/admin.middleware';
+//import {auth} from '../middlewares/auth.middleware';
+import {userRole} from '../middlewares/userRole.middleware';
 
 class DeviceStateController implements Controller {
     public path = '/api/state';
@@ -15,20 +17,30 @@ class DeviceStateController implements Controller {
     }
 
     private initializeRoutes() {
-        this.router.get(`${this.path}/all`, this.getAllDeviceStates);
+        this.router.get(`${this.path}/all`, this.getAllDeviceStates);//TODO: NXP auth
+        this.router.get(`${this.path}/get`, userRole, this.getAllUserDeviceStates);
+
         this.router.get(`${this.path}/latest`, this.getLatestStateFromAllDevice);
         this.router.post(`${this.path}/update`, this.updateMultipleDeviceStates);
         this.router.post(`${this.path}/update/:id`, checkIdParam, this.updateDeviceState);
         this.router.get(`${this.path}/all/:id`, checkIdParam, this.getAllDeviceStateData);
         this.router.get(`${this.path}/:id`, checkIdParam, this.getDeviceState);
-        this.router.delete(`${this.path}/all`, this.cleanAllDeviceStateData);
-        this.router.delete(`${this.path}/:id`, checkIdParam, this.removeDeviceState);
+
+        this.router.delete(`${this.path}/all`, admin, this.cleanAllDeviceStateData);
+        this.router.delete(`${this.path}/:id`, admin, checkIdParam, this.removeDeviceState);
     }
 
-private getAllDeviceStates = async (request: Request, response: Response, next: NextFunction) => {
-    const allDeviceStates = await this.deviceStateService.getAllDeviceStates();
-    response.status(200).json(allDeviceStates);
-};
+    private getAllUserDeviceStates = async (request: Request, response: Response, next: NextFunction) => {
+        const role = response.locals.userRole;
+        const allUserDeviceStates = await this.deviceStateService.getAllUserDeviceStates(role);
+
+        response.status(200).json(allUserDeviceStates);
+    };
+
+    private getAllDeviceStates = async (request: Request, response: Response, next: NextFunction) => {
+        const allDeviceStates = await this.deviceStateService.getAllDeviceStates();
+        response.status(200).json(allDeviceStates);
+    };
     private cleanAllDeviceStateData = async (request: Request, response: Response, next: NextFunction) => {
         await this.deviceStateService.cleanAllDeviceData();
         response.status(200).json({message: `Wszystkie dane zostały usunięte.`});
@@ -39,7 +51,6 @@ private getAllDeviceStates = async (request: Request, response: Response, next: 
         response.status(200).json(allData);
     };
     private getLatestStateFromAllDevice = async (request: Request, response: Response, next: NextFunction) => {
-        const {id} = request.params;
         const allData = await this.deviceStateService.getAllLatestDeviceStateEntry();
         response.status(200).json(allData);
     }
