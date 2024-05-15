@@ -6,4 +6,4 @@ const PasswordSchema = new Schema<IPassword>({
    password: { type: String, required: true }
 });
 
-export default model<IPassword>('Password', PasswordSchema);
+export default model<IPassword>('PasswordKR', PasswordSchema);
