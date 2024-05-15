@@ -14,4 +14,4 @@ const TokenSchema = new Schema<IToken>({
    value: { type: String, required: true }
 });
 
-export default model<IToken>('Token', TokenSchema);
+export default model<IToken>('TokenKR', TokenSchema);
