@@ -3,8 +3,8 @@ import {Request, Response, NextFunction, Router} from 'express';
 import {checkIdParam} from '../middlewares/deviceIdParam.middleware';
 import SensorService from '../modules/services/sensor.service';
 import Joi from 'joi';
-// import {config} from "../config";
-// import {ISensor} from "../modules/models/sensor.model";
+import {auth} from '../middlewares/auth.middleware';
+import {admin} from "../middlewares/admin.middleware";
 
 class SensorController implements Controller {
     public path = '/api/sensor';
