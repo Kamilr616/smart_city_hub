@@ -4,6 +4,22 @@ import {IDevice} from "../models/device.model";
 
 export default class DeviceService {
 
+    public async getAllUserDevices(loc: string) {
+        try {
+            return await DeviceModel.find({location: loc}, {__v: 0, _id: 0});
+        } catch (error) {
+            throw new Error(`Query failed: ${error}`);
+        }
+    }
+    public async getAllUserDevicesByLoc(location: string) {
+
+        try {
+            return await DeviceModel.find({location: location}, {__v: 0, _id: 0});
+        } catch (error) {
+            throw new Error(`Query failed: ${error}`);
+        }
+    }
+
     public async createDeviceEntry(dataParams: IDevice) {
         try {
             const deviceModel = new DeviceModel(dataParams);

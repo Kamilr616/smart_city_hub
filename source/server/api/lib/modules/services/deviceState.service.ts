@@ -1,6 +1,6 @@
 import DeviceStateModel from '../schemas/deviceState.schema';
 import {config} from "../../config";
-import {IDeviceState} from "../models/deviceState.model";
+import DeviceModel from "../schemas/device.schema";
 
 export default class DeviceStateService {
 
@@ -13,6 +13,36 @@ export default class DeviceStateService {
     //         throw new Error('Wystąpił błąd podczas tworzenia ');
     //     }
     // }
+    public async getAllUserDeviceStates(role: string) {
+        try {
+            // Pobieramy urządzenia na podstawie roli użytkownika
+            const devices = await DeviceModel.find({location: role}, {__v: 0, _id: 0});
+
+            // Pobieramy identyfikatory urządzeń
+            const ids = devices.map(device => device.deviceId);
+
+            // Tworzymy tablicę obietnic dla wszystkich zapytań do bazy danych o stany urządzeń
+            const promises = ids.map(id =>
+                DeviceStateModel.find({deviceId: id}, {__v: 0, _id: 0})
+                    .catch(error => {
+                        console.error(`Failed to fetch device states for deviceId ${id}: ${error}`);
+                        // W przypadku błędu zwracamy pustą tablicę
+                        return [];
+                    })
+            );
+
+            // Wykonujemy wszystkie zapytania równolegle
+            const results = await Promise.all(promises);
+
+            // Łączymy wyniki wszystkich zapytań w jedną tablicę
+            // Zwracamy wszystkie stany urządzeń
+            return results.flat();
+        } catch (error) {
+            // Obsługa błędów w przypadku nieudanej próby pobrania urządzeń
+            throw new Error(`Failed to fetch devices for role ${role}: ${error}`);
+        }
+    }
+
 
     public async cleanDeviceData(deviceID: string) {
         try {
@@ -85,14 +115,16 @@ export default class DeviceStateService {
             throw new Error(`Query failed: ${error}`);
         }
     }
-public async getAllDeviceStates() {
-    try {
-        const deviceStates = await DeviceStateModel.find({}, {__v: 0, _id: 0});
-        return deviceStates.map(deviceState => deviceState.states[0].state);
-    } catch (error) {
-        throw new Error(`Query failed: ${error}`);
+
+    public async getAllDeviceStates() {
+        try {
+            const deviceStates = await DeviceStateModel.find({}, {__v: 0, _id: 0});
+            return deviceStates.map(deviceState => deviceState.states[0].state);
+        } catch (error) {
+            throw new Error(`Query failed: ${error}`);
+        }
     }
-}
+
     public async getAllPeriodDeviceStateEntry(limitNum: number) {
         let latestData: any[] = [];
         await Promise.all(

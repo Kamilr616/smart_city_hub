@@ -4,6 +4,10 @@ import {checkIdParam} from '../middlewares/deviceIdParam.middleware';
 import DeviceService from '../modules/services/device.service';
 import Joi from 'joi';
 import {IDevice} from "../modules/models/device.model";
+import {admin} from "../middlewares/admin.middleware";
+import {auth} from "../middlewares/auth.middleware";
+
+//import {userRole} from "../middlewares/userRole.middleware";
 
 class DeviceController implements Controller {
     public path = '/api/device';
@@ -15,13 +19,28 @@ class DeviceController implements Controller {
     }
 
     private initializeRoutes() {
-        this.router.get(`${this.path}/latest`, this.getLatestReadingsFromAllDevice);
-        this.router.get(`${this.path}/all/:id`,checkIdParam, this.getAllDeviceData);
-        this.router.post(`${this.path}/:id`, checkIdParam, this.updateDevice);
-        this.router.get(`${this.path}/:id`, checkIdParam, this.getDeviceData);
-        this.router.delete(`${this.path}/all`, this.cleanAllDeviceData);
-        this.router.delete(`${this.path}/:id`, checkIdParam, this.removeDevice);
+        this.router.get(`${this.path}/latest`, admin, this.getLatestReadingsFromAllDevice);
+        this.router.get(`${this.path}/get/:location`, admin, this.getAllUserDevicesByLoc);
+        this.router.get(`${this.path}/get`, auth, this.getAllUserDevices);
+
+        this.router.get(`${this.path}/all/:id`, admin, checkIdParam, this.getAllDeviceData);
+        this.router.post(`${this.path}/:id`, admin, checkIdParam, this.updateDevice);  //TODO: admin
+        this.router.get(`${this.path}/:id`, admin, checkIdParam, this.getDeviceData);
+        this.router.delete(`${this.path}/all`, admin, this.cleanAllDeviceData);
+        this.router.delete(`${this.path}/:id`, admin, checkIdParam, this.removeDevice);
     }
+
+    private getAllUserDevices = async (request: Request, response: Response, next: NextFunction) => {
+        const loc = response.locals.userRole;
+        const allUserDevices = await this.deviceService.getAllUserDevices(loc);
+        response.status(200).json(allUserDevices);
+    };
+    private getAllUserDevicesByLoc = async (request: Request, response: Response, next: NextFunction) => {
+        const {location} = request.params;
+        const allUserDevices = await this.deviceService.getAllUserDevicesByLoc(location);
+
+        response.status(200).json(allUserDevices);
+    };
 
     private cleanAllDeviceData = async (request: Request, response: Response, next: NextFunction) => {
         await this.deviceService.cleanAllDeviceData();

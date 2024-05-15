@@ -16,13 +16,13 @@ class SensorController implements Controller {
     }
 
     private initializeRoutes() {
-        this.router.get(`${this.path}/latest`, this.getLatestReadingsFromAllSensor);
-        this.router.get(`${this.path}/:id`, checkIdParam, this.getAllSensorData);
-        this.router.get(`${this.path}/:id/latest`, checkIdParam, this.getPeriodSensorData);
-        this.router.get(`${this.path}/:id/:num`, checkIdParam, this.getPeriodSensorData);
-        this.router.post(`${this.path}/:id`, checkIdParam, this.addSensorData);
-        this.router.delete(`${this.path}/all`, this.cleanAllSensorData);
-        this.router.delete(`${this.path}/:id`, checkIdParam, this.cleanSensorData);
+        this.router.get(`${this.path}/latest`, auth, this.getLatestReadingsFromAllSensor);
+        this.router.get(`${this.path}/:id`, auth, checkIdParam, this.getAllSensorData);
+        this.router.get(`${this.path}/:id/latest`, auth, checkIdParam, this.getPeriodSensorData);
+        this.router.get(`${this.path}/:id/:num`, auth, checkIdParam, this.getPeriodSensorData);
+        this.router.post(`${this.path}/:id`, admin, checkIdParam, this.addSensorData);
+        this.router.delete(`${this.path}/all`, admin, this.cleanAllSensorData);
+        this.router.delete(`${this.path}/:id`, admin, checkIdParam, this.cleanSensorData);
     }
 
     private cleanSensorData = async (request: Request, response: Response, next: NextFunction) => {
@@ -38,7 +38,7 @@ class SensorController implements Controller {
 
     private getPeriodSensorData = async (request: Request, response: Response, next: NextFunction) => {
         const {id, num} = request.params;
-        let allData: any[] = [];
+        let allData: any[];
         if (num) {
             allData = await this.sensorService.getPeriodSensorDataLatest(parseInt(num));
         } else {
@@ -48,7 +48,6 @@ class SensorController implements Controller {
     }
 
     private getLatestReadingsFromAllSensor = async (request: Request, response: Response, next: NextFunction) => {
-        const {id} = request.params;
         const allData = await this.sensorService.getAllNewestSensorData();
         response.status(200).json(allData);
     }
