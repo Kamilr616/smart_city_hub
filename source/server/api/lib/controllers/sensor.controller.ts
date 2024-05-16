@@ -1,6 +1,6 @@
 import Controller from '../interfaces/controller.interface';
 import {Request, Response, NextFunction, Router} from 'express';
-import {checkIdParam} from '../middlewares/deviceIdParam.middleware';
+import {checkSensorIdParam} from '../middlewares/deviceIdParam.middleware';
 import SensorService from '../modules/services/sensor.service';
 import Joi from 'joi';
 import {admin} from "../middlewares/admin.middleware";
@@ -23,56 +23,59 @@ class SensorController implements Controller {
         //this.router.get(`${this.path}/user/all/latest`, userRole, this.getAllUserLatestSensorData);
 
         this.router.get(`${this.path}/all/latest`, auth, this.getLatestReadingsFromAllSensor);
-        this.router.get(`${this.path}/all/:num`, admin, checkIdParam, this.getPeriodSensorData);
+        this.router.get(`${this.path}/all/:num`, admin, checkSensorIdParam, this.getPeriodSensorData);
         this.router.get(`${this.path}/all`, auth, this.getPeriodAllSensorData);
-        this.router.get(`${this.path}/:id`, admin, checkIdParam, this.getAllSingleSensorData);
-        this.router.post(`${this.path}/iot/update`, admin, checkIdParam, this.addMultipleSensorData);  //TODO: NXP auth
-        this.router.post(`${this.path}/update/:id`, admin, checkIdParam, this.addSingleSensorData);
+        this.router.get(`${this.path}/:id`, admin, checkSensorIdParam, this.getAllSingleSensorData);
+        this.router.post(`${this.path}/iot/update`, admin, checkSensorIdParam, this.addMultipleSensorData);  //TODO: NXP auth
+        this.router.post(`${this.path}/update/:id`, admin, checkSensorIdParam, this.addSingleSensorData);
         this.router.delete(`${this.path}/all`, admin, this.cleanAllSensorData);
-        this.router.delete(`${this.path}/:id`, admin, checkIdParam, this.cleanSingleSensorData);
+        this.router.delete(`${this.path}/:id`, admin, checkSensorIdParam, this.cleanSingleSensorData);
     }
+
     private getPeriodAllSensorData = async (request: Request, response: Response, next: NextFunction) => {
-        const allData = await this.sensorService.getPeriodSensorDataLatest(20);
-        response.status(200).json(allData);
-    }
+        response.status(200).json(await this.sensorService.getPeriodSensorDataLatest(20));
+    };
 
     private getAllSensorData = async (request: Request, response: Response, next: NextFunction) => {
         response.status(200).json(await this.sensorService.getAllSensorDataService());
-    }
+    };
+
     private getAllUserSensorData = async (request: Request, response: Response, next: NextFunction) => {
         const role = response.locals.userRole;
         response.status(200).json(await this.sensorService.getAllUserSensorDataService(role));
-    }
+    };
+
     private getAllUserLatestSensorData = async (request: Request, response: Response, next: NextFunction) => {
         const role = response.locals.userRole;
         response.status(200).json(await this.sensorService.getAllUserLatestSensorDataService(role));
-    }
+    };
+
     private cleanSingleSensorData = async (request: Request, response: Response, next: NextFunction) => {
         const {id} = request.params;
         await this.sensorService.cleanSensorData(id);
         response.status(200).json({message: `Dane dla urządzenia ${id} zostały usunięte.`});
-    }
+    };
 
     private cleanAllSensorData = async (request: Request, response: Response, next: NextFunction) => {
         await this.sensorService.cleanAllSensorData();
         response.status(200).json({message: `Wszystkie dane zostały usunięte.`});
-    }
+    };
 
     private getPeriodSensorData = async (request: Request, response: Response, next: NextFunction) => {
         const {num} = request.params;
         const allData = await this.sensorService.getPeriodSensorDataLatest(parseInt(num, 10));
         response.status(200).json(allData);
-    }
+    };
 
     private getLatestReadingsFromAllSensor = async (request: Request, response: Response, next: NextFunction) => {
         response.status(200).json(await this.sensorService.getAllNewestSensorData());
-    }
+    };
 
     private getAllSingleSensorData = async (request: Request, response: Response, next: NextFunction) => {
         const {id} = request.params;
         const allData = await this.sensorService.query(id);
         response.status(200).json(allData);
-    }
+    };
 
     private addSingleSensorData = async (request: Request, response: Response, next: NextFunction) => {
         const {air} = request.body;
@@ -107,6 +110,7 @@ class SensorController implements Controller {
             response.status(400).json({error: 'Invalid input data.'});
         }
     };
+
     private addMultipleSensorData = async (request: Request, response: Response, next: NextFunction) => {
         const {sensorData} = request.body; // Przyjmujemy tablicę obiektów z danymi pomiarowymi dla różnych urządzeń
         // Walidacja danych wejściowych za pomocą biblioteki Joi
@@ -120,7 +124,6 @@ class SensorController implements Controller {
                 }).required()
             })
         );
-
         try {
             // Sprawdzamy, czy dane wejściowe pasują do określonego schematu
             const validatedData = await schema.validateAsync(sensorData);
@@ -148,7 +151,7 @@ class SensorController implements Controller {
             console.error(`Validation Error: ${error.message}`);
             response.status(400).json({error: 'Invalid input data.'});
         }
-    }
+    };
 
 }
 
