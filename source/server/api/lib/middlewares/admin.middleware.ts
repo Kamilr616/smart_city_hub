@@ -16,7 +16,7 @@ export const admin = (request: Request, response: Response, next: NextFunction) 
                     return response.status(400).send('Invalid token.');
                 }
                 const user: IUser = decoded as IUser;
-                if (!user.isAdmin) {
+                if (!user.isAdmin && !(user.role === 'admin')) {
                     return response.status(403).send('Access denied.');
                 }
                 next();
