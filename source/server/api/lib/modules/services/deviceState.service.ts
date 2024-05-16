@@ -89,9 +89,7 @@ export default class DeviceStateService {
                     upsert: true
                 }
             }));
-
             await DeviceStateModel.bulkWrite(bulkOps);
-            console.log('Bulk update operation completed successfully.');
         } catch (error) {
             console.error('Error during bulk update:', error);
             throw new Error('Failed to update device states in bulk');
@@ -180,9 +178,9 @@ export default class DeviceStateService {
     }
 
     public async updateUserDeviceStatesBatch(deviceStates: Array<{
-        deviceId: number;
-        state: boolean
-    }>, role: string): Promise<void> {
+                                                                    deviceId: number;
+                                                                    state: boolean
+                                                                }>, role: string):Promise<void> {
         try {
             // Fetch the devices for the user's role
             let devices;
@@ -192,7 +190,6 @@ export default class DeviceStateService {
                 devices = await DeviceModel.find({location: role}, {__v: 0, _id: 0});
             }
             const userDeviceIds = devices.map(device => device.deviceId);
-
             // Filter the deviceStates array to only include devices that the user has access to
             const validDeviceStates = deviceStates.filter(deviceState => userDeviceIds.includes(deviceState.deviceId));
 
@@ -200,7 +197,6 @@ export default class DeviceStateService {
             if (validDeviceStates.length === 0) {
                 console.error('No valid devices found for the user role');
             }
-
             // Proceed with the bulk update operation for the valid devices
             const bulkOps = validDeviceStates.map(deviceState => ({
                 updateOne: {
@@ -211,7 +207,6 @@ export default class DeviceStateService {
             }));
 
             await DeviceStateModel.bulkWrite(bulkOps);
-            console.log('Bulk update operation completed successfully.');
         } catch (error) {
             console.error('Error during bulk update:', error);
             throw new Error('Failed to update device states in bulk');
