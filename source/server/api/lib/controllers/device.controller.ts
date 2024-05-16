@@ -1,6 +1,5 @@
 import Controller from '../interfaces/controller.interface';
 import {Request, Response, NextFunction, Router} from 'express';
-import {checkIdParam} from '../middlewares/deviceIdParam.middleware';
 import DeviceService from '../modules/services/device.service';
 import Joi from 'joi';
 import {IDevice} from "../modules/models/device.model";
@@ -20,52 +19,51 @@ class DeviceController implements Controller {
         this.router.get(`${this.path}/latest`, admin, this.getLatestReadingsFromAllDevice);
         this.router.get(`${this.path}/get/:location`, admin, this.getAllUserDevicesByLoc);
         this.router.get(`${this.path}/user/get`, userRole, this.getAllUserDevices);
-        this.router.get(`${this.path}/all/:id`, admin, checkIdParam, this.getAllDeviceData);
-        this.router.post(`${this.path}/:id`, admin, checkIdParam, this.updateDevice);  //TODO: admin
-        this.router.get(`${this.path}/:id`, admin, checkIdParam, this.getDeviceData);
+        this.router.get(`${this.path}/all/:id`, admin, this.getAllDeviceData);
+        this.router.post(`${this.path}/:id`, admin, this.updateDevice);
+        this.router.get(`${this.path}/:id`, admin, this.getDeviceData);
         this.router.delete(`${this.path}/all`, admin, this.cleanAllDeviceData);
-        this.router.delete(`${this.path}/:id`, admin, checkIdParam, this.removeDevice);
+        this.router.delete(`${this.path}/:id`, admin, this.removeDevice);
     }
 
     private getAllUserDevices = async (request: Request, response: Response, next: NextFunction) => {
         const loc = response.locals.userRole;
         const allUserDevices = await this.deviceService.getAllUserDevices(loc);
         response.status(200).json(allUserDevices);
-    }
+    };
 
     private getAllUserDevicesByLoc = async (request: Request, response: Response, next: NextFunction) => {
         const {location} = request.params;
         const allUserDevices = await this.deviceService.getAllUserDevicesByLoc(location);
         response.status(200).json(allUserDevices);
-    }
+    };
 
     private cleanAllDeviceData = async (request: Request, response: Response, next: NextFunction) => {
         await this.deviceService.cleanAllDeviceData();
         response.status(200).json({message: `Wszystkie dane zostały usunięte.`});
-    }
+    };
 
     private getAllDeviceData = async (request: Request, response: Response, next: NextFunction) => {
         const {id} = request.params;
         const allData = await this.deviceService.query(id);
         response.status(200).json(allData);
-    }
+    };
 
     private getLatestReadingsFromAllDevice = async (request: Request, response: Response, next: NextFunction) => {
-        const allData = await this.deviceService.getAllLatestDeviceEntry();
-        response.status(200).json(allData);
-    }
+        response.status(200).json(await this.deviceService.getAllLatestDeviceEntry());
+    };
 
     private removeDevice = async (request: Request, response: Response, next: NextFunction) => {
         const {id} = request.params;
         await this.deviceService.cleanDeviceData(id);
         response.status(200).json({message: `Urządzenie ${id} zostało usunięte.`});
-    }
+    };
 
     private getDeviceData = async (request: Request, response: Response, next: NextFunction) => {
         const {id} = request.params;
         const allData = await this.deviceService.query(id);
         response.status(200).json(allData);
-    }
+    };
 
     private updateDevice = async (request: Request, response: Response, next: NextFunction) => {
         const {location, name, description, type} = request.body;
@@ -96,7 +94,7 @@ class DeviceController implements Controller {
             console.error(`Validation Error: ${error.message}`);
             response.status(400).json({error: 'Invalid input data.'});
         }
-    }
+    };
 
 }
 

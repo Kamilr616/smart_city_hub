@@ -16,7 +16,6 @@ export const userRole = (request: Request, response: Response, next: NextFunctio
                 }
                 const user: IUser = decoded as IUser;
                 response.locals.userRole = user.role;
-                console.log('userRole:', response.locals.userRole);
                 next();
                 return;
             });

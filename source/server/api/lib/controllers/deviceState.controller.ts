@@ -1,6 +1,5 @@
 import Controller from '../interfaces/controller.interface';
 import {Request, Response, NextFunction, Router} from 'express';
-import {checkIdParam} from '../middlewares/deviceIdParam.middleware';
 import DeviceStateService from '../modules/services/deviceState.service';
 import Joi from 'joi';
 import {admin} from '../middlewares/admin.middleware';
@@ -13,30 +12,28 @@ class DeviceStateController implements Controller {
 
     constructor() {
         this.initializeRoutes();
-    };
+    }
 
     private initializeRoutes() {
-        this.router.post(`${this.path}/user/update`, userRole, this.updateMultipleUserDeviceState);
-        this.router.get(`${this.path}/iot/all`, admin, this.getAllLatestDeviceState);//TODO: NXP auth
+        this.router.get(`${this.path}/iot/all`, admin, this.getAllLatestDeviceState); //TODO: NXP auth
         this.router.get(`${this.path}/user/latest`, userRole, this.getAllLatestUserDeviceState);
         this.router.get(`${this.path}/latest`, admin, this.getAllLatestDeviceState);
         this.router.get(`${this.path}/all`, admin, this.getAllDeviceStateData);
+        this.router.post(`${this.path}/user/update`, userRole, this.updateMultipleUserDeviceState);
         this.router.post(`${this.path}/update`, admin, this.updateMultipleDeviceState);
-        this.router.post(`${this.path}/update/:id`, admin, checkIdParam, this.updateSingleDeviceState);
-        this.router.get(`${this.path}/:id`, admin, checkIdParam, this.getSingleDeviceStateData);
+        this.router.post(`${this.path}/update/:id`, admin, this.updateSingleDeviceState);
+        this.router.get(`${this.path}/:id`, admin, this.getSingleDeviceStateData);
         this.router.delete(`${this.path}/all`, admin, this.cleanAllDeviceStateData);
-        this.router.delete(`${this.path}/:id`, admin, checkIdParam, this.cleanSingleDeviceStateData);
-    };
+        this.router.delete(`${this.path}/:id`, admin, this.cleanSingleDeviceStateData);
+    }
 
     private getAllLatestUserDeviceState = async (request: Request, response: Response, next: NextFunction) => {
         const role = response.locals.userRole;
-        const allUserDeviceStates = await this.deviceStateService.getAllUserDeviceStates(role);
-        response.status(200).json(allUserDeviceStates);
+        response.status(200).json(await this.deviceStateService.getAllUserDeviceStates(role));
     };
 
     private getAllDeviceStateData = async (request: Request, response: Response, next: NextFunction) => {
-        const allDeviceStates = await this.deviceStateService.getAllDeviceStateDataService();
-        response.status(200).json(allDeviceStates);
+        response.status(200).json(await this.deviceStateService.getAllDeviceStateDataService());
     };
 
     private cleanAllDeviceStateData = async (request: Request, response: Response, next: NextFunction) => {

@@ -51,11 +51,10 @@ export default class SensorService {
         }
     }
 
-
     public async getPeriodSensorDataLatest(limitNum: number) {
         let latestData: any[] = [];
         await Promise.all(
-            Array.from({length: config.supportedDevicesNum}, async (_, i) => {
+            Array.from({length: config.supportedSensorsNum}, async (_, i) => {
                 try {
                     const latestEntry = await SensorModel.find({deviceId: i}, {
                         __v: 0,
@@ -79,7 +78,7 @@ export default class SensorService {
     public async getAllNewestSensorData() {
         let latestData: any[] = [];
         await Promise.all(
-            Array.from({length: config.supportedDevicesNum}, async (_, i) => {
+            Array.from({length: config.supportedSensorsNum}, async (_, i) => {
                 try {
                     const latestEntry = await SensorModel.find({deviceId: i}, {
                         __v: 0,
@@ -101,7 +100,6 @@ export default class SensorService {
     }
 
     //TODO: getAllUserSensorData, getAllUserLatestSensorData service
-
     async getAllUserSensorDataService(role: string) {
         return [role];
     }
@@ -113,7 +111,7 @@ export default class SensorService {
     async getAllSensorDataService() {
         let latestData: any[] = [];
         await Promise.all(
-            Array.from({length: config.supportedDevicesNum}, async (_, i) => {
+            Array.from({length: config.supportedSensorsNum}, async (_, i) => {
                 try {
                     const latestEntry = await SensorModel.find({deviceId: i}, {
                         __v: 0,
@@ -133,4 +131,5 @@ export default class SensorService {
         );
         return latestData;
     }
+
 }
