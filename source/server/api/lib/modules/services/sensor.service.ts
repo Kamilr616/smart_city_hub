@@ -100,4 +100,37 @@ export default class SensorService {
         return latestData;
     }
 
+    //TODO: getAllUserSensorData, getAllUserLatestSensorData service
+
+    async getAllUserSensorDataService(role: string) {
+        return [role];
+    }
+
+    async getAllUserLatestSensorDataService(role: string) {
+        return [role];
+    }
+
+    async getAllSensorDataService() {
+        let latestData: any[] = [];
+        await Promise.all(
+            Array.from({length: config.supportedDevicesNum}, async (_, i) => {
+                try {
+                    const latestEntry = await SensorModel.find({deviceId: i}, {
+                        __v: 0,
+                        _id: 0
+                    }).sort({$natural: -1});
+                    if (latestEntry.length) {
+                        latestData.push(latestEntry);
+                    } else {
+                        latestData.push({deviceId: i});
+                    }
+                } catch (error) {
+                    // @ts-ignore
+                    console.error(`Błąd podczas pobierania danych dla urządzenia ${i + 1}: ${error.message}`);
+                    latestData.push({});
+                }
+            })
+        );
+        return latestData;
+    }
 }

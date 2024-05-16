@@ -31,23 +31,25 @@ class DeviceController implements Controller {
         const loc = response.locals.userRole;
         const allUserDevices = await this.deviceService.getAllUserDevices(loc);
         response.status(200).json(allUserDevices);
-    };
+    }
+
     private getAllUserDevicesByLoc = async (request: Request, response: Response, next: NextFunction) => {
         const {location} = request.params;
         const allUserDevices = await this.deviceService.getAllUserDevicesByLoc(location);
-
         response.status(200).json(allUserDevices);
-    };
+    }
 
     private cleanAllDeviceData = async (request: Request, response: Response, next: NextFunction) => {
         await this.deviceService.cleanAllDeviceData();
         response.status(200).json({message: `Wszystkie dane zostały usunięte.`});
     }
+
     private getAllDeviceData = async (request: Request, response: Response, next: NextFunction) => {
         const {id} = request.params;
         const allData = await this.deviceService.query(id);
         response.status(200).json(allData);
-    };
+    }
+
     private getLatestReadingsFromAllDevice = async (request: Request, response: Response, next: NextFunction) => {
         const allData = await this.deviceService.getAllLatestDeviceEntry();
         response.status(200).json(allData);
@@ -59,12 +61,11 @@ class DeviceController implements Controller {
         response.status(200).json({message: `Urządzenie ${id} zostało usunięte.`});
     }
 
-
     private getDeviceData = async (request: Request, response: Response, next: NextFunction) => {
         const {id} = request.params;
         const allData = await this.deviceService.query(id);
         response.status(200).json(allData);
-    };
+    }
 
     private updateDevice = async (request: Request, response: Response, next: NextFunction) => {
         const {location, name, description, type} = request.body;
@@ -96,6 +97,7 @@ class DeviceController implements Controller {
             response.status(400).json({error: 'Invalid input data.'});
         }
     }
+
 }
 
 
