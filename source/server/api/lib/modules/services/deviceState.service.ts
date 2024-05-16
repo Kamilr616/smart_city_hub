@@ -4,23 +4,17 @@ import DeviceModel from "../schemas/device.schema";
 
 export default class DeviceStateService {
 
-    // public async createDeviceStateEntry(dataParams: IDeviceState) {
-    //     try {
-    //         const deviceModel = new DeviceStateModel(dataParams);
-    //         await deviceModel.save();
-    //     } catch (error) {
-    //         console.error('Wystąpił błąd podczas tworzenia ', error);
-    //         throw new Error('Wystąpił błąd podczas tworzenia ');
-    //     }
-    // }
     public async getAllUserDeviceStates(role: string) {
         try {
+            let devices;
             // Pobieramy urządzenia na podstawie roli użytkownika
-            const devices = await DeviceModel.find({location: role}, {__v: 0, _id: 0});
-
+            if (role === 'admin') {
+                devices = await DeviceModel.find({}, {__v: 0, _id: 0});
+            } else {
+                devices = await DeviceModel.find({location: role}, {__v: 0, _id: 0});
+            }
             // Pobieramy identyfikatory urządzeń
             const ids = devices.map(device => device.deviceId);
-
             // Tworzymy tablicę obietnic dla wszystkich zapytań do bazy danych o stany urządzeń
             const promises = ids.map(id =>
                 DeviceStateModel.find({deviceId: id}, {__v: 0, _id: 0})
@@ -30,21 +24,25 @@ export default class DeviceStateService {
                         return [];
                     })
             );
-
             // Wykonujemy wszystkie zapytania równolegle
             const results = await Promise.all(promises);
-
-            // Łączymy wyniki wszystkich zapytań w jedną tablicę
+            // Spłaszczamy wyniki do jednej tablicy i mapujemy je do oczekiwanego formatu
             // Zwracamy wszystkie stany urządzeń
-            return results.flat();
+            return results.flat().map(deviceState => {
+                const lastIndex = deviceState.states.length - 1;
+                return {
+                    deviceId: deviceState.deviceId,
+                    state: deviceState.states[lastIndex].state,
+                    timestamp: deviceState.states[lastIndex].timestamp
+                };
+            });
         } catch (error) {
             // Obsługa błędów w przypadku nieudanej próby pobrania urządzeń
-            throw new Error(`Failed to fetch devices for role ${role}: ${error}`);
+            throw new Error(`Failed to fetch devices for ${role}: ${error}`);
         }
     }
 
-
-    public async cleanDeviceData(deviceID: string) {
+    public async cleanSingleDeviceStateDataService(deviceID: string) {
         try {
             await DeviceStateModel.deleteMany({deviceId: deviceID});
         } catch (error) {
@@ -52,7 +50,7 @@ export default class DeviceStateService {
         }
     }
 
-    public async cleanAllDeviceData() {
+    public async cleanAllDeviceStateDataService() {
         try {
             console.log('Starting to delete all sensor data.');
             const result = await DeviceStateModel.deleteMany({});
@@ -65,7 +63,7 @@ export default class DeviceStateService {
         }
     }
 
-    public async updateDeviceState(deviceStateData: {
+    public async updateSingleDeviceStateService(deviceStateData: {
         deviceId: number;
         state: boolean;
         timestamp: Date
@@ -116,10 +114,18 @@ export default class DeviceStateService {
         }
     }
 
-    public async getAllDeviceStates() {
+    public async getAllLatestDeviceStatesService() {
         try {
             const deviceStates = await DeviceStateModel.find({}, {__v: 0, _id: 0});
             return deviceStates.map(deviceState => deviceState.states[0].state);
+        } catch (error) {
+            throw new Error(`Query failed: ${error}`);
+        }
+    }
+
+    public async getAllDeviceStateDataService() {
+        try {
+            return await DeviceStateModel.find({}, {__v: 0, _id: 0});//.map(deviceState => deviceState.states[0].state);
         } catch (error) {
             throw new Error(`Query failed: ${error}`);
         }
@@ -149,7 +155,7 @@ export default class DeviceStateService {
         return latestData;
     }
 
-    public async getAllLatestDeviceStateEntry() {
+    public async getAllLatestDeviceStateService() {
         let latestData: any[] = [];
         await Promise.all(
             Array.from({length: config.supportedDevicesNum}, async (_, i) => {
@@ -171,5 +177,44 @@ export default class DeviceStateService {
             })
         );
         return latestData;
+    }
+
+    public async updateUserDeviceStatesBatch(deviceStates: Array<{
+        deviceId: number;
+        state: boolean
+    }>, role: string): Promise<void> {
+        try {
+            // Fetch the devices for the user's role
+            let devices;
+            if (role === 'admin') {
+                devices = await DeviceModel.find({}, {__v: 0, _id: 0});
+            } else {
+                devices = await DeviceModel.find({location: role}, {__v: 0, _id: 0});
+            }
+            const userDeviceIds = devices.map(device => device.deviceId);
+
+            // Filter the deviceStates array to only include devices that the user has access to
+            const validDeviceStates = deviceStates.filter(deviceState => userDeviceIds.includes(deviceState.deviceId));
+
+            // If there are no valid devices, throw an error
+            if (validDeviceStates.length === 0) {
+                console.error('No valid devices found for the user role');
+            }
+
+            // Proceed with the bulk update operation for the valid devices
+            const bulkOps = validDeviceStates.map(deviceState => ({
+                updateOne: {
+                    filter: {deviceId: deviceState.deviceId},
+                    update: {$push: {states: {state: deviceState.state, timestamp: new Date()}}},
+                    upsert: true
+                }
+            }));
+
+            await DeviceStateModel.bulkWrite(bulkOps);
+            console.log('Bulk update operation completed successfully.');
+        } catch (error) {
+            console.error('Error during bulk update:', error);
+            throw new Error('Failed to update device states in bulk');
+        }
     }
 }
