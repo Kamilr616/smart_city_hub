@@ -6,7 +6,13 @@ export default class DeviceService {
 
     public async getAllUserDevices(loc: string) {
         try {
-            return await DeviceModel.find({location: loc}, {__v: 0, _id: 0});
+            let devices;
+        if (loc === 'admin') {
+            devices = await DeviceModel.find({}, {__v: 0, _id: 0});
+        } else {
+            devices = await DeviceModel.find({location: loc}, {__v: 0, _id: 0});
+        }
+            return devices;
         } catch (error) {
             throw new Error(`Query failed: ${error}`);
         }

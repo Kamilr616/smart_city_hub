@@ -1,7 +1,7 @@
 import Controller from '../interfaces/controller.interface';
 import {Request, Response, NextFunction, Router} from 'express';
 import {auth} from '../middlewares/auth.middleware';
-//import {admin} from '../middlewares/admin.middleware';
+import {admin} from '../middlewares/admin.middleware';
 import UserService from "../modules/services/user.service";
 import PasswordService from "../modules/services/password.service";
 import TokenService from "../modules/services/token.service";
@@ -18,8 +18,8 @@ class UserController implements Controller {
     }
 
     private initializeRoutes() {
-        this.router.post(`${this.path}/create`, this.createNewOrUpdate); //TODO admin
-        this.router.post(`${this.path}/auth`, this.authenticate); //
+        this.router.post(`${this.path}/create`, admin, this.createNewOrUpdate);
+        this.router.post(`${this.path}/auth`, this.authenticate);
         this.router.delete(`${this.path}/logout/:userId`, auth, this.removeHashSession);
     }
 
