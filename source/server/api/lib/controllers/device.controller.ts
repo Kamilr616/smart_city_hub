@@ -5,9 +5,7 @@ import DeviceService from '../modules/services/device.service';
 import Joi from 'joi';
 import {IDevice} from "../modules/models/device.model";
 import {admin} from "../middlewares/admin.middleware";
-import {auth} from "../middlewares/auth.middleware";
-
-//import {userRole} from "../middlewares/userRole.middleware";
+import {userRole} from "../middlewares/userRole.middleware";
 
 class DeviceController implements Controller {
     public path = '/api/device';
@@ -21,8 +19,7 @@ class DeviceController implements Controller {
     private initializeRoutes() {
         this.router.get(`${this.path}/latest`, admin, this.getLatestReadingsFromAllDevice);
         this.router.get(`${this.path}/get/:location`, admin, this.getAllUserDevicesByLoc);
-        this.router.get(`${this.path}/get`, auth, this.getAllUserDevices);
-
+        this.router.get(`${this.path}/user/get`, userRole, this.getAllUserDevices);
         this.router.get(`${this.path}/all/:id`, admin, checkIdParam, this.getAllDeviceData);
         this.router.post(`${this.path}/:id`, admin, checkIdParam, this.updateDevice);  //TODO: admin
         this.router.get(`${this.path}/:id`, admin, checkIdParam, this.getDeviceData);

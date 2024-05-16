@@ -8,7 +8,7 @@ const DeviceStateSchema = new Schema({
         ref: 'Device'  // Reference to the Device collection
     },
     states: [{
-        state: { type: Boolean, required: true },
+        state: { type: Boolean, required: true, default: false},
         timestamp: { type: Date, default: Date.now }
     }]
 });
