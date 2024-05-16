@@ -12,7 +12,7 @@ class App {
         this.app = express();
         this.initializeMiddlewares();
         this.initializeControllers(controllers);
-        this.connectToDatabase().then(r => console.log('Connected to database'));
+        this.connectToDatabase().then(_ => console.log('Connected to database'));
     }
 
     private initializeMiddlewares(): void {
@@ -29,7 +29,6 @@ class App {
     private async connectToDatabase(): Promise<void> {
         try {
             await mongoose.connect(config.databaseUrl);
-            console.log('Connection with database established');
 
         } catch (error) {
             console.error('Error connecting to MongoDB:', error);
