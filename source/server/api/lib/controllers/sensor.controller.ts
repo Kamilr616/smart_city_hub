@@ -22,9 +22,9 @@ class SensorController implements Controller {
         //this.router.get(`${this.path}/user/all`, userRole, this.getAllUserSensorData);
         //this.router.get(`${this.path}/user/all/latest`, userRole, this.getAllUserLatestSensorData);
 
-        this.router.get(`${this.path}/all/latest`, auth, this.getLatestReadingsFromAllSensor);
+        this.router.get(`${this.path}/all/latest`, this.getLatestReadingsFromAllSensor);
         this.router.get(`${this.path}/all/:num`, admin, checkSensorIdParam, this.getPeriodSensorData);
-        this.router.get(`${this.path}/all`, auth, this.getPeriodAllSensorData);
+        this.router.get(`${this.path}/all`, this.getPeriodAllSensorData);
         this.router.get(`${this.path}/:id`, admin, checkSensorIdParam, this.getAllSingleSensorData);
         this.router.post(`${this.path}/iot/update`, admin, checkSensorIdParam, this.addMultipleSensorData);  //TODO: NXP auth
         this.router.post(`${this.path}/update/:id`, admin, checkSensorIdParam, this.addSingleSensorData);

@@ -4,6 +4,8 @@ import Controller from "./interfaces/controller.interface";
 import bodyParser from 'body-parser';
 import morgan from 'morgan';
 import mongoose from 'mongoose';
+import cors from 'cors';
+
 
 class App {
     public app: express.Application;
@@ -13,11 +15,19 @@ class App {
         this.initializeMiddlewares();
         this.initializeControllers(controllers);
         this.connectToDatabase().then(_ => console.log('Connected to database'));
+
     }
 
     private initializeMiddlewares(): void {
         this.app.use(bodyParser.json());
         this.app.use(morgan('dev'));
+        this.app.use(cors({
+           origin: '*',
+           methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+           credentials: true,
+           optionsSuccessStatus: 204,
+           allowedHeaders: 'Content-Type,Authorization',
+       }));
     }
 
     private initializeControllers(controllers: Controller[]): void {

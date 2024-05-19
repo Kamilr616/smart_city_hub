@@ -60,8 +60,9 @@ export default class SensorService {
                         __v: 0,
                         _id: 0
                     }).limit(limitNum).sort({$natural: -1});
+
                     if (latestEntry.length) {
-                        latestData.push(latestEntry[0]);
+                        latestData.push(latestEntry);
                     } else {
                         latestData.push({deviceId: i});
                     }
@@ -72,6 +73,7 @@ export default class SensorService {
                 }
             })
         );
+        console.log(latestData);
         return latestData;
     }
 
