@@ -4,7 +4,6 @@ import {checkSensorIdParam} from '../middlewares/deviceIdParam.middleware';
 import SensorService from '../modules/services/sensor.service';
 import Joi from 'joi';
 import {admin} from "../middlewares/admin.middleware";
-import {userRole} from "../middlewares/userRole.middleware";
 import {ISensor} from "../modules/models/sensor.model";
 import {auth} from "../middlewares/auth.middleware";
 
@@ -19,12 +18,12 @@ class SensorController implements Controller {
     }
 
     private initializeRoutes() {
-        //this.router.get(`${this.path}/user/all`, userRole, this.getAllUserSensorData);
-        //this.router.get(`${this.path}/user/all/latest`, userRole, this.getAllUserLatestSensorData);
+        //this.router.get(`${this.path}/user/all`, auth, this.getAllUserSensorData);
+        //this.router.get(`${this.path}/user/all/latest`, auth, this.getAllUserLatestSensorData);
 
-        this.router.get(`${this.path}/all/latest`, this.getLatestReadingsFromAllSensor);
+        this.router.get(`${this.path}/all/latest`, this.getLatestReadingsFromAllSensor); //auth
         this.router.get(`${this.path}/all/:num`, admin, checkSensorIdParam, this.getPeriodSensorData);
-        this.router.get(`${this.path}/all`, this.getPeriodAllSensorData);
+        this.router.get(`${this.path}/all`, this.getPeriodAllSensorData); //auth
         this.router.get(`${this.path}/:id`, admin, checkSensorIdParam, this.getAllSingleSensorData);
         this.router.post(`${this.path}/iot/update`, admin, checkSensorIdParam, this.addMultipleSensorData);  //TODO: NXP auth
         this.router.post(`${this.path}/update/:id`, admin, checkSensorIdParam, this.addSingleSensorData);

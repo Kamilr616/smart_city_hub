@@ -8,7 +8,7 @@
 #define I2C_SDA        21
 #define I2C_SCL        22
 #define MCP_ADDRESS_1 0x27
-//#define USE_SERIAL Serial
+#define USE_SERIAL Serial
 #define SSID "C111"
 #define PASS "abcdefabcdef987654321"
 #define URL "http://192.168.50.243:4200/api/state/iot/all"
