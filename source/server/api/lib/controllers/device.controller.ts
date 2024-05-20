@@ -4,7 +4,7 @@ import DeviceService from '../modules/services/device.service';
 import Joi from 'joi';
 import {IDevice} from "../modules/models/device.model";
 import {admin} from "../middlewares/admin.middleware";
-import {userRole} from "../middlewares/userRole.middleware";
+import {auth} from "../middlewares/auth.middleware";
 
 class DeviceController implements Controller {
     public path = '/api/device';
@@ -18,7 +18,7 @@ class DeviceController implements Controller {
     private initializeRoutes() {
         this.router.get(`${this.path}/latest`, admin, this.getLatestReadingsFromAllDevice);
         this.router.get(`${this.path}/get/:location`, admin, this.getAllUserDevicesByLoc);
-        this.router.get(`${this.path}/user/get`, userRole, this.getAllUserDevices);
+        this.router.get(`${this.path}/user/get`, auth, this.getAllUserDevices);
         this.router.get(`${this.path}/all/:id`, admin, this.getAllDeviceData);
         this.router.post(`${this.path}/:id`, admin, this.updateDevice);
         this.router.get(`${this.path}/:id`, admin, this.getDeviceData);
@@ -28,14 +28,12 @@ class DeviceController implements Controller {
 
     private getAllUserDevices = async (request: Request, response: Response, next: NextFunction) => {
         const loc = response.locals.userRole;
-        const allUserDevices = await this.deviceService.getAllUserDevices(loc);
-        response.status(200).json(allUserDevices);
+        response.status(200).json(await this.deviceService.getAllUserDevices(loc));
     };
 
     private getAllUserDevicesByLoc = async (request: Request, response: Response, next: NextFunction) => {
         const {location} = request.params;
-        const allUserDevices = await this.deviceService.getAllUserDevicesByLoc(location);
-        response.status(200).json(allUserDevices);
+        response.status(200).json(await this.deviceService.getAllUserDevicesByLoc(location));
     };
 
     private cleanAllDeviceData = async (request: Request, response: Response, next: NextFunction) => {
@@ -45,8 +43,7 @@ class DeviceController implements Controller {
 
     private getAllDeviceData = async (request: Request, response: Response, next: NextFunction) => {
         const {id} = request.params;
-        const allData = await this.deviceService.query(id);
-        response.status(200).json(allData);
+        response.status(200).json(await this.deviceService.query(id));
     };
 
     private getLatestReadingsFromAllDevice = async (request: Request, response: Response, next: NextFunction) => {
@@ -61,8 +58,7 @@ class DeviceController implements Controller {
 
     private getDeviceData = async (request: Request, response: Response, next: NextFunction) => {
         const {id} = request.params;
-        const allData = await this.deviceService.query(id);
-        response.status(200).json(allData);
+        response.status(200).json(await this.deviceService.query(id));
     };
 
     private updateDevice = async (request: Request, response: Response, next: NextFunction) => {

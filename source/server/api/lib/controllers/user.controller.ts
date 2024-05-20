@@ -31,7 +31,7 @@ class UserController implements Controller {
             if (!user) {
                 response.status(401).json({error: 'Unauthorized'});
             }
-// @ts-ignore
+            // @ts-ignore
             await this.passwordService.authorize(user.id, await this.passwordService.hashPassword(password));
             const token = await this.tokenService.create(user);
             response.status(200).json(this.tokenService.getToken(token));
