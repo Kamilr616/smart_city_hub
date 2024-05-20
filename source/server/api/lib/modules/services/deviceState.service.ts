@@ -115,7 +115,7 @@ export default class DeviceStateService {
     public async getAllLatestDeviceStatesService() {
         try {
             const deviceStates = await DeviceStateModel.find({}, {__v: 0, _id: 0});
-            return deviceStates.map(deviceState => deviceState.states[0].state);
+            return deviceStates.map(deviceState => deviceState.states[deviceState.states.length -1].state);
         } catch (error) {
             throw new Error(`Query failed: ${error}`);
         }
