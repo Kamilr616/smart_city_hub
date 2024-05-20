@@ -4,6 +4,7 @@ import DeviceStateService from '../modules/services/deviceState.service';
 import Joi from 'joi';
 import {admin} from '../middlewares/admin.middleware';
 import {userRole} from '../middlewares/userRole.middleware';
+import {auth} from "../middlewares/auth.middleware";
 
 class DeviceStateController implements Controller {
     public path = '/api/state';
@@ -15,7 +16,7 @@ class DeviceStateController implements Controller {
     }
 
     private initializeRoutes() {
-        this.router.get(`${this.path}/iot/all`, admin, this.getAllLatestDeviceState); //TODO: NXP auth
+        this.router.get(`${this.path}/iot/all`, auth, this.getAllLatestIotDeviceState); //TODO: NXP auth
         this.router.get(`${this.path}/user/latest`, userRole, this.getAllLatestUserDeviceState);
         this.router.get(`${this.path}/latest`, admin, this.getAllLatestDeviceState);
         this.router.get(`${this.path}/all`, admin, this.getAllDeviceStateData);
@@ -30,6 +31,10 @@ class DeviceStateController implements Controller {
     private getAllLatestUserDeviceState = async (request: Request, response: Response, next: NextFunction) => {
         const role = response.locals.userRole;
         response.status(200).json(await this.deviceStateService.getAllUserDeviceStates(role));
+    };
+
+    private getAllLatestIotDeviceState = async (request: Request, response: Response, next: NextFunction) => {
+        response.status(200).json(await this.deviceStateService.getAllLatestDeviceStatesService());
     };
 
     private getAllDeviceStateData = async (request: Request, response: Response, next: NextFunction) => {
