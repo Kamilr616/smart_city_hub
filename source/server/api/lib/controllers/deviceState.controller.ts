@@ -3,7 +3,6 @@ import {Request, Response, NextFunction, Router} from 'express';
 import DeviceStateService from '../modules/services/deviceState.service';
 import Joi from 'joi';
 import {admin} from '../middlewares/admin.middleware';
-import {userRole} from '../middlewares/userRole.middleware';
 import {auth} from "../middlewares/auth.middleware";
 
 class DeviceStateController implements Controller {
@@ -17,10 +16,10 @@ class DeviceStateController implements Controller {
 
     private initializeRoutes() {
         this.router.get(`${this.path}/iot/all`, auth, this.getAllLatestIotDeviceState); //TODO: NXP auth
-        this.router.get(`${this.path}/user/latest`, userRole, this.getAllLatestUserDeviceState);
+        this.router.get(`${this.path}/user/latest`, auth, this.getAllLatestUserDeviceState);
         this.router.get(`${this.path}/latest`, admin, this.getAllLatestDeviceState);
         this.router.get(`${this.path}/all`, admin, this.getAllDeviceStateData);
-        this.router.post(`${this.path}/user/update`, userRole, this.updateMultipleUserDeviceState);
+        this.router.post(`${this.path}/user/update`, auth, this.updateMultipleUserDeviceState);
         this.router.post(`${this.path}/update`, admin, this.updateMultipleDeviceState);
         this.router.post(`${this.path}/update/:id`, admin, this.updateSingleDeviceState);
         this.router.get(`${this.path}/:id`, admin, this.getSingleDeviceStateData);
@@ -48,13 +47,11 @@ class DeviceStateController implements Controller {
 
     private getSingleDeviceStateData = async (request: Request, response: Response, next: NextFunction) => {
         const {id} = request.params;
-        const allData = await this.deviceStateService.queryState(id);
-        response.status(200).json(allData);
+        response.status(200).json(await this.deviceStateService.queryState(id));
     };
 
     private getAllLatestDeviceState = async (request: Request, response: Response, next: NextFunction) => {
-        const allData = await this.deviceStateService.getAllLatestDeviceStateService();
-        response.status(200).json(allData);
+        response.status(200).json(await this.deviceStateService.getAllLatestDeviceStateService());
     };
 
     private cleanSingleDeviceStateData = async (request: Request, response: Response, next: NextFunction) => {
@@ -99,11 +96,9 @@ class DeviceStateController implements Controller {
             deviceId: Joi.number().integer().required(),
             state: Joi.boolean().required()
         });
-
         try {
             // Validate each item in the array
             await Promise.all(deviceStates.map((deviceState: any) => schema.validateAsync(deviceState)));
-
             // Update states for all devices
             await this.deviceStateService.updateDeviceStatesBatch(deviceStates);
             response.status(200).json({message: "Device states updated successfully."});
@@ -121,7 +116,6 @@ class DeviceStateController implements Controller {
             deviceId: Joi.number().integer().required(),
             state: Joi.boolean().required()
         });
-
         try {
             // Validate each item in the array
             await Promise.all(deviceStates.map((deviceState: any) => schema.validateAsync(deviceState)));
