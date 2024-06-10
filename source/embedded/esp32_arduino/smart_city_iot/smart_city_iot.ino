@@ -12,11 +12,76 @@
 #define SSID "C111"
 #define PASS "abcdefabcdef987654321"
 #define URL "http://192.168.50.243:4200/api/state/iot/all"
-#define TOKEN "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjQ0ZWUzNjQ0Njg5NTViZWQ1MjY3YTkiLCJuYW1lIjoidXNlcjFAdXNlcjEucGwiLCJyb2xlIjoiSG91c2VfMDEiLCJpc0FkbWluIjpmYWxzZSwiYWNjZXNzIjoiYXV0aCIsImlhdCI6MTcxNTc5MzYxNSwiZXhwIjoxNzE3MDAzMjE1fQ.U8xy3JBTOf32D-AGBQN5IuVjp3kzsK_hgGMgGHz0-fs" 
+#define TOKEN "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjY3NjgxMTZhMDYwMjJhYzViYzNhYzYiLCJuYW1lIjoiYWRtaW5AYWRtaW4ucGwiLCJyb2xlIjoiYWRtaW4iLCJpc0FkbWluIjp0cnVlLCJhY2Nlc3MiOiJhdXRoIiwiaWF0IjoxNzE4MDUyODg5LCJleHAiOjE3MjA2NDQ4ODl9.fk-aMPlXWVbsSfCPwybXg6IqbgDL6dyFs8Y0Icebe60"
 
 WiFiMulti wifiMulti;
-MCP23017 mcp1(I2C_SDA,I2C_SCL); 
+MCP23017 mcp1(I2C_SDA,I2C_SCL);
 
+
+void initExpanders()    {
+    mcp1.iodir(0x00, 0x00, 0x27);
+    mcp1.iodir(0x01, 0x00, 0x27);
+    mcp1.iodir(0x00, 0x00, 0x26);
+    mcp1.iodir(0x01, 0x00, 0x26);
+    mcp1.iodir(0x00, 0x00, 0x25);
+    mcp1.iodir(0x01, 0x00, 0x25);
+    mcp1.iodir(0x00, 0x00, 0x24);
+    mcp1.iodir(0x01, 0x00, 0x24);
+    mcp1.iodir(0x00, 0x00, 0x23);
+    mcp1.iodir(0x01, 0x00, 0x23);
+    mcp1.iodir(0x00, 0x00, 0x22);
+    mcp1.iodir(0x01, 0x00, 0x22);
+
+    mcp1.write_gpio(0x00, 0x00, 0x27);
+    mcp1.write_gpio(0x01, 0X00, 0x27);
+    mcp1.write_gpio(0x00, 0x00, 0x26);
+    mcp1.write_gpio(0x01, 0X00, 0x26);
+    mcp1.write_gpio(0x00, 0x00, 0x25);
+    mcp1.write_gpio(0x01, 0X00, 0x25);
+    mcp1.write_gpio(0x00, 0x00, 0x24);
+    mcp1.write_gpio(0x01, 0X00, 0x24);
+    mcp1.write_gpio(0x00, 0x00, 0x23);
+    mcp1.write_gpio(0x01, 0X00, 0x23);
+    mcp1.write_gpio(0x00, 0x00, 0x22);
+    mcp1.write_gpio(0x01, 0X00, 0x22);
+}
+void writeExpanderPorts(const JsonArray &payload)
+{
+    // Initialize variables to hold the port values
+    uint8_t portValues[12] = {0};
+
+    // Set port values based on the payload
+    for (size_t i = 0; i < 96; i++)
+    {
+        size_t portIndex = i / 8;
+        size_t bitIndex = i % 8;
+
+        if (!payload[i].as<bool>())
+        {
+            portValues[portIndex] |= (1 << bitIndex); // Set the corresponding bit
+        }
+    }
+
+    mcp1.write_gpio(0x00, portValues[0], 0x27);
+    mcp1.write_gpio(0x01, portValues[1], 0x27);
+    mcp1.write_gpio(0x00, portValues[2], 0x26);
+    mcp1.write_gpio(0x01, portValues[3], 0x26);
+    mcp1.write_gpio(0x00, portValues[4], 0x25);
+    mcp1.write_gpio(0x01, portValues[5], 0x25);
+    mcp1.write_gpio(0x00, portValues[6], 0x24);
+    mcp1.write_gpio(0x01, portValues[7], 0x24);
+    mcp1.write_gpio(0x00, portValues[8], 0x23);
+    mcp1.write_gpio(0x01, portValues[9], 0x23);
+    mcp1.write_gpio(0x00, portValues[10], 0x22);
+    mcp1.write_gpio(0x01, portValues[11], 0x22);
+
+    USE_SERIAL.printf("Port A0: 0x%02X, Port B0: 0x%02X\n", portValues[0], portValues[1]);
+    USE_SERIAL.printf("Port A1: 0x%02X, Port B1: 0x%02X\n", portValues[2], portValues[3]);
+    USE_SERIAL.printf("Port A2: 0x%02X, Port B2: 0x%02X\n", portValues[4], portValues[5]);
+    USE_SERIAL.printf("Port A3: 0x%02X, Port B3: 0x%02X\n", portValues[6], portValues[7]);
+    USE_SERIAL.printf("Port A4: 0x%02X, Port B4: 0x%02X\n", portValues[8], portValues[9]);
+    USE_SERIAL.printf("Port A5: 0x%02X, Port B5: 0x%02X\n", portValues[10], portValues[11]);
+}
 
 void setup() {
     USE_SERIAL.begin(9600);
@@ -25,124 +90,7 @@ void setup() {
     USE_SERIAL.println("START");
 
     wifiMulti.addAP(SSID, PASS);
-    mcp1.iodir(MCP23017_PORTA, MCP23017_IODIR_ALL_OUTPUT , MCP23017_ADDRESS_27);
-    mcp1.iodir(MCP23017_PORTB, MCP23017_IODIR_ALL_OUTPUT , MCP23017_ADDRESS_27);
-    mcp1.iodir(MCP23017_PORTA, MCP23017_IODIR_ALL_OUTPUT , MCP23017_ADDRESS_26);
-    mcp1.iodir(MCP23017_PORTB, MCP23017_IODIR_ALL_OUTPUT , MCP23017_ADDRESS_26);
-    mcp1.iodir(MCP23017_PORTA, MCP23017_IODIR_ALL_OUTPUT , MCP23017_ADDRESS_25);
-    mcp1.iodir(MCP23017_PORTB, MCP23017_IODIR_ALL_OUTPUT , MCP23017_ADDRESS_25);
-    mcp1.iodir(MCP23017_PORTA, MCP23017_IODIR_ALL_OUTPUT , MCP23017_ADDRESS_24);
-    mcp1.iodir(MCP23017_PORTB, MCP23017_IODIR_ALL_OUTPUT , MCP23017_ADDRESS_24);
-    mcp1.iodir(MCP23017_PORTA, MCP23017_IODIR_ALL_OUTPUT , MCP23017_ADDRESS_23);
-    mcp1.iodir(MCP23017_PORTB, MCP23017_IODIR_ALL_OUTPUT , MCP23017_ADDRESS_23);
-    mcp1.iodir(MCP23017_PORTA, MCP23017_IODIR_ALL_OUTPUT , MCP23017_ADDRESS_22);
-    mcp1.iodir(MCP23017_PORTB, MCP23017_IODIR_ALL_OUTPUT , MCP23017_ADDRESS_22);
-
-    mcp1.write_gpio(MCP23017_PORTA, 0x00, MCP23017_ADDRESS_27);
-    mcp1.write_gpio(MCP23017_PORTB, 0X00, MCP23017_ADDRESS_27);
-    mcp1.write_gpio(MCP23017_PORTA, 0x00, MCP23017_ADDRESS_26);
-    mcp1.write_gpio(MCP23017_PORTB, 0X00, MCP23017_ADDRESS_26);
-    mcp1.write_gpio(MCP23017_PORTA, 0x00, MCP23017_ADDRESS_25);
-    mcp1.write_gpio(MCP23017_PORTB, 0X00, MCP23017_ADDRESS_25);
-    mcp1.write_gpio(MCP23017_PORTA, 0x00, MCP23017_ADDRESS_24);
-    mcp1.write_gpio(MCP23017_PORTB, 0X00, MCP23017_ADDRESS_24);
-    mcp1.write_gpio(MCP23017_PORTA, 0x00, MCP23017_ADDRESS_23);
-    mcp1.write_gpio(MCP23017_PORTB, 0X00, MCP23017_ADDRESS_23);
-    mcp1.write_gpio(MCP23017_PORTA, 0x00, MCP23017_ADDRESS_22);
-    mcp1.write_gpio(MCP23017_PORTB, 0X00, MCP23017_ADDRESS_22);
-}
-
-void writeExpanderPorts2(const JsonArray& payload) {
-    // Initialize variables to hold the port values
-    uint8_t portA0Value = 0;
-    uint8_t portB0Value = 0;
-    uint8_t portA1Value = 0;
-    uint8_t portB1Value = 0;
-    uint8_t portA2Value = 0;
-    uint8_t portB2Value = 0;
-    uint8_t portA3Value = 0;
-    uint8_t portB3Value = 0;
-    uint8_t portA4Value = 0;
-    uint8_t portB4Value = 0;
-    uint8_t portA5Value = 0;
-    uint8_t portB5Value = 0;
-
-    // Set port values based on the payload
-    for (size_t i = 0; i < 8; i++) {
-        if (!payload[i].as<bool>()) {
-            portA0Value |= (1 << i); // Set the corresponding bit
-        }
-        if (!payload[i + 8].as<bool>()) {
-            portB0Value |= (1 << i); // Set the corresponding bit
-        }
-         if (!payload[i + 16].as<bool>()) {
-            portA1Value |= (1 << i); // Set the corresponding bit
-        }
-        if (!payload[i + 24].as<bool>()) {
-            portB1Value |= (1 << i); // Set the corresponding bit
-        }
-       if (!payload[i + 32].as<bool>()) {
-            portA2Value |= (1 << i); // Set the corresponding bit
-        }
-        if (!payload[i + 40].as<bool>()) {
-            portB2Value |= (1 << i); // Set the corresponding bit
-        }
-        if (!payload[i + 48].as<bool>()) {
-            portA3Value |= (1 << i); // Set the corresponding bit
-        }
-        if (!payload[i + 56].as<bool>()) {
-            portB3Value |= (1 << i); // Set the corresponding bit
-        }
-    }
-
-    // Write to MCP23017 ports
-    mcp1.write_gpio(MCP23017_PORTA, portA0Value, MCP23017_ADDRESS_27);
-    mcp1.write_gpio(MCP23017_PORTB, portB0Value, MCP23017_ADDRESS_27);
-    mcp1.write_gpio(MCP23017_PORTA, portA1Value, MCP23017_ADDRESS_26);
-    mcp1.write_gpio(MCP23017_PORTB, portB1Value, MCP23017_ADDRESS_26);
-    mcp1.write_gpio(MCP23017_PORTA, portA2Value, MCP23017_ADDRESS_25);
-    mcp1.write_gpio(MCP23017_PORTB, portB2Value, MCP23017_ADDRESS_25);
-    mcp1.write_gpio(MCP23017_PORTA, portA3Value, MCP23017_ADDRESS_24);
-    mcp1.write_gpio(MCP23017_PORTB, portB3Value, MCP23017_ADDRESS_24);
-
-    USE_SERIAL.printf("Port A0: 0x%02X, Port B0: 0x%02X\n Port A1: 0x%02X, Port B1 : 0x%02X\n", portA0Value, portB0Value, portA1Value, portB1Value);
-    USE_SERIAL.printf("Port A2: 0x%02X, Port B2: 0x%02X\n Port A3: 0x%02X, Port B3 : 0x%02X\n", portA2Value, portB2Value, portA3Value, portB3Value);
-}
-
-void writeExpanderPorts(const JsonArray& payload) {
-    // Initialize variables to hold the port values
-    uint8_t portValues[12] = {0};
-
-    // Set port values based on the payload
-    for (size_t i = 0; i < 96; i++) {
-        size_t portIndex = i / 8;
-        size_t bitIndex = i % 8;
-
-        if (!payload[i].as<bool>()) {
-            portValues[portIndex] |= (1 << bitIndex); // Set the corresponding bit
-        }
-    }
-
-    // Write to MCP23017 ports
-    mcp1.write_gpio(MCP23017_PORTA, portValues[0], MCP23017_ADDRESS_27);
-    mcp1.write_gpio(MCP23017_PORTB, portValues[1], MCP23017_ADDRESS_27);
-    mcp1.write_gpio(MCP23017_PORTA, portValues[2], MCP23017_ADDRESS_26);
-    mcp1.write_gpio(MCP23017_PORTB, portValues[3], MCP23017_ADDRESS_26);
-    mcp1.write_gpio(MCP23017_PORTA, portValues[4], MCP23017_ADDRESS_25);
-    mcp1.write_gpio(MCP23017_PORTB, portValues[5], MCP23017_ADDRESS_25);
-    mcp1.write_gpio(MCP23017_PORTA, portValues[6], MCP23017_ADDRESS_24);
-    mcp1.write_gpio(MCP23017_PORTB, portValues[7], MCP23017_ADDRESS_24);
-    mcp1.write_gpio(MCP23017_PORTA, portValues[8], MCP23017_ADDRESS_23);
-    mcp1.write_gpio(MCP23017_PORTB, portValues[9], MCP23017_ADDRESS_23);
-    mcp1.write_gpio(MCP23017_PORTA, portValues[10], MCP23017_ADDRESS_22);
-    mcp1.write_gpio(MCP23017_PORTB, portValues[11], MCP23017_ADDRESS_22);
-
-    USE_SERIAL.printf("Port A0: 0x%02X, Port B0: 0x%02X\n", portValues[0], portValues[1]);
-    USE_SERIAL.printf("Port A1: 0x%02X, Port B1: 0x%02X\n", portValues[2], portValues[3]);
-    USE_SERIAL.printf("Port A2: 0x%02X, Port B2: 0x%02X\n", portValues[4], portValues[5]);
-    USE_SERIAL.printf("Port A3: 0x%02X, Port B3: 0x%02X\n", portValues[6], portValues[7]);
-    USE_SERIAL.printf("Port A4: 0x%02X, Port B4: 0x%02X\n", portValues[8], portValues[9]);
-    USE_SERIAL.printf("Port A5: 0x%02X, Port B5: 0x%02X\n", portValues[10], portValues[11]);
+    initExpanders();
 }
 
 void loop() {
