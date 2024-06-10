@@ -1,5 +1,5 @@
 import DeviceStateModel from '../schemas/deviceState.schema';
-import {config} from "../../config";
+import { config } from "../../config";
 import DeviceModel from "../schemas/device.schema";
 
 export default class DeviceStateService {
@@ -9,15 +9,15 @@ export default class DeviceStateService {
             let devices;
             // Pobieramy urządzenia na podstawie roli użytkownika
             if (role === 'admin') {
-                devices = await DeviceModel.find({}, {__v: 0, _id: 0});
+                devices = await DeviceModel.find({}, { __v: 0, _id: 0 });
             } else {
-                devices = await DeviceModel.find({location: role}, {__v: 0, _id: 0});
+                devices = await DeviceModel.find({ location: role }, { __v: 0, _id: 0 });
             }
             // Pobieramy identyfikatory urządzeń
             const ids = devices.map(device => device.deviceId);
             // Tworzymy tablicę obietnic dla wszystkich zapytań do bazy danych o stany urządzeń
             const promises = ids.map(id =>
-                DeviceStateModel.find({deviceId: id}, {__v: 0, _id: 0})
+                DeviceStateModel.find({ deviceId: id }, { __v: 0, _id: 0 })
                     .catch(error => {
                         console.error(`Failed to fetch device states for deviceId ${id}: ${error}`);
                         // W przypadku błędu zwracamy pustą tablicę
@@ -44,7 +44,7 @@ export default class DeviceStateService {
 
     public async cleanSingleDeviceStateDataService(deviceID: string) {
         try {
-            await DeviceStateModel.deleteMany({deviceId: deviceID});
+            await DeviceStateModel.deleteMany({ deviceId: deviceID });
         } catch (error) {
             throw new Error(`Query failed: ${error}`);
         }
@@ -71,8 +71,8 @@ export default class DeviceStateService {
         try {
             // Assuming the method is called 'updateDeviceState'
             await DeviceStateModel.updateOne(
-                {deviceId: deviceStateData.deviceId},
-                {$push: {states: {state: deviceStateData.state, timestamp: deviceStateData.timestamp}}}
+                { deviceId: deviceStateData.deviceId },
+                { $push: { states: { state: deviceStateData.state, timestamp: deviceStateData.timestamp } } }
             );
         } catch (error) {
             console.error('Error updating device state:', error);
@@ -84,8 +84,8 @@ export default class DeviceStateService {
         try {
             const bulkOps = deviceStates.map(deviceState => ({
                 updateOne: {
-                    filter: {deviceId: deviceState.deviceId},
-                    update: {$push: {states: {state: deviceState.state, timestamp: new Date()}}},
+                    filter: { deviceId: deviceState.deviceId },
+                    update: { $push: { states: { state: deviceState.state, timestamp: new Date() } } },
                     upsert: true
                 }
             }));
@@ -98,7 +98,7 @@ export default class DeviceStateService {
 
     public async queryState(deviceID: string) {
         try {
-            return await DeviceStateModel.find({deviceId: deviceID}, {__v: 0, _id: 0});
+            return await DeviceStateModel.find({ deviceId: deviceID }, { __v: 0, _id: 0 });
         } catch (error) {
             throw new Error(`Query failed: ${error}`);
         }
@@ -106,7 +106,7 @@ export default class DeviceStateService {
 
     public async getState(deviceID: string) {
         try {
-            return await DeviceStateModel.find({deviceId: deviceID}, {__v: 0, _id: 0}).limit(1).sort({$natural: -1});
+            return await DeviceStateModel.find({ deviceId: deviceID }, { __v: 0, _id: 0 }).limit(1).sort({ $natural: -1 });
         } catch (error) {
             throw new Error(`Query failed: ${error}`);
         }
@@ -114,8 +114,8 @@ export default class DeviceStateService {
 
     public async getAllLatestDeviceStatesService() {
         try {
-            const deviceStates = await DeviceStateModel.find({}, {__v: 0, _id: 0});
-            return deviceStates.map(deviceState => deviceState.states[deviceState.states.length -1].state);
+            const deviceStates = await DeviceStateModel.find({}, { __v: 0, _id: 0 });
+            return deviceStates.map(deviceState => deviceState.states[deviceState.states.length - 1].state);
         } catch (error) {
             throw new Error(`Query failed: ${error}`);
         }
@@ -123,7 +123,7 @@ export default class DeviceStateService {
 
     public async getAllDeviceStateDataService() {
         try {
-            return await DeviceStateModel.find({}, {__v: 0, _id: 0});//.map(deviceState => deviceState.states[0].state);
+            return await DeviceStateModel.find({}, { __v: 0, _id: 0 });//.map(deviceState => deviceState.states[0].state);
         } catch (error) {
             throw new Error(`Query failed: ${error}`);
         }
@@ -132,16 +132,16 @@ export default class DeviceStateService {
     public async getAllPeriodDeviceStateEntry(limitNum: number) {
         let latestData: any[] = [];
         await Promise.all(
-            Array.from({length: config.supportedDevicesNum}, async (_, i) => {
+            Array.from({ length: config.supportedDevicesNum }, async (_, i) => {
                 try {
-                    const latestEntry = await DeviceStateModel.find({deviceId: i}, {
+                    const latestEntry = await DeviceStateModel.find({ deviceId: i }, {
                         __v: 0,
                         _id: 0
-                    }).limit(limitNum).sort({$natural: -1});
+                    }).limit(limitNum).sort({ $natural: -1 });
                     if (latestEntry.length) {
                         latestData.push(latestEntry[0]);
                     } else {
-                        latestData.push({deviceId: i});
+                        latestData.push({ deviceId: i });
                     }
                 } catch (error) {
                     // @ts-ignore
@@ -156,16 +156,16 @@ export default class DeviceStateService {
     public async getAllLatestDeviceStateService() {
         let latestData: any[] = [];
         await Promise.all(
-            Array.from({length: config.supportedDevicesNum}, async (_, i) => {
+            Array.from({ length: config.supportedDevicesNum }, async (_, i) => {
                 try {
-                    const latestEntry = await DeviceStateModel.find({deviceId: i}, {
+                    const latestEntry = await DeviceStateModel.find({ deviceId: i }, {
                         __v: 0,
                         _id: 0
-                    }).limit(1).sort({$natural: -1});
+                    }).limit(1).sort({ $natural: -1 });
                     if (latestEntry.length) {
                         latestData.push(latestEntry[0]);
                     } else {
-                        latestData.push({deviceId: i});
+                        latestData.push({ deviceId: i });
                     }
                 } catch (error) {
                     // @ts-ignore
@@ -178,16 +178,16 @@ export default class DeviceStateService {
     }
 
     public async updateUserDeviceStatesBatch(deviceStates: Array<{
-                                                                    deviceId: number;
-                                                                    state: boolean
-                                                                }>, role: string):Promise<void> {
+        deviceId: number;
+        state: boolean
+    }>, role: string): Promise<void> {
         try {
             // Fetch the devices for the user's role
             let devices;
             if (role === 'admin') {
-                devices = await DeviceModel.find({}, {__v: 0, _id: 0});
+                devices = await DeviceModel.find({}, { __v: 0, _id: 0 });
             } else {
-                devices = await DeviceModel.find({location: role}, {__v: 0, _id: 0});
+                devices = await DeviceModel.find({ location: role }, { __v: 0, _id: 0 });
             }
             const userDeviceIds = devices.map(device => device.deviceId);
             // Filter the deviceStates array to only include devices that the user has access to
@@ -200,8 +200,8 @@ export default class DeviceStateService {
             // Proceed with the bulk update operation for the valid devices
             const bulkOps = validDeviceStates.map(deviceState => ({
                 updateOne: {
-                    filter: {deviceId: deviceState.deviceId},
-                    update: {$push: {states: {state: deviceState.state, timestamp: new Date()}}},
+                    filter: { deviceId: deviceState.deviceId },
+                    update: { $push: { states: { state: deviceState.state, timestamp: new Date() } } },
                     upsert: true
                 }
             }));
