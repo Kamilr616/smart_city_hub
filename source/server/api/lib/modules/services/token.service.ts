@@ -17,7 +17,7 @@ class TokenService {
             userData,
             config.JwtSecret,
             {
-                expiresIn: '14d'
+                expiresIn: '30d'
             });
 
         try {
