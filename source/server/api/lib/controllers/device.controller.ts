@@ -20,7 +20,7 @@ class DeviceController implements Controller {
         this.router.get(`${this.path}/get/:location`, admin, this.getAllUserDevicesByLoc);
         this.router.get(`${this.path}/user/get`, auth, this.getAllUserDevices);
         this.router.get(`${this.path}/all/:id`, admin, this.getAllDeviceData);
-        this.router.post(`${this.path}/:id`, admin, this.updateDevice);
+        this.router.post(`${this.path}/update`, admin, this.updateDevice);
         this.router.get(`${this.path}/:id`, admin, this.getDeviceData);
         this.router.delete(`${this.path}/all`, admin, this.cleanAllDeviceData);
         this.router.delete(`${this.path}/:id`, admin, this.removeDevice);
@@ -62,8 +62,8 @@ class DeviceController implements Controller {
     };
 
     private updateDevice = async (request: Request, response: Response, next: NextFunction) => {
-        const {location, name, description, type} = request.body;
-        const {id} = request.params;
+        const {location, name, description, type, id} = request.body;
+        //const {id} = request.params;
         const schema = Joi.object({
             location: Joi.string().allow('').required(),
             name: Joi.string().allow(''), // default value if not provided
