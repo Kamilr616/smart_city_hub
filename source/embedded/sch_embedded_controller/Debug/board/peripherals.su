@@ -1,2 +1,0 @@
-../board/peripherals.c:86:6:BOARD_InitPeripherals_cm33_core0	4	static
-../board/peripherals.c:94:6:BOARD_InitBootPeripherals	8	static
