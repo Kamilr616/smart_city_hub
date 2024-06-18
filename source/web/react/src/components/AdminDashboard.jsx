@@ -7,23 +7,27 @@ import AddDevice from "../AddDevice";
 const AdminDashboard = () => {
   const [selectedTab, setSelectedTab] = useState(null);
 
-  return (
-    <div className="h-full flex">
-      <AdminSidebar setSelectedTab={setSelectedTab} />
-      <div className="flex flex-col  mt-10 w-3/4">
-        {selectedTab ? (
-          selectedTab == "addNewUser" ? (
-            <AddNewUser />
-          ) : (
-            <AddDevice />
-          )
-        ) : (
+return (
+  <div className="h-full flex">
+    <AdminSidebar setSelectedTab={setSelectedTab} />
+    <div className="flex flex-col mt-10 w-3/4">
+      {selectedTab ? (
+        selectedTab === "addNewUser" ? (
+          <AddNewUser />
+        ) : selectedTab === "addNewDevice" ? (
+          <AddDevice />
+        ) : selectedTab === "controlPanel" ? (
           <AdminsTable />
-        )}
-        {/* <AdminsTable /> */}
-      </div>
+
+        ) : (
+          <div>Selected tab not implemented</div>
+        )
+      ) : (
+        <AdminsTable />
+      )}
     </div>
-  );
+  </div>
+);
 };
 
 export default AdminDashboard;
