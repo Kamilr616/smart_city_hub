@@ -63,7 +63,6 @@ class DeviceController implements Controller {
 
     private updateDevice = async (request: Request, response: Response, next: NextFunction) => {
         const {location, name, description, type, id} = request.body;
-        //const {id} = request.params;
         const schema = Joi.object({
             location: Joi.string().allow('').required(),
             name: Joi.string().allow(''), // default value if not provided

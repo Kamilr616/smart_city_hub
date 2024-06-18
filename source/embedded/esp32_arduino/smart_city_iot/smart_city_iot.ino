@@ -7,12 +7,11 @@
 
 #define I2C_SDA        21
 #define I2C_SCL        22
-//#define ADDRESS_1 MCP_ADDRESS_27
 #define USE_SERIAL Serial
 #define SSID "C111"
-#define PASS "abcdefabcdef987654321"
+#define PASS "wifi_pass"
 #define URL "http://192.168.50.243:4200/api/state/iot/all"
-#define TOKEN "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjY3NjgxMTZhMDYwMjJhYzViYzNhYzYiLCJuYW1lIjoiYWRtaW5AYWRtaW4ucGwiLCJyb2xlIjoiYWRtaW4iLCJpc0FkbWluIjp0cnVlLCJhY2Nlc3MiOiJhdXRoIiwiaWF0IjoxNzE4MDUyODg5LCJleHAiOjE3MjA2NDQ4ODl9.fk-aMPlXWVbsSfCPwybXg6IqbgDL6dyFs8Y0Icebe60"
+#define TOKEN "Bearer secret_admin_token"
 
 WiFiMulti wifiMulti;
 MCP23017 mcp1(I2C_SDA,I2C_SCL);
@@ -47,10 +46,8 @@ void initExpanders()    {
 }
 void writeExpanderPorts(const JsonArray &payload)
 {
-    // Initialize variables to hold the port values
     uint8_t portValues[12] = {0};
 
-    // Set port values based on the payload
     for (size_t i = 0; i < 96; i++)
     {
         size_t portIndex = i / 8;
@@ -58,7 +55,7 @@ void writeExpanderPorts(const JsonArray &payload)
 
         if (!payload[i].as<bool>())
         {
-            portValues[portIndex] |= (1 << bitIndex); // Set the corresponding bit
+            portValues[portIndex] |= (1 << bitIndex);
         }
     }
 
@@ -94,7 +91,6 @@ void setup() {
 }
 
 void loop() {
-    // wait for WiFi connection
     if((wifiMulti.run() == WL_CONNECTED)) {
 
         HTTPClient http;
@@ -102,17 +98,12 @@ void loop() {
         http.addHeader("x-access-token", TOKEN);       
         int httpCode = http.GET();
 
-        // httpCode will be negative on error
         if(httpCode > 0) {
-            // HTTP header has been send and Server response header has been handled
             USE_SERIAL.printf("[HTTP] GET... code: %d\n", httpCode);
 
-            // file found at server
             if(httpCode == HTTP_CODE_OK) {
                 String payload = http.getString();
                 //USE_SERIAL.println(payload);
-                // Allocate the JSON document
-                // Use a StaticJsonDocument of sufficient size
                 JsonDocument doc;
                 DeserializationError error = deserializeJson(doc, payload);
 
@@ -121,11 +112,7 @@ void loop() {
                     USE_SERIAL.println(error.f_str());
                     return;
                 }
-                 //bool [] respond_arr = jsonToBool(doc)
-
-                // Get the array from the JSON document
                 JsonArray array = doc.as<JsonArray>();
-                // Write to expander ports based on payload                
                 writeExpanderPorts(array);
             }
         } 
