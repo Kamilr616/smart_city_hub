@@ -200,9 +200,7 @@ const AdminsTable = () => {
                     >
                       delete
                     </span>
-                    <span className="rounded-md bg-black py-3 px-4 text-xs font-bold text-white cursor-pointer">
-                      edit
-                    </span>
+
                   </td>
                   <td className="w-full lg:w-auto p-3 text-gray-800 text-center  border-b border-gray-200 text-center block lg:table-cell relative lg:static">
                     {device.description}
