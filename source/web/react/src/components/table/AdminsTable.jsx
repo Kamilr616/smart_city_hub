@@ -151,49 +151,52 @@ const AdminsTable = () => {
         </div>
         <table className="border-collapse w-3/4 mx-auto border border-gray-200 px-2 py-4 mt-2">
           <thead>
-            <tr>
-              <th className="p-3  text-gray-600  border-b border-gray-200 hidden lg:table-cell">
-                Name
-              </th>
-              <th className="p-3  text-gray-600  border-b border-gray-200 hidden lg:table-cell">
-                state
-              </th>
-              <th className="p-3  text-gray-600  border-b border-gray-200 hidden lg:table-cell">
-                options
-              </th>
-              <th className="p-3  text-gray-600  border-b border-gray-200 hidden lg:table-cell">
-                Description
-              </th>
-            </tr>
+          <tr>
+            <th className="p-3  text-gray-600  border-b border-gray-200 hidden lg:table-cell">
+              Name
+            </th>
+            <th className="p-3  text-gray-600  border-b border-gray-200 hidden lg:table-cell">
+              State
+            </th>
+            <th className="p-3  text-gray-600  border-b border-gray-200 hidden lg:table-cell">
+              Options
+            </th>
+            <th className="p-3  text-gray-600  border-b border-gray-200 hidden lg:table-cell">
+              Description
+            </th>
+            <th className="p-3  text-gray-600  border-b border-gray-200 hidden lg:table-cell">
+              Id
+            </th>
+          </tr>
           </thead>
           <tbody>
-            {devices?.map((device) => {
-              return (
+          {devices?.map((device) => {
+            return (
                 <tr className="bg-white lg:hover:bg-gray-100 flex lg:table-row flex-row lg:flex-row flex-wrap lg:flex-no-wrap mb-10 lg:mb-0">
                   <td className="w-full lg:w-auto p-3 text-gray-800 text-center  border-b border-gray-200 block lg:table-cell relative lg:static">
                     {device.name}
                   </td>
                   <td className="w-full lg:w-auto p-3 text-gray-800 text-center  border-b border-gray-200 text-center block lg:table-cell relative lg:static">
                     <span
-                      onClick={() =>
-                        updateState(
-                          device.deviceId,
-                          fetchState(device.deviceId)
-                        )
-                      }
-                      className={`${
-                        fetchState(device.deviceId) == "on"
-                          ? `bg-green-400`
-                          : "bg-red-400"
-                      } rounded-md  py-3 px-4 text-xs font-bold text-white cursor-pointer`}
+                        onClick={() =>
+                            updateState(
+                                device.deviceId,
+                                fetchState(device.deviceId)
+                            )
+                        }
+                        className={`${
+                            fetchState(device.deviceId) == "on"
+                                ? `bg-green-400`
+                                : "bg-red-400"
+                        } rounded-md  py-3 px-4 text-xs font-bold text-white cursor-pointer`}
                     >
                       {fetchState(device.deviceId)}
                     </span>
                   </td>
                   <td className="w-full lg:w-auto p-3 text-gray-800 text-center  border-b border-gray-200 text-center block lg:table-cell relative lg:static">
                     <span
-                      onClick={() => deleteDevice(device.deviceId)}
-                      className="rounded-md bg-black py-3 px-4 text-xs font-bold text-white cursor-pointer mr-3"
+                        onClick={() => deleteDevice(device.deviceId)}
+                        className="rounded-md bg-black py-3 px-4 text-xs font-bold text-white cursor-pointer mr-3"
                     >
                       delete
                     </span>
@@ -204,9 +207,12 @@ const AdminsTable = () => {
                   <td className="w-full lg:w-auto p-3 text-gray-800 text-center  border-b border-gray-200 text-center block lg:table-cell relative lg:static">
                     {device.description}
                   </td>
+                  <td className="w-full lg:w-auto p-3 text-gray-800 text-center  border-b border-gray-200 text-center block lg:table-cell relative lg:static">
+                    {device.deviceId}
+                  </td>
                 </tr>
-              );
-            })}
+            );
+          })}
           </tbody>
         </table>
       </div>
