@@ -3,6 +3,8 @@ import { UserContext } from "../context/auth";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
+import kiLogo from '../assets/ki_LOGO_b.svg'
+
 function AdminSidebar({ setSelectedTab }) {
   const { user, setUser, logout } = useContext(UserContext);
   const navigate = useNavigate();
