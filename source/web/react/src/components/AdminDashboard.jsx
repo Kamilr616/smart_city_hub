@@ -3,6 +3,7 @@ import AdminsTable from "./table/AdminsTable";
 import AdminSidebar from "./AdminSidebar";
 import AddNewUser from "../AddNewUser";
 import AddDevice from "../AddDevice";
+import kiLogo from '../assets/ki_LOGO_b.svg'
 
 const AdminDashboard = () => {
   const [selectedTab, setSelectedTab] = useState("HomeLights");
