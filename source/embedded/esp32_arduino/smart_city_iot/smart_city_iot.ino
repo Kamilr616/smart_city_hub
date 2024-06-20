@@ -1,49 +1,51 @@
 #include <Arduino.h>
 #include <WiFi.h>
-#include <WiFiMulti.h>
 #include <HTTPClient.h>
-#include "MCP23017.h"
 #include <ArduinoJson.h>
 
 #define I2C_SDA        21
 #define I2C_SCL        22
 #define USE_SERIAL Serial
 #define SSID "C111"
-#define PASS "wifi_pass"
+#define PASS "abcdefabcdef987654321"
 #define URL "http://192.168.50.243:4200/api/state/iot/all"
-#define TOKEN "Bearer secret_admin_token"
+#define TOKEN "Bearer "
 
-WiFiMulti wifiMulti;
-MCP23017 mcp1(I2C_SDA,I2C_SCL);
+uint8_t adresses_len = 5;
+uint8_t addresses[adresses_len+1] = {0x27, 0x26, 0x25, 0x24, 0x23, 0x22};
 
 
-void initExpanders()    {
-    mcp1.iodir(0x00, 0x00, 0x27);
-    mcp1.iodir(0x01, 0x00, 0x27);
-    mcp1.iodir(0x00, 0x00, 0x26);
-    mcp1.iodir(0x01, 0x00, 0x26);
-    mcp1.iodir(0x00, 0x00, 0x25);
-    mcp1.iodir(0x01, 0x00, 0x25);
-    mcp1.iodir(0x00, 0x00, 0x24);
-    mcp1.iodir(0x01, 0x00, 0x24);
-    mcp1.iodir(0x00, 0x00, 0x23);
-    mcp1.iodir(0x01, 0x00, 0x23);
-    mcp1.iodir(0x00, 0x00, 0x22);
-    mcp1.iodir(0x01, 0x00, 0x22);
-
-    mcp1.write_gpio(0x00, 0x00, 0x27);
-    mcp1.write_gpio(0x01, 0X00, 0x27);
-    mcp1.write_gpio(0x00, 0x00, 0x26);
-    mcp1.write_gpio(0x01, 0X00, 0x26);
-    mcp1.write_gpio(0x00, 0x00, 0x25);
-    mcp1.write_gpio(0x01, 0X00, 0x25);
-    mcp1.write_gpio(0x00, 0x00, 0x24);
-    mcp1.write_gpio(0x01, 0X00, 0x24);
-    mcp1.write_gpio(0x00, 0x00, 0x23);
-    mcp1.write_gpio(0x01, 0X00, 0x23);
-    mcp1.write_gpio(0x00, 0x00, 0x22);
-    mcp1.write_gpio(0x01, 0X00, 0x22);
+void initWire(sda, scl){
+    Wire.begin(sda, scl);     
+    Wire.setClock(100000);  //100kHz
 }
+
+void iodir(uint8_t port, uint8_t iodir, uint8_t address)
+{
+  Wire.beginTransmission(address);
+  Wire.write(REGISTER_IODIRA | port);  
+  Wire.write(iodir);                   
+  Wire.endTransmission();
+}
+
+void write_gpio(uint8_t port, uint32_t data, uint8_t address)
+{
+  Wire.beginTransmission(address);
+  Wire.write(REGISTER_GPIOA | port);
+  Wire.write(data);
+  Wire.endTransmission();
+}
+
+void initExpanders() {
+    for (uint8_t i = 0; i < 5); i++) {
+        uint8_t address = addresses[i];
+        iodir(0x00, 0x00, address);
+        iodir(0x01, 0x00, address);
+        write_gpio(0x00, 0x00, address);
+        write_gpio(0x01, 0x00, address);
+    }
+}
+
 void writeExpanderPorts(const JsonArray &payload)
 {
     uint8_t portValues[12] = {0};
@@ -59,25 +61,16 @@ void writeExpanderPorts(const JsonArray &payload)
         }
     }
 
-    mcp1.write_gpio(0x00, portValues[0], 0x27);
-    mcp1.write_gpio(0x01, portValues[1], 0x27);
-    mcp1.write_gpio(0x00, portValues[2], 0x26);
-    mcp1.write_gpio(0x01, portValues[3], 0x26);
-    mcp1.write_gpio(0x00, portValues[4], 0x25);
-    mcp1.write_gpio(0x01, portValues[5], 0x25);
-    mcp1.write_gpio(0x00, portValues[6], 0x24);
-    mcp1.write_gpio(0x01, portValues[7], 0x24);
-    mcp1.write_gpio(0x00, portValues[8], 0x23);
-    mcp1.write_gpio(0x01, portValues[9], 0x23);
-    mcp1.write_gpio(0x00, portValues[10], 0x22);
-    mcp1.write_gpio(0x01, portValues[11], 0x22);
+    for (uint8_t i = 0; i < adresses_len; i++)
+    {
+        mcp1.write_gpio(0x00, portValues[2*i], addresses[i]);
+        mcp1.write_gpio(0x01, portValues[2*i + 1], addresses[i]);
+    }
 
-    USE_SERIAL.printf("Port A0: 0x%02X, Port B0: 0x%02X\n", portValues[0], portValues[1]);
-    USE_SERIAL.printf("Port A1: 0x%02X, Port B1: 0x%02X\n", portValues[2], portValues[3]);
-    USE_SERIAL.printf("Port A2: 0x%02X, Port B2: 0x%02X\n", portValues[4], portValues[5]);
-    USE_SERIAL.printf("Port A3: 0x%02X, Port B3: 0x%02X\n", portValues[6], portValues[7]);
-    USE_SERIAL.printf("Port A4: 0x%02X, Port B4: 0x%02X\n", portValues[8], portValues[9]);
-    USE_SERIAL.printf("Port A5: 0x%02X, Port B5: 0x%02X\n", portValues[10], portValues[11]);
+    for (uint8_t i = 0; i < adresses_len; i++)
+    {
+        USE_SERIAL.printf("Port A%u: 0x%02X, Port B%u: 0x%02X\n", i, portValues[2*i], i, portValues[2*i + 1]);
+    }
 }
 
 void setup() {
@@ -86,13 +79,19 @@ void setup() {
     delay(100);
     USE_SERIAL.println("START");
 
-    wifiMulti.addAP(SSID, PASS);
+    WiFi.begin(SSID, PASS);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(1000);
+        USE_SERIAL.println("Connecting to WiFi...");
+    }
+
+    USE_SERIAL.println("Connected to WiFi");    
+    initWire(I2C_SDA, I2C_SCL);
     initExpanders();
 }
 
 void loop() {
-    if((wifiMulti.run() == WL_CONNECTED)) {
-
+    if (WiFi.status() == WL_CONNECTED) {
         HTTPClient http;
         http.begin(URL);       
         http.addHeader("x-access-token", TOKEN);       
