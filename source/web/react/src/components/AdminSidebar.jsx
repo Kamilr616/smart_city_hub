@@ -5,7 +5,6 @@ import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import kiLogo from '../assets/ki_LOGO_b.svg'
 
-
 function AdminSidebar({ setSelectedTab }) {
   const { user, setUser, logout } = useContext(UserContext);
   const navigate = useNavigate();
@@ -38,8 +37,7 @@ function AdminSidebar({ setSelectedTab }) {
             role="button"
             tabIndex="0"
             className="flex items-center w-full p-3 rounded-lg text-start leading-tight transition-all hover:bg-blue-50 hover:bg-opacity-80 focus:bg-blue-50 focus:bg-opacity-80 active:bg-gray-50 active:bg-opacity-80 hover:text-blue-900 focus:text-blue-900 active:text-blue-900 outline-none"
-            onClick={() => setSelectedTab(`controlPanel`)}
-
+            onClick={() => setSelectedTab(`HomeLights`)}
           >
             <div className="grid place-items-center mr-4">
               <svg
@@ -54,7 +52,6 @@ function AdminSidebar({ setSelectedTab }) {
             </div>
             Home Lights
           </div>
-
 
           <div
             role="button"
