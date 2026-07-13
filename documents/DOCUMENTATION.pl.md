@@ -1,0 +1,128 @@
+# Smart City Hub — dokumentacja techniczna
+
+Skrócona dokumentacja systemu (wersja polska; wersja angielska: [DOCUMENTATION.md](DOCUMENTATION.md)). Instrukcje uruchomienia znajdują się w [README](../README.md).
+
+## 1. Przegląd systemu
+
+System składa się z czterech komponentów:
+
+1. **API** (`source/server/api`) — centralny serwer REST w Node.js/Express/TypeScript. Przechowuje użytkowników, urządzenia, odczyty sensorów i historię stanów w MongoDB. Port domyślny: **4200**.
+2. **Panel webowy** (`source/web/react`) — SPA w React; osobne widoki dla administratora (zarządzanie użytkownikami i urządzeniami) i użytkownika (sterowanie przypisanymi urządzeniami).
+3. **Firmware ESP32** (`source/embedded/esp32_arduino`) — odpytuje API o aktualne stany urządzeń i ustawia 96 wyjść cyfrowych przez ekspandery MCP23017.
+4. **Aplikacja mobilna** (`source/mobile/react-native`) — React Native; korzysta z Firebase (Auth + Firestore) jako niezależnego backendu.
+
+```mermaid
+flowchart LR
+    WEB["Panel webowy React"] -->|"REST + JWT"| API["API Express / TypeScript"]
+    ESP["ESP32 + 6× MCP23017"] -->|"odpytuje stany z JWT"| API
+    API <-->|"Mongoose"| DB[(MongoDB)]
+    MOBILE["Prototyp React Native"] --> FB["Firebase Auth + Firestore"]
+```
+
+Ścieżka mobilna/Firebase jest niezależna od Node.js/MongoDB i dane nie są między nimi synchronizowane.
+
+## 2. Uwierzytelnianie i role
+
+- Logowanie: `POST /api/user/auth` zwraca token **JWT** (sekret: zmienna `JWT_SECRET_KEY`).
+- Token przekazywany w nagłówku `Authorization: Bearer <token>` lub `x-access-token`.
+- Hasła hashowane **bcrypt**, przechowywane w osobnej kolekcji (`password.schema.ts`); tokeny sesji w kolekcji tokenów (`token.schema.ts`).
+- Middleware:
+  - `auth.middleware` — wymaga poprawnego JWT (dostęp „user").
+  - `admin.middleware` — wymaga JWT oraz roli `admin` / flagi `isAdmin`.
+- Panel webowy przechowuje token w `sessionStorage`; zamknięcie karty przeglądarki usuwa lokalną sesję. API dodatkowo sprawdza, czy token nadal istnieje w kolekcji sesji po stronie serwera.
+
+## 3. Modele danych (MongoDB / Mongoose)
+
+| Model | Pola | Opis |
+|---|---|---|
+| **User** | `email` (unikalny), `name` (unikalny), `role` (domyślnie `user`), `active`, `isAdmin` | Konta użytkowników |
+| **Password** | `userId`, `password` (hash bcrypt) | Hasła, osobno od użytkowników |
+| **Token** | `userId`, `value` | Tokeny sesji |
+| **Device** | `deviceId` (Number), `location`, `name` (domyślnie `outlet`), `type`, `description`, `editDate` | Metadane urządzeń (maks. 96) |
+| **DeviceState** | `deviceId` (ref: Device), `states[]` — `{state: Boolean, timestamp: Date}` | Historia włączeń/wyłączeń |
+| **Sensor** | `deviceId`, `temperature`, `pressure`, `humidity`, `readingDate` | Odczyty sensorów |
+
+## 4. Endpointy API
+
+Prefiks wszystkich tras: `/api`. Oznaczenia: 🔓 publiczny, 👤 wymaga JWT, 🛡️ wymaga roli admin.
+
+### Użytkownicy — `/api/user`
+
+| Metoda | Ścieżka | Dostęp | Opis |
+|---|---|---|---|
+| POST | `/create` | 🛡️ | Utworzenie użytkownika |
+| POST | `/auth` | 🔓 | Logowanie, zwraca JWT |
+| DELETE | `/logout` | 👤 | Wylogowanie i unieważnienie bieżącego tokenu |
+
+### Urządzenia — `/api/device`
+
+| Metoda | Ścieżka | Dostęp | Opis |
+|---|---|---|---|
+| GET | `/latest` | 🛡️ | Najnowsze dane urządzeń |
+| GET | `/get/:location` | 🛡️ | Urządzenia wg lokalizacji |
+| GET | `/user/get` | 👤 | Urządzenia przypisane do zalogowanego użytkownika |
+| GET | `/all/:id` | 🛡️ | Wszystkie wpisy dla urządzenia |
+| GET | `/:id` | 🛡️ | Pojedyncze urządzenie |
+| POST | `/update` | 🛡️ | Dodanie / aktualizacja urządzenia |
+| DELETE | `/all` | 🛡️ | Usunięcie wszystkich urządzeń |
+| DELETE | `/:id` | 🛡️ | Usunięcie urządzenia |
+
+### Stany urządzeń — `/api/state`
+
+| Metoda | Ścieżka | Dostęp | Opis |
+|---|---|---|---|
+| GET | `/iot/all` | 👤 | Aktualne stany wszystkich urządzeń — używane przez ESP32 |
+| GET | `/user/latest` | 👤 | Najnowsze stany urządzeń użytkownika |
+| GET | `/latest` | 🛡️ | Najnowsze stany (wszystkie) |
+| GET | `/all` | 🛡️ | Pełna historia stanów |
+| GET | `/:id` | 🛡️ | Stan konkretnego urządzenia |
+| POST | `/user/update` | 👤 | Zmiana stanu urządzenia przez użytkownika |
+| POST | `/update`, `/update/:id` | 🛡️ | Zmiana stanu przez administratora |
+| DELETE | `/all`, `/:id` | 🛡️ | Usunięcie historii stanów |
+
+### Sensory — `/api/sensor`
+
+| Metoda | Ścieżka | Dostęp | Opis |
+|---|---|---|---|
+| GET | `/all/latest` | 🔓 | Najnowsze odczyty wszystkich sensorów |
+| GET | `/all` | 🔓 | Najnowsze 20 odczytów każdego skonfigurowanego sensora |
+| GET | `/all/:num` | 🛡️ | Ostatnie dodatnie *num* odczytów każdego skonfigurowanego sensora |
+| GET | `/:id` | 🛡️ | Odczyty sensora |
+| POST | `/iot/update` | 🛡️ | Walidacja i zbiorczy zapis odczytów sensorów |
+| POST | `/update/:id` | 🛡️ | Aktualizacja odczytu |
+| DELETE | `/all`, `/:id` | 🛡️ | Usunięcie odczytów |
+
+## 5. Panel webowy — przepływ
+
+1. `Login.jsx` → `POST /api/user/auth` → token JWT zapisywany dla bieżącej karty w `sessionStorage`.
+2. Router (`App.jsx`) kieruje na podstawie roli: `Dashboard` (user) lub `AdminDashboard` (admin); trasy chronione przez `PrivateRoutes`.
+3. Użytkownik: `UsersTable` pobiera urządzenia z `GET /api/device/user/get` i przełącza stany przez `POST /api/state/user/update`.
+4. Administrator: zakładki *addNewUser* (`POST /api/user/create`), *addNewDevice* (`POST /api/device/update`) oraz *controlPanel* (`AdminsTable` — sterowanie wszystkimi urządzeniami).
+
+## 6. Firmware ESP32
+
+- **Sprzęt:** ESP32 + 6× MCP23017 na magistrali I2C (adresy `0x22`–`0x27`), łącznie 96 wyjść; SDA=21, SCL=22; UART 9600 baud.
+- **Działanie:** po połączeniu z WiFi szkic cyklicznie wykonuje `GET /api/state/iot/all` (z tokenem w nagłówku `x-access-token`), parsuje odpowiedź JSON (`ArduinoJson`) i ustawia piny ekspanderów zgodnie z otrzymanymi stanami.
+- **Konfiguracja:** skopiuj `secrets.example.h` do ignorowanego pliku `secrets.h`, a następnie ustaw SSID WiFi, adres API oraz token bearer przed wgraniem firmware.
+
+## 7. Konfiguracja środowiska
+
+| Komponent | Zmienna | Opis |
+|---|---|---|
+| API | `PORT` | Port serwera (domyślnie 4200) |
+| API | `JWT_SECRET_KEY` | Sekret do podpisywania JWT |
+| API | `MONGODB_URI` | Connection string MongoDB Atlas |
+| Web | `VITE_API_URL` | Adres API, np. `http://localhost:4200/api` |
+| Mobile | `firebaseConfig.local.ts` | Lokalna konfiguracja Firebase skopiowana z wersjonowanego szablonu |
+| Firmware | `secrets.h` | Lokalne SSID Wi-Fi, adres API i token skopiowane z `secrets.example.h` |
+
+Pliki `.env` nie są wersjonowane (`.gitignore`).
+
+## 8. Znane ograniczenia / uwagi
+
+- Limit 96 urządzeń wynika ze sprzętu (6 ekspanderów × 16 wyjść) i jest odzwierciedlony w konfiguracji API.
+- API ma ukierunkowane testy regresji tras sensorów, a projekt mobilny zachowuje jeden test dymny renderowania React Native. Panel webowy nie ma zestawu testów automatycznych. Brak konfiguracji Docker/CI.
+- Panel webowy przechodzi zadanie ESLint. ESLint archiwalnego projektu mobilnego obecnie nie przechodzi, głównie z powodu konfliktu plików CRLF z wersjonowaną regułą końca linii Prettier; ten dług formatowania nie jest poprawiany automatycznie, ponieważ przepisałoby to większość projektu.
+- Dane konfiguracyjne firmware są dostarczane przez ignorowany plik `secrets.h`; ich zmiana nadal wymaga rekompilacji.
+- Aplikacja mobilna używa Firebase zamiast API Node.js — oba backendy nie są zsynchronizowane.
+- Zainstalowano pakiety klienta/core GraphQL, ale nie ma aktywnego schematu ani endpointu GraphQL; zaimplementowanym interfejsem jest REST.
