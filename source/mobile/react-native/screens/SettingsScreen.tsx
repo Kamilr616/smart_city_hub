@@ -1,7 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ImageBackground, Modal, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ImageBackground, Modal, TextInput, ListRenderItem } from 'react-native';
 
-const initialData = [
+type DeviceState = 'on' | 'off';
+interface Device {
+  id: string;
+  name: string;
+  state?: DeviceState;
+  location?: string;
+  description?: string;
+  type?: string;
+  deviceId?: string;
+}
+
+const initialData: Device[] = [
   { id: '1', name: 'Lampa uliczna', state: 'on'},
   { id: '2', name: 'Lapma uliczna', state: 'on'},
   { id: '3', name: 'Parter zielonu tyl'},
@@ -16,9 +27,9 @@ const SettingsScreen: React.FC = () => {
   const [data, setData] = useState(initialData);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [addModalVisible, setAddModalVisible] = useState(false);
-  const [selectedLight, setSelectedLight] = useState(null);
+  const [selectedLight, setSelectedLight] = useState<Device | null>(null);
   const [newName, setNewName] = useState('');
-  const [newDevice, setNewDevice] = useState({
+  const [newDevice, setNewDevice] = useState<Omit<Device, 'id'>>({
     location: '',
     name: '',
     description: '',
@@ -28,8 +39,8 @@ const SettingsScreen: React.FC = () => {
   });
 
   // Function to toggle the state of a light
-  const toggleLightState = (id) => {
-    const updatedData = data.map(item => {
+  const toggleLightState = (id: string) => {
+    const updatedData = data.map((item): Device => {
       if (item.id === id) {
         return {
           ...item,
@@ -42,13 +53,13 @@ const SettingsScreen: React.FC = () => {
   };
 
   // Function to delete a light
-  const deleteLight = (id) => {
+  const deleteLight = (id: string) => {
     const updatedData = data.filter(item => item.id !== id);
     setData(updatedData);
   };
 
   // Function to open edit modal
-  const openEditModal = (light) => {
+  const openEditModal = (light: Device) => {
     setSelectedLight(light);
     setNewName(light.name);
     setEditModalVisible(true);
@@ -56,6 +67,9 @@ const SettingsScreen: React.FC = () => {
 
   // Function to save edited name
   const saveEdit = () => {
+    if (!selectedLight) {
+      return;
+    }
     const updatedData = data.map(item => {
       if (item.id === selectedLight.id) {
         return {
@@ -84,7 +98,7 @@ const SettingsScreen: React.FC = () => {
     setAddModalVisible(false);
   };
 
-  const renderItem = ({ item }) => (
+  const renderItem: ListRenderItem<Device> = ({ item }) => (
     <View style={styles.row}>
       <Text style={styles.name}>{item.name}</Text>
       <TouchableOpacity onPress={() => toggleLightState(item.id)} style={[styles.stateButton, item.state === 'on' ? styles.on : styles.off]}>

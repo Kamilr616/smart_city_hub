@@ -1,10 +1,10 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { UserContext } from "./context/auth";
 import axios from "axios";
 const AddNewUser = () => {
-  const { user, setUser } = useContext(UserContext);
+  const { user } = useContext(UserContext);
 
   const [formData, setFormDate] = useState({
     name: "",
@@ -151,8 +151,8 @@ const AddNewUser = () => {
                   placeholder="password"
                   id="password"
                   name="password"
-                  type="text"
-                  autoComplete="password"
+                  type="password"
+                  autoComplete="new-password"
                   required
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   value={formData.password}
@@ -175,8 +175,8 @@ const AddNewUser = () => {
                   placeholder="confirm your password"
                   id="cpassword"
                   name="cpassword"
-                  type="text"
-                  autoComplete="cpassword"
+                  type="password"
+                  autoComplete="new-password"
                   required
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   value={formData.confirmPassword}

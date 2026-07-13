@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ImageBackground, ListRenderItem } from 'react-native';
+
+type DeviceState = 'on' | 'off';
+interface Device {
+  id: string;
+  name: string;
+  state: DeviceState;
+  description: string;
+}
 
 // Define the initial data
-const initialData = [
+const initialData: Device[] = [
   { id: '1', name: 'Lampa uliczna', state: 'on', description: 'Identyfikator: 0' },
   { id: '2', name: 'Lapma uliczna', state: 'on', description: 'Identyfikator: 8' },
   { id: '3', name: 'Parter zielonu tyl	', state: 'on', description: 'Identyfikator: 23' },
@@ -17,8 +25,8 @@ const DevicesScreen: React.FC = () => {
   const [data, setData] = useState(initialData);
 
   // Function to toggle the state of a light
-  const toggleLightState = (id) => {
-    const updatedData = data.map(item => {
+  const toggleLightState = (id: string) => {
+    const updatedData = data.map((item): Device => {
       if (item.id === id) {
         return {
           ...item,
@@ -30,7 +38,7 @@ const DevicesScreen: React.FC = () => {
     setData(updatedData);
   };
 
-  const renderItem = ({ item }) => (
+  const renderItem: ListRenderItem<Device> = ({ item }) => (
     <View style={styles.row}>
       <Text style={styles.name}>{item.name}</Text>
       <TouchableOpacity onPress={() => toggleLightState(item.id)} style={[styles.stateButton, item.state === 'on' ? styles.on : styles.off]}>

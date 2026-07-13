@@ -1,8 +1,5 @@
-import React, { useContext } from "react";
 import Sidebar from "./Sidebar";
-import Navbar from "./Navbar";
 import UsersTable from "./table/UsersTable";
-import { UserContext } from "../context/auth";
 
 const Dashboard = () => {
   return (

@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, FlatList, Dimensions, ImageBackground, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, FlatList, Dimensions, ImageBackground, TouchableOpacity, Modal, ListRenderItem } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 
 const screenWidth = Dimensions.get('window').width;
+
+type DeviceState = 'on' | 'off';
+interface FavoriteDevice {
+  id: string;
+  name: string;
+  state: DeviceState;
+}
 
 // Sample data for the chart representing the number of times devices were turned on and off during the week
 const initialChartData = {
@@ -21,7 +28,7 @@ const initialChartData = {
   ],
 };
 
-const initialFavoriteDevices = [
+const initialFavoriteDevices: FavoriteDevice[] = [
   { id: '1', name: 'Lampa uliczna', state: 'on' },
   { id: '2', name: 'Parter czerwony	', state: 'off' },
   { id: '3', name: 'Dach zewnatrz', state: 'off' },
@@ -32,16 +39,19 @@ const initialFavoriteDevices = [
 const MainScreen: React.FC = () => {
   const [favoriteDevices, setFavoriteDevices] = useState(initialFavoriteDevices);
   const [chartData, setChartData] = useState(initialChartData);
-  const [selectedDevice, setSelectedDevice] = useState(null);
+  const [selectedDevice, setSelectedDevice] = useState<FavoriteDevice | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const openModal = (device) => {
+  const openModal = (device: FavoriteDevice) => {
     setSelectedDevice(device);
     setModalVisible(true);
   };
 
   const toggleDeviceState = () => {
-    const updatedDevices = favoriteDevices.map((device) => {
+    if (!selectedDevice) {
+      return;
+    }
+    const updatedDevices = favoriteDevices.map((device): FavoriteDevice => {
       if (device.id === selectedDevice.id) {
         return {
           ...device,
@@ -55,7 +65,7 @@ const MainScreen: React.FC = () => {
     setModalVisible(false);
   };
 
-  const updateChartData = (newState) => {
+  const updateChartData = (newState: DeviceState) => {
     const currentDayIndex = new Date().getDay() - 1; // getDay() returns 0 for Sunday, 1 for Monday, etc.
     const updatedChartData = { ...chartData };
 
@@ -68,7 +78,7 @@ const MainScreen: React.FC = () => {
     setChartData(updatedChartData);
   };
 
-  const renderDevice = ({ item }) => (
+  const renderDevice: ListRenderItem<FavoriteDevice> = ({ item }) => (
     <TouchableOpacity style={styles.deviceContainer} onPress={() => openModal(item)}>
       <Text style={styles.deviceName}>{item.name}</Text>
       <Text style={[styles.deviceState, item.state === 'on' ? styles.on : styles.off]}>{item.state.toUpperCase()}</Text>

@@ -1,18 +1,15 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
-import { useNavigation } from '@react-navigation/native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { DrawerContentComponentProps, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { signOut } from 'firebase/auth'; 
 import { FIREBASE_AUTH } from '../FirebaseConfig'; 
 
-const CustomDrawerContent: React.FC = (props) => {
-  const navigation = useNavigation();
-
+const CustomDrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
   const handleLogout = async () => {
     try {
       await signOut(FIREBASE_AUTH);
       console.log('Wylogowano użytkownika');
-      navigation.navigate('Login');
+      props.navigation.navigate('Login');
     } catch (error) {
       console.error('Błąd podczas wylogowywania użytkownika:', error);
     }

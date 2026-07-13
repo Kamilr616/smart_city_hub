@@ -7,19 +7,19 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  useColorScheme,
   View,
   ImageBackground,
   Alert,
 } from 'react-native';
 
-import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { useNavigation } from '@react-navigation/native';
+import { DrawerNavigationProp } from '@react-navigation/drawer';
+import type { RootDrawerParamList } from '../App';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { FIREBASE_AUTH } from '../FirebaseConfig';
 
 const LoginScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<DrawerNavigationProp<RootDrawerParamList, 'Login'>>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -93,7 +93,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 45,
     fontWeight: 'bold',
-    marginBottom: 1,
     color: '#29B1ED',
     marginBottom: 30,
   },

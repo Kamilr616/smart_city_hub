@@ -1,30 +1,15 @@
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import "./App.css";
 import Login from "./Login";
-import { Navigate, Route, Routes, createBrowserRouter } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import Dashboard from "./components/Dashboard";
 import AdminDashboard from "./components/AdminDashboard";
 import { PrivateRoutes } from "./privateRoute";
 import { UserContext } from "./context/auth";
-import Cookies from "js-cookie";
 
 function App() {
-  const router = createBrowserRouter([
-    {
-      path: "/",
-      element: <Dashboard />,
-    },
-    {
-      path: "login",
-      element: <Login />,
-    },
-    {
-      path: "adminDashboard",
-      element: <AdminDashboard />,
-    },
-  ]);
-
-  const { getRole } = useContext(UserContext);
+  const { user } = useContext(UserContext);
+  const isAdmin = Boolean(user?.isAdmin);
   return (
     <>
       <Routes>
@@ -32,11 +17,11 @@ function App() {
           <Route
             exact
             path="/"
-            element={getRole() ? <AdminDashboard /> : <Dashboard />}
+            element={isAdmin ? <AdminDashboard /> : <Dashboard />}
           />
           <Route
             path="/adminDashboard"
-            element={getRole() ? <AdminDashboard /> : <Navigate to="/" />}
+            element={isAdmin ? <AdminDashboard /> : <Navigate to="/" replace />}
           />
         </Route>
         <Route path="/login" element={<Login />} />

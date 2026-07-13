@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { PropsWithChildren, useState } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -15,10 +15,14 @@ import {
 
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { useNavigation } from '@react-navigation/native';
+import { DrawerNavigationProp } from '@react-navigation/drawer';
+import type { RootDrawerParamList } from '../App';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { FIREBASE_AUTH } from '../FirebaseConfig';
 import { FIREBASE_APP } from '../FirebaseConfig';
 import { getFirestore, doc, setDoc } from "firebase/firestore";
+
+type SectionProps = PropsWithChildren<{ title: string }>;
 
 const Section: React.FC<SectionProps> = ({children, title}) => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -39,7 +43,7 @@ const Section: React.FC<SectionProps> = ({children, title}) => {
 };
 
 const RegistrationScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<DrawerNavigationProp<RootDrawerParamList, 'Registration'>>();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

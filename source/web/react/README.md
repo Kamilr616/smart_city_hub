@@ -1,8 +1,22 @@
-# React + Vite
+# Smart City Hub web dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 18 and Vite client for the Smart City Hub Node.js API. The application provides JWT-based login, role-aware user and administrator dashboards, device assignment, and remote device-state control.
 
-Currently, two official plugins are available:
+The architecture, screenshots, and full setup are documented in the [repository README](../../../README.md).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Run locally
+
+Create `.env` in this directory and point it at the API prefix:
+
+```env
+VITE_API_URL=http://localhost:4200/api
+```
+
+Then run:
+
+```bash
+npm ci
+npm run dev
+```
+
+Use `npm run lint` and `npm run build` before committing frontend changes.

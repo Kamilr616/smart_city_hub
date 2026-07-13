@@ -1,17 +1,17 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { UserContext } from "./context/auth";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 const AddDevice = () => {
-  const { user, setUser } = useContext(UserContext);
+  const { user } = useContext(UserContext);
 
   const [deviceData, setDeviceData] = useState({
     location: "",
     name: "",
     description: "",
     type: "",
-    id: "",
+    deviceId: "",
   });
 
   const submitDevice = async (e) => {
@@ -35,7 +35,7 @@ const AddDevice = () => {
         name: "",
         description: "",
         type: "",
-        id: "",
+        deviceId: "",
       });
     } catch (error) {
       toast("Something went wrong.");
@@ -170,9 +170,9 @@ const AddDevice = () => {
                   autoComplete="deviceID"
                   required
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  value={deviceData.id}
+                  value={deviceData.deviceId}
                   onChange={(e) =>
-                    setDeviceData({ ...deviceData, id: e.target.value })
+                    setDeviceData({ ...deviceData, deviceId: e.target.value })
                   }
                 />
               </div>
