@@ -1,9 +1,8 @@
 import { Schema, model } from 'mongoose';
-import {IPassword} from "../models/password.model";
 
-const PasswordSchema = new Schema<IPassword>({
+const PasswordSchema = new Schema({
    userId: { type: Schema.Types.ObjectId, ref: 'user', required: true, unique: true },
    password: { type: String, required: true }
 });
 
-export default model<IPassword>('PasswordKR', PasswordSchema);
+export default model('PasswordKR', PasswordSchema);

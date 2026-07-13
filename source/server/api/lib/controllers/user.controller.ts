@@ -20,7 +20,7 @@ class UserController implements Controller {
     private initializeRoutes() {
         this.router.post(`${this.path}/create`, admin, this.createNewOrUpdate);
         this.router.post(`${this.path}/auth`, this.authenticate);
-        this.router.delete(`${this.path}/logout/:userId`, auth, this.removeHashSession);
+        this.router.delete(`${this.path}/logout`, auth, this.removeHashSession);
     }
 
     private authenticate = async (request: Request, response: Response, next: NextFunction) => {
@@ -29,12 +29,14 @@ class UserController implements Controller {
         try {
             const user = await this.userService.getByEmailOrName(login);
             if (!user) {
-                response.status(401).json({error: 'Unauthorized'});
+                return response.status(401).json({error: 'Unauthorized'});
             }
-            // @ts-ignore
-            await this.passwordService.authorize(user.id, await this.passwordService.hashPassword(password));
+            if (typeof password !== 'string' || !await this.passwordService.authorize(user.id, password)) {
+                return response.status(401).json({error: 'Unauthorized'});
+            }
+
             const token = await this.tokenService.create(user);
-            response.status(200).json(this.tokenService.getToken(token));
+            return response.status(200).json(this.tokenService.getToken(token));
         } catch (error) {
         if (!response.headersSent) {
             console.error(`Error: ${error instanceof Error ? error.message : error}`);
@@ -50,34 +52,42 @@ class UserController implements Controller {
         const userData = request.body;
         try {
             const user = await this.userService.createNewOrUpdate(userData);
+            if (!user) {
+                return response.status(400).json({error: 'User could not be created'});
+            }
             if (userData.password) {
                 const hashedPassword = await this.passwordService.hashPassword(userData.password)
                 await this.passwordService.createOrUpdate({
-                    // @ts-ignore
                     userId: user._id,
                     password: hashedPassword
                 });
             }
             response.status(200).json(user);
         } catch (error) {
-            // @ts-ignore
-            console.error(`Validation Error: ${error.message}`);
-            // @ts-ignore
-            response.status(400).json({error: 'Bad request', value: error.message});
+        if (!response.headersSent) {
+            console.error(`Error: ${error instanceof Error ? error.message : error}`);
+            return response.status(500).json({ error: 'Internal Server Error' });
         }
+        else {
+            console.error(`Error: ${error instanceof Error ? error.message : error}`);
+        }
+        }
+
 
     };
 
     private removeHashSession = async (request: Request, response: Response, next: NextFunction) => {
-        const {userId} = request.params
-
         try {
-            const result = await this.tokenService.remove(userId);
+            const result = await this.tokenService.remove(response.locals.authToken);
             response.status(200).send(result);
         } catch (error) {
-            // @ts-ignore
-            console.error(`Validation Error: ${error.message}`);
-            response.status(401).json({error: 'Unauthorized'});
+        if (!response.headersSent) {
+            console.error(`Error: ${error instanceof Error ? error.message : error}`);
+            return response.status(500).json({ error: 'Internal Server Error' });
+        }
+        else {
+            console.error(`Error: ${error instanceof Error ? error.message : error}`);
+        }
         }
     };
 }

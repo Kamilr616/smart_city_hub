@@ -17,7 +17,7 @@ const getEnvVariable = (key: string): string => {
 }
 
 export const config: Config = {
-    port: getEnvVariable('PORT'),
+    port: process.env.PORT || '4200',
     supportedDevicesNum: 96,
     supportedSensorsNum: 2,
     JwtSecret: getEnvVariable('JWT_SECRET_KEY'),

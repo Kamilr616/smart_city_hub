@@ -68,8 +68,6 @@ export default class DeviceService {
             return result.deletedCount;  // Optionally return the number of deleted documents
         } catch (error) {
             console.error(`Query failed: ${error}`);
-            // @ts-ignore
-            throw new Error(`Query failed: ${error.message}`);  // It's good to use error.message
         }
     }
 
@@ -88,8 +86,10 @@ export default class DeviceService {
                         latestData.push({deviceId: i});
                     }
                 } catch (error) {
-                    // @ts-ignore
-                    console.error(`Błąd podczas pobierania danych dla urządzenia ${i + 1}: ${error.message}`);
+                    if(error)
+                    {
+                    console.error(`Błąd podczas pobierania danych dla urządzenia ${i + 1}`);
+                    }
                     latestData.push({});
                 }
             })
@@ -112,8 +112,10 @@ export default class DeviceService {
                         latestData.push({deviceId: i});
                     }
                 } catch (error) {
-                    // @ts-ignore
-                    console.error(`Błąd podczas pobierania danych dla urządzenia ${i + 1}: ${error.message}`);
+                     if(error)
+                    {
+                    console.error(`Błąd podczas pobierania danych dla urządzenia ${i + 1}`);
+                    }
                     latestData.push({});
                 }
             })

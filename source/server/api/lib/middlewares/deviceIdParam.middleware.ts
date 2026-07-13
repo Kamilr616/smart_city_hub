@@ -9,3 +9,11 @@ export const checkSensorIdParam: RequestHandler = (request: Request, response: R
     }
     next();
 };
+
+export const checkSensorLimitParam: RequestHandler = (request: Request, response: Response, next: NextFunction) => {
+    const limit = Number(request.params.num);
+    if (!Number.isInteger(limit) || limit <= 0) {
+        return response.status(400).send('Invalid sensor reading limit.');
+    }
+    next();
+};

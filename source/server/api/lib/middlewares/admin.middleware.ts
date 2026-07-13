@@ -1,31 +1,20 @@
 import {Request, Response, NextFunction} from 'express';
-import jwt from 'jsonwebtoken';
-import {config} from '../config';
-import {IUser} from "../modules/models/user.model";
+import {verifyActiveToken} from './auth.middleware';
 
-export const admin = (request: Request, response: Response, next: NextFunction) => {
-    // @ts-ignore
-    let token = request.headers['x-access-token'] || request.headers['authorization'];
-    if (token && typeof token === 'string') {
-        if (token.startsWith('Bearer ')) {
-            token = token.slice(7, token.length);
+export const admin = async (request: Request, response: Response, next: NextFunction) => {
+    try {
+        const authentication = await verifyActiveToken(request);
+        if (!authentication) {
+            return response.status(401).send('Access denied or session expired.');
         }
-        try {
-            jwt.verify(token, config.JwtSecret, (err, decoded) => {
-                if (err) {
-                    return response.status(400).send('Invalid token.');
-                }
-                const user: IUser = decoded as IUser;
-                if (!user.isAdmin && !(user.role === 'admin')) {
-                    return response.status(403).send('Access denied.');
-                }
-                next();
-                return;
-            });
-        } catch (ex) {
-            return response.status(400).send('Invalid token.');
+        if (!authentication.user.isAdmin && authentication.user.role !== 'admin') {
+            return response.status(403).send('Access denied.');
         }
-    } else {
-        return response.status(401).send('Access denied. No token provided.');
+        response.locals.userRole = authentication.user.role;
+        response.locals.userId = authentication.user.userId;
+        response.locals.authToken = authentication.token;
+        next();
+    } catch (ex) {
+        return response.status(401).send('Invalid token.');
     }
 };

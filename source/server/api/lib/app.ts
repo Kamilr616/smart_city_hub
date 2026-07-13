@@ -24,9 +24,8 @@ class App {
         this.app.use(cors({
            origin: '*',
            methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-           credentials: true,
            optionsSuccessStatus: 204,
-           allowedHeaders: 'Content-Type,Authorization',
+           allowedHeaders: 'Content-Type,Authorization,x-access-token',
        }));
     }
 

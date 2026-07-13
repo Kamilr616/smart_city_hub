@@ -9,12 +9,12 @@ export default class DeviceStateService {
             let devices;
             // Pobieramy urządzenia na podstawie roli użytkownika
             if (role === 'admin') {
-                devices = await DeviceModel.find({}, { __v: 0, _id: 0 });
+                devices = await DeviceModel.find({}, { __v: 0, _id: 0 }).select('deviceId').lean();
             } else {
-                devices = await DeviceModel.find({ location: role }, { __v: 0, _id: 0 });
+                devices = await DeviceModel.find({ location: role }, { __v: 0, _id: 0 }).select('deviceId').lean();
             }
             // Pobieramy identyfikatory urządzeń
-            const ids = devices.map(device => device.deviceId);
+            const ids = (devices as Array<Record<string, any>>).map(device => device.deviceId);
             // Tworzymy tablicę obietnic dla wszystkich zapytań do bazy danych o stany urządzeń
             const promises = ids.map(id =>
                 DeviceStateModel.find({ deviceId: id }, { __v: 0, _id: 0 })
@@ -25,7 +25,7 @@ export default class DeviceStateService {
                     })
             );
             // Wykonujemy wszystkie zapytania równolegle
-            const results = await Promise.all(promises);
+            const results = await Promise.all(promises as Array<Promise<any[]>>);
             // Spłaszczamy wyniki do jednej tablicy i mapujemy je do oczekiwanego formatu
             // Zwracamy wszystkie stany urządzeń
             return results.flat().map(deviceState => {
@@ -115,7 +115,11 @@ export default class DeviceStateService {
     public async getAllLatestDeviceStatesService() {
         try {
             const deviceStates = await DeviceStateModel.find({}, { __v: 0, _id: 0 });
-            return deviceStates.map(deviceState => deviceState.states[deviceState.states.length - 1].state);
+            return (deviceStates as Array<Record<string, any>>).map(deviceState => {
+                const states = deviceState.states as Array<Record<string, any>>;
+                const lastEntry = states[states.length - 1] || {};
+                return lastEntry.state;
+            });
         } catch (error) {
             throw new Error(`Query failed: ${error}`);
         }
@@ -189,7 +193,7 @@ export default class DeviceStateService {
             } else {
                 devices = await DeviceModel.find({ location: role }, { __v: 0, _id: 0 });
             }
-            const userDeviceIds = devices.map(device => device.deviceId);
+            const userDeviceIds = (devices as Array<Record<string, any>>).map(device => device.deviceId);
             // Filter the deviceStates array to only include devices that the user has access to
             const validDeviceStates = deviceStates.filter(deviceState => userDeviceIds.includes(deviceState.deviceId));
 

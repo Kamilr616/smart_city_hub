@@ -1,5 +1,4 @@
 import {Schema, model} from 'mongoose';
-import {IDevice} from "../models/device.model";
 
 export const DeviceSchema: Schema = new Schema({
     location: {type: String, required: true},
@@ -10,4 +9,4 @@ export const DeviceSchema: Schema = new Schema({
     type: {type: String, default: 'default'},
 });
 
-export default model<IDevice>('DeviceKR', DeviceSchema);
+export default model('DeviceKR', DeviceSchema);

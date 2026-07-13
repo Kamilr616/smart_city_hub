@@ -31,3 +31,7 @@ dist-ssr
 /httpRequests/
 # GitHub Copilot persisted chat sessions
 /copilot/chatSessions
+
+# environment secrets
+.env
+source/embedded/esp32_arduino/smart_city_iot/secrets.h

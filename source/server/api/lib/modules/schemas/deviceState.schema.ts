@@ -1,7 +1,14 @@
 import {Schema, model} from 'mongoose';
-import {IDeviceState} from "../models/deviceState.model";
 
-const DeviceStateSchema = new Schema({
+export interface DeviceStateDocument {
+    deviceId: number;
+    states: Array<{
+        state: boolean;
+        timestamp: Date;
+    }>;
+}
+
+const DeviceStateSchema = new Schema<DeviceStateDocument>({
     deviceId: {
         type: Number,
         required: true,
@@ -14,4 +21,4 @@ const DeviceStateSchema = new Schema({
 });
 
 
-export default model<IDeviceState>('DeviceStateKR', DeviceStateSchema);
+export default model<DeviceStateDocument>('DeviceStateKR', DeviceStateSchema);
