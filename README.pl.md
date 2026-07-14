@@ -10,11 +10,11 @@
 
 > 🇬🇧 [English version](README.md)
 
-SmartCityHub to zintegrowany system do zarządzania i monitorowania infrastruktury miejskiej. Łączy urządzenia IoT oparte na ESP32, centralne API w Node.js/TypeScript, panel webowy w React oraz aplikację mobilną React Native.
+Smart City Hub to zintegrowany system do zarządzania i monitorowania infrastruktury miejskiej. Łączy urządzenia IoT oparte na ESP32, centralne API w Node.js/TypeScript, panel webowy w React oraz aplikację mobilną React Native.
 
-Panel webowy i firmware ESP32 korzystają ze wspólnego API Node.js/MongoDB. Zachowany prototyp mobilny jest osobnym klientem opartym na Firebase Auth i Firestore.
+Panel webowy i firmware ESP32 korzystają ze wspólnego API Node.js/MongoDB. Aplikacja React Native miała być kolejnym klientem tego systemu, ale integracja nie została ukończona; zachowany prototyp mobilny niezależnie korzysta z Firebase Auth i Firestore.
 
-📄 Szczegółowy opis architektury i API znajduje się w [dokumentacji technicznej](documents/DOCUMENTATION.pl.md) ([English](documents/DOCUMENTATION.md)).
+📄 Szczegółowy opis architektury i API znajduje się w [dokumentacji technicznej](docs/DOCUMENTATION.pl.md) ([English version](docs/DOCUMENTATION.md)).
 
 **🗓️ Okres realizacji:** 2024
 
@@ -31,7 +31,9 @@ System został zbudowany i zademonstrowany na **fizycznej makiecie miasta z LEGO
   <img src="docs/media/lego-city.jpg" alt="Podświetlona makieta inteligentnego miasta z LEGO" width="72%"/>
 </p>
 
-🎬 [Obejrzyj połączone demo oświetlenia LEGO](docs/media/lego-city-demo.mp4) *(12 s, bez dźwięku)*
+🎬 [Obejrzyj połączone demo oświetlenia LEGO](docs/media/lego-city-demo.mp4) *(33 s, z muzyką)*
+
+Muzyka: „Soft Corporate” — MusicLFiles (CC BY 4.0). Zobacz [informacje o licencjach podmiotów trzecich](docs/THIRD_PARTY_NOTICES.md).
 
 ## Zrzuty ekranu
 
@@ -62,8 +64,8 @@ smart_city_hub/
 │   ├── server/api/            # REST API (Node.js, Express, TypeScript, Mongoose)
 │   ├── web/react/             # Panel webowy (React 18, Vite, Tailwind CSS)
 │   ├── mobile/react-native/   # Aplikacja mobilna (React Native + Firebase)
-│   └── embedded/esp32_arduino/# Firmware ESP32 (Arduino, MCP23017)
-├── documents/                 # Dokumentacja techniczna/kursowa i materiały sprzętowe
+│   └── embedded/esp32_arduino/ # Firmware ESP32 (Arduino, MCP23017)
+├── docs/                      # Dokumentacja, materiały sprzętowe i multimedia
 ├── LICENSE                    # MIT
 └── README.md
 ```
@@ -79,7 +81,7 @@ smart_city_hub/
 
 - Node.js 18+ i npm
 - Konto MongoDB Atlas (lub lokalna instancja MongoDB)
-- Do firmware: Arduino IDE / PlatformIO ze wsparciem ESP32, biblioteki `ArduinoJson` i `MCP23017` (dołączone w repo)
+- Do firmware: Arduino IDE ze wsparciem płytek ESP32 oraz `ArduinoJson` 7.x; kod biblioteki MCP23017 znajduje się w repozytorium
 - Do aplikacji mobilnej: środowisko React Native (Android Studio / Xcode) i projekt Firebase
 
 ## Szybki start
@@ -88,18 +90,29 @@ smart_city_hub/
 
 ```bash
 cd source/server/api
-npm install
+npm ci
 ```
 
-Utwórz plik `.env`:
+Skopiuj `.env.example` do `.env`, a następnie zastąp wartości przykładowe:
 
 ```env
 PORT=4200
 JWT_SECRET_KEY=<losowy_sekret>
 MONGODB_URI=mongodb+srv://<user>:<haslo>@<cluster>.mongodb.net/<baza>
+INITIAL_ADMIN_EMAIL=admin@example.com
+INITIAL_ADMIN_NAME=admin
+INITIAL_ADMIN_PASSWORD=<co_najmniej_12_znakow>
 ```
 
-Uruchom:
+W przypadku nowej bazy jednorazowo utwórz pierwszego administratora:
+
+```bash
+npm run seed:admin
+```
+
+Polecenie jest idempotentne dla istniejącego, kompletnego administratora i odmawia nadpisania użytkownika powodującego konflikt. Po utworzeniu konta usuń `INITIAL_ADMIN_PASSWORD` z pliku `.env`.
+
+Uruchom API:
 
 ```bash
 npm run dev     # tryb deweloperski (ts-node)
@@ -114,10 +127,10 @@ API domyślnie nasłuchuje na `http://localhost:4200`.
 
 ```bash
 cd source/web/react
-npm install
+npm ci
 ```
 
-Utwórz plik `.env`:
+Skopiuj `.env.example` do `.env` i zmień go, jeśli API działa pod innym adresem:
 
 ```env
 VITE_API_URL=http://localhost:4200/api
@@ -131,6 +144,8 @@ npm run build    # build produkcyjny do dist/
 npm run preview  # podgląd builda produkcyjnego
 ```
 
+Serwer deweloperski Vite jest domyślnie dostępny pod adresem `http://localhost:5173`.
+
 ### 3. Firmware ESP32
 
 1. Otwórz `source/embedded/esp32_arduino/smart_city_iot/smart_city_iot.ino` w Arduino IDE.
@@ -140,16 +155,16 @@ npm run preview  # podgląd builda produkcyjnego
 
 ### 4. Aplikacja mobilna (opcjonalnie)
 
-Aplikacja mobilna korzysta z własnego backendu **Firebase** (Auth + Firestore), niezależnego od API Node.js.
+Integracja ze wspólnym API Node.js była planowana, ale nie została ukończona. Zachowany prototyp mobilny korzysta więc z własnego backendu **Firebase** (Auth + Firestore).
 
 ```bash
 cd source/mobile/react-native
-npm install
+npm ci
 npm start        # bundler Metro
 npm run android  # lub: npm run ios
 ```
 
-`npm install` tworzy ignorowany `firebaseConfig.local.ts` z szablonu, jeżeli pliku brakuje. Przed uruchomieniem uzupełnij lokalny plik konfiguracją swojego projektu Firebase.
+`npm ci` tworzy ignorowany `firebaseConfig.local.ts` z szablonu, jeżeli pliku brakuje. Przed uruchomieniem uzupełnij lokalny plik konfiguracją swojego projektu Firebase.
 
 ## Stos technologiczny
 
@@ -165,7 +180,7 @@ npm run android  # lub: npm run ios
 
 | Osoba | Rola |
 |-------|------|
-| **Kamil Rataj** ([@Kamilr616](https://github.com/Kamilr616)) | Autor i opiekun |
+| **Kamil Rataj** ([@Kamilr616](https://github.com/Kamilr616), [LinkedIn](https://www.linkedin.com/in/kamil-r-153ab7121/)) | Autor i opiekun |
 | **Mateusz Ciszek** ([@Matix351](https://github.com/Matix351)) | Współautor |
 
 ## Bezpieczeństwo
@@ -174,8 +189,4 @@ Wartości JWT, MongoDB, Firebase i Wi-Fi przechowuj w opisanych wyżej plikach l
 
 ## Licencja
 
-Udostępniono na licencji [MIT](LICENSE). Instrukcje i materiały referencyjne podmiotów trzecich zachowują warunki swoich wydawców i nie są objęte licencją MIT.
-
-## 👤 Autor
-
-**Kamil Rataj** — [GitHub](https://github.com/Kamilr616) · [LinkedIn](https://www.linkedin.com/in/kamil-r-153ab7121/)
+Kod i dokumentacja autorstwa zespołu projektu są udostępnione na licencji [MIT](LICENSE). Dołączone i wskazane materiały podmiotów trzecich pozostają na właściwych im warunkach; zobacz [informacje o licencjach podmiotów trzecich](docs/THIRD_PARTY_NOTICES.md).

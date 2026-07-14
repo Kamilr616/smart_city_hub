@@ -1,12 +1,12 @@
 # Smart City Hub mobile app
 
-React Native client with Firebase Authentication and Firestore. It is an independent mobile prototype within Smart City Hub and does not use the repository's Node.js API. The app includes login and registration, device, statistics, settings, and project-information screens.
+React Native client with Firebase Authentication and Firestore. It was planned as a client of the shared Smart City Hub Node.js API, but that integration was not completed. The retained app is therefore an independent Firebase-backed prototype and does not use the repository's Node.js API. It includes login and registration, device, statistics, settings, and project-information screens.
 
 The full system description is in the [repository README](../../../README.md).
 
 ## Firebase configuration
 
-`npm install` copies `firebaseConfig.local.example.ts` to the git-ignored `firebaseConfig.local.ts` when the local file is missing. Replace the placeholder values in that local file with the configuration of your Firebase project; do not commit real credentials.
+`npm ci` copies `firebaseConfig.local.example.ts` to the git-ignored `firebaseConfig.local.ts` when the local file is missing. Replace the placeholder values in that local file with the configuration of your Firebase project; do not commit real credentials.
 
 ## Run locally
 

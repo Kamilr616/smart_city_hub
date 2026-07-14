@@ -8,13 +8,13 @@
 [![ESP32](https://img.shields.io/badge/ESP32-Arduino-E7352C?logo=espressif&logoColor=white)](https://www.espressif.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> 🇵🇱 [Wersja polska](README.pl.md)
+> 🇵🇱 [Polish version](README.pl.md)
 
-SmartCityHub is an integrated system for managing and monitoring urban infrastructure. It combines ESP32-based IoT devices, a central Node.js/TypeScript API, a React web dashboard, and a React Native mobile app.
+Smart City Hub is an integrated system for managing and monitoring urban infrastructure. It combines ESP32-based IoT devices, a central Node.js/TypeScript API, a React web dashboard, and a React Native mobile app.
 
-The web dashboard and ESP32 firmware share the Node.js/MongoDB API. The retained mobile prototype is a separate client backed by Firebase Auth and Firestore.
+The web dashboard and ESP32 firmware share the Node.js/MongoDB API. The React Native app was planned as another client of this system, but that integration was not completed; the retained mobile prototype uses Firebase Auth and Firestore independently.
 
-📄 A detailed description of the architecture and API is available in the [technical documentation](documents/DOCUMENTATION.md) ([wersja polska](documents/DOCUMENTATION.pl.md)).
+📄 A detailed description of the architecture and API is available in the [technical documentation](docs/DOCUMENTATION.md) ([Polish version](docs/DOCUMENTATION.pl.md)).
 
 **🗓️ Project period:** 2024
 
@@ -31,7 +31,9 @@ The system was built and demonstrated on a **physical LEGO city model** at the K
   <img src="docs/media/lego-city.jpg" alt="Illuminated LEGO smart-city model" width="72%"/>
 </p>
 
-🎬 [Watch the combined LEGO lighting demo](docs/media/lego-city-demo.mp4) *(12 s, no audio)*
+🎬 [Watch the combined LEGO lighting demo](docs/media/lego-city-demo.mp4) *(33 s, with music)*
+
+Music: “Soft Corporate” by MusicLFiles (CC BY 4.0). See [Third-party notices](docs/THIRD_PARTY_NOTICES.md).
 
 ## Screenshots
 
@@ -62,8 +64,8 @@ smart_city_hub/
 │   ├── server/api/            # REST API (Node.js, Express, TypeScript, Mongoose)
 │   ├── web/react/             # Web dashboard (React 18, Vite, Tailwind CSS)
 │   ├── mobile/react-native/   # Mobile app (React Native + Firebase)
-│   └── embedded/esp32_arduino/# ESP32 firmware (Arduino, MCP23017)
-├── documents/                 # Technical/course documentation and hardware references
+│   └── embedded/esp32_arduino/ # ESP32 firmware (Arduino, MCP23017)
+├── docs/                      # Documentation, hardware references, and media
 ├── LICENSE                    # MIT
 └── README.md
 ```
@@ -79,7 +81,7 @@ smart_city_hub/
 
 - Node.js 18+ and npm
 - A MongoDB Atlas account (or a local MongoDB instance)
-- For the firmware: Arduino IDE / PlatformIO with ESP32 support, the `ArduinoJson` and `MCP23017` libraries (bundled in the repo)
+- For the firmware: Arduino IDE with ESP32 board support and `ArduinoJson` 7.x; the MCP23017 library source is included in the repository
 - For the mobile app: a React Native environment (Android Studio / Xcode) and a Firebase project
 
 ## Quick start
@@ -88,18 +90,29 @@ smart_city_hub/
 
 ```bash
 cd source/server/api
-npm install
+npm ci
 ```
 
-Create a `.env` file:
+Copy `.env.example` to `.env`, then replace the placeholder values:
 
 ```env
 PORT=4200
 JWT_SECRET_KEY=<random_secret>
 MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/<database>
+INITIAL_ADMIN_EMAIL=admin@example.com
+INITIAL_ADMIN_NAME=admin
+INITIAL_ADMIN_PASSWORD=<at_least_12_characters>
 ```
 
-Run:
+For a fresh database, create the first administrator once:
+
+```bash
+npm run seed:admin
+```
+
+The command is idempotent for an existing complete administrator and refuses to overwrite a conflicting user. Remove `INITIAL_ADMIN_PASSWORD` from `.env` after the account has been created.
+
+Run the API:
 
 ```bash
 npm run dev     # development mode (ts-node)
@@ -114,10 +127,10 @@ The API listens on `http://localhost:4200` by default.
 
 ```bash
 cd source/web/react
-npm install
+npm ci
 ```
 
-Create a `.env` file:
+Copy `.env.example` to `.env` and adjust it if the API uses a different address:
 
 ```env
 VITE_API_URL=http://localhost:4200/api
@@ -131,6 +144,8 @@ npm run build    # production build to dist/
 npm run preview  # preview the production build
 ```
 
+The Vite development server is available at `http://localhost:5173` by default.
+
 ### 3. ESP32 firmware
 
 1. Open `source/embedded/esp32_arduino/smart_city_iot/smart_city_iot.ino` in the Arduino IDE.
@@ -140,16 +155,16 @@ npm run preview  # preview the production build
 
 ### 4. Mobile app (optional)
 
-The mobile app uses its own **Firebase** backend (Auth + Firestore), independent of the Node.js API.
+Integration with the shared Node.js API was planned but not completed. The retained mobile prototype therefore uses its own **Firebase** backend (Auth + Firestore).
 
 ```bash
 cd source/mobile/react-native
-npm install
+npm ci
 npm start        # Metro bundler
 npm run android  # or: npm run ios
 ```
 
-`npm install` creates the ignored `firebaseConfig.local.ts` from the placeholder template when it is missing. Fill that local file with your Firebase project configuration before running the app.
+`npm ci` creates the ignored `firebaseConfig.local.ts` from the placeholder template when it is missing. Fill that local file with your Firebase project configuration before running the app.
 
 ## Tech stack
 
@@ -165,7 +180,7 @@ npm run android  # or: npm run ios
 
 | Member | Role |
 |--------|------|
-| **Kamil Rataj** ([@Kamilr616](https://github.com/Kamilr616)) | Author & maintainer |
+| **Kamil Rataj** ([@Kamilr616](https://github.com/Kamilr616), [LinkedIn](https://www.linkedin.com/in/kamil-r-153ab7121/)) | Author & maintainer |
 | **Mateusz Ciszek** ([@Matix351](https://github.com/Matix351)) | Co-author |
 
 ## Security
@@ -174,8 +189,4 @@ Keep JWT, MongoDB, Firebase, and Wi-Fi values in the local files described above
 
 ## License
 
-Released under the [MIT](LICENSE) license. Third-party manuals and reference documents retain their publishers' terms and are not covered by the MIT license.
-
-## 👤 Author
-
-**Kamil Rataj** — [GitHub](https://github.com/Kamilr616) · [LinkedIn](https://www.linkedin.com/in/kamil-r-153ab7121/)
+Project-authored code and documentation are released under the [MIT](LICENSE) license. Bundled and referenced third-party materials remain under their respective terms; see [Third-party notices](docs/THIRD_PARTY_NOTICES.md).

@@ -12,7 +12,7 @@ independent backend.
 - `source/server/api/` — Express + TypeScript backend (auth, device state).
 - `source/web/react/` — web client · `source/mobile/react-native/` — mobile client.
 - `source/embedded/esp32_arduino/` — device firmware.
-- `documents/DOCUMENTATION.md` (+ `.pl.md`) — API/architecture notes.
+- `docs/DOCUMENTATION.md` (+ `.pl.md`) — API/architecture notes.
 - `docs/media/` — LEGO-city photos + demo video.
 
 ## Build / run
@@ -31,7 +31,7 @@ independent backend.
 
 ## Documentation
 - [README.md](README.md) · [README.pl.md](README.pl.md)
-- [`documents/DOCUMENTATION.md`](documents/DOCUMENTATION.md)
+- [`docs/DOCUMENTATION.md`](docs/DOCUMENTATION.md)
 - License: **MIT** — see [LICENSE](LICENSE).
 
 _Educational / portfolio project._

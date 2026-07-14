@@ -9,7 +9,7 @@ The system consists of four components:
 1. **API** (`source/server/api`) — the central REST server built with Node.js/Express/TypeScript. Stores users, devices, sensor readings, and state history in MongoDB. Default port: **4200**.
 2. **Web dashboard** (`source/web/react`) — a React SPA with separate views for the administrator (user and device management) and the regular user (controlling assigned devices).
 3. **ESP32 firmware** (`source/embedded/esp32_arduino`) — polls the API for current device states and drives 96 digital outputs through MCP23017 expanders.
-4. **Mobile app** (`source/mobile/react-native`) — React Native; uses Firebase (Auth + Firestore) as an independent backend.
+4. **Mobile app** (`source/mobile/react-native`) — React Native; planned as a client of the shared Node.js API, but the integration was not completed. The retained prototype uses Firebase (Auth + Firestore) as an independent backend.
 
 ```mermaid
 flowchart LR
@@ -19,7 +19,7 @@ flowchart LR
     MOBILE["React Native prototype"] --> FB["Firebase Auth + Firestore"]
 ```
 
-The mobile/Firebase data path is separate from the Node.js/MongoDB path and is not synchronized with it.
+The original plan was to integrate the mobile app with the Node.js/MongoDB system. That work was not completed, so the retained mobile/Firebase data path remains separate and its data is not synchronized with the main system.
 
 ## 2. Authentication and roles
 
@@ -112,11 +112,16 @@ All routes are prefixed with `/api`. Legend: 🔓 public, 👤 requires JWT, �
 | API | `PORT` | Server port (default 4200) |
 | API | `JWT_SECRET_KEY` | JWT signing secret |
 | API | `MONGODB_URI` | MongoDB Atlas connection string |
+| API seed | `INITIAL_ADMIN_EMAIL` | Email used only by `npm run seed:admin` |
+| API seed | `INITIAL_ADMIN_NAME` | Login name used only by `npm run seed:admin` |
+| API seed | `INITIAL_ADMIN_PASSWORD` | Initial password (minimum 12 characters); remove it after seeding |
 | Web | `VITE_API_URL` | API address, e.g. `http://localhost:4200/api` |
 | Mobile | `firebaseConfig.local.ts` | Local Firebase web configuration copied from the checked-in template |
 | Firmware | `secrets.h` | Local Wi-Fi SSID, API URL and bearer token copied from `secrets.example.h` |
 
-`.env` files are not versioned (`.gitignore`).
+Copy each checked-in `.env.example` to `.env` before running the relevant component. For a fresh MongoDB database, run `npm run seed:admin` from `source/server/api` once. The command does not overwrite an existing conflicting user and is safe to rerun for an already complete administrator.
+
+`.env` files are not versioned (`.gitignore`). Never commit the initial administrator password.
 
 ## 8. Known limitations / notes
 
@@ -124,5 +129,9 @@ All routes are prefixed with `/api`. Legend: 🔓 public, 👤 requires JWT, �
 - The API has focused sensor-route regression tests and the mobile project retains one React Native render smoke test. The web dashboard has no automated test suite. There is no Docker/CI configuration.
 - The web dashboard passes its ESLint task. The archived mobile tree's ESLint task currently fails, predominantly because its CRLF files conflict with the checked-in Prettier end-of-line rule; this formatting debt is not corrected automatically because it would rewrite most of that project.
 - Firmware credentials are supplied through the ignored `secrets.h`; changing them still requires recompilation.
-- The mobile app uses Firebase instead of the Node.js API — the two backends are not synchronized.
+- Planned integration of the mobile app with the Node.js API was not completed. The retained prototype uses Firebase, and the two backends are not synchronized.
 - GraphQL client/core packages are installed, but there is no active GraphQL schema or endpoint; REST is the implemented interface.
+
+## 9. Licenses
+
+Project-authored code and documentation are covered by the repository's [MIT license](../LICENSE). Bundled libraries, media, manuals, and package dependencies retain their own terms; see [Third-party notices](THIRD_PARTY_NOTICES.md).

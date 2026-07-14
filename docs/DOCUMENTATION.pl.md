@@ -9,7 +9,7 @@ System składa się z czterech komponentów:
 1. **API** (`source/server/api`) — centralny serwer REST w Node.js/Express/TypeScript. Przechowuje użytkowników, urządzenia, odczyty sensorów i historię stanów w MongoDB. Port domyślny: **4200**.
 2. **Panel webowy** (`source/web/react`) — SPA w React; osobne widoki dla administratora (zarządzanie użytkownikami i urządzeniami) i użytkownika (sterowanie przypisanymi urządzeniami).
 3. **Firmware ESP32** (`source/embedded/esp32_arduino`) — odpytuje API o aktualne stany urządzeń i ustawia 96 wyjść cyfrowych przez ekspandery MCP23017.
-4. **Aplikacja mobilna** (`source/mobile/react-native`) — React Native; korzysta z Firebase (Auth + Firestore) jako niezależnego backendu.
+4. **Aplikacja mobilna** (`source/mobile/react-native`) — React Native; miała być klientem wspólnego API Node.js, ale integracja nie została ukończona. Zachowany prototyp korzysta z Firebase (Auth + Firestore) jako niezależnego backendu.
 
 ```mermaid
 flowchart LR
@@ -19,7 +19,7 @@ flowchart LR
     MOBILE["Prototyp React Native"] --> FB["Firebase Auth + Firestore"]
 ```
 
-Ścieżka mobilna/Firebase jest niezależna od Node.js/MongoDB i dane nie są między nimi synchronizowane.
+Pierwotny plan zakładał integrację aplikacji mobilnej z systemem Node.js/MongoDB. Prace nie zostały ukończone, dlatego zachowana ścieżka mobilna/Firebase pozostaje niezależna, a jej dane nie są synchronizowane z głównym systemem.
 
 ## 2. Uwierzytelnianie i role
 
@@ -112,11 +112,16 @@ Prefiks wszystkich tras: `/api`. Oznaczenia: 🔓 publiczny, 👤 wymaga JWT, �
 | API | `PORT` | Port serwera (domyślnie 4200) |
 | API | `JWT_SECRET_KEY` | Sekret do podpisywania JWT |
 | API | `MONGODB_URI` | Connection string MongoDB Atlas |
+| Seed API | `INITIAL_ADMIN_EMAIL` | E-mail używany wyłącznie przez `npm run seed:admin` |
+| Seed API | `INITIAL_ADMIN_NAME` | Nazwa logowania używana wyłącznie przez `npm run seed:admin` |
+| Seed API | `INITIAL_ADMIN_PASSWORD` | Hasło początkowe (minimum 12 znaków); usuń je po seedowaniu |
 | Web | `VITE_API_URL` | Adres API, np. `http://localhost:4200/api` |
 | Mobile | `firebaseConfig.local.ts` | Lokalna konfiguracja Firebase skopiowana z wersjonowanego szablonu |
 | Firmware | `secrets.h` | Lokalne SSID Wi-Fi, adres API i token skopiowane z `secrets.example.h` |
 
-Pliki `.env` nie są wersjonowane (`.gitignore`).
+Przed uruchomieniem komponentu skopiuj właściwy wersjonowany plik `.env.example` do `.env`. Dla nowej bazy MongoDB uruchom jednorazowo `npm run seed:admin` w `source/server/api`. Polecenie nie nadpisuje istniejącego użytkownika powodującego konflikt i można je bezpiecznie uruchomić ponownie dla kompletnego administratora.
+
+Pliki `.env` nie są wersjonowane (`.gitignore`). Nigdy nie commituj początkowego hasła administratora.
 
 ## 8. Znane ograniczenia / uwagi
 
@@ -124,5 +129,9 @@ Pliki `.env` nie są wersjonowane (`.gitignore`).
 - API ma ukierunkowane testy regresji tras sensorów, a projekt mobilny zachowuje jeden test dymny renderowania React Native. Panel webowy nie ma zestawu testów automatycznych. Brak konfiguracji Docker/CI.
 - Panel webowy przechodzi zadanie ESLint. ESLint archiwalnego projektu mobilnego obecnie nie przechodzi, głównie z powodu konfliktu plików CRLF z wersjonowaną regułą końca linii Prettier; ten dług formatowania nie jest poprawiany automatycznie, ponieważ przepisałoby to większość projektu.
 - Dane konfiguracyjne firmware są dostarczane przez ignorowany plik `secrets.h`; ich zmiana nadal wymaga rekompilacji.
-- Aplikacja mobilna używa Firebase zamiast API Node.js — oba backendy nie są zsynchronizowane.
+- Planowana integracja aplikacji mobilnej z API Node.js nie została ukończona. Zachowany prototyp używa Firebase, a oba backendy nie są zsynchronizowane.
 - Zainstalowano pakiety klienta/core GraphQL, ale nie ma aktywnego schematu ani endpointu GraphQL; zaimplementowanym interfejsem jest REST.
+
+## 9. Licencje
+
+Kod i dokumentacja autorstwa zespołu projektu są objęte repozytoryjną [licencją MIT](../LICENSE). Dołączone biblioteki, multimedia, instrukcje i zależności pakietów zachowują własne warunki; zobacz [informacje o licencjach podmiotów trzecich](THIRD_PARTY_NOTICES.md).
