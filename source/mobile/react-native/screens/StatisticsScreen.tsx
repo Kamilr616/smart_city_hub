@@ -1,6 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, ImageBackground } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Dimensions,
+  ImageBackground,
+} from 'react-native';
+import {LineChart} from 'react-native-chart-kit';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -40,7 +47,9 @@ const StatisticsScreen: React.FC = () => {
   };
 
   return (
-    <ImageBackground source={require('../assets/blue.jpg')} style={styles.background}>
+    <ImageBackground
+      source={require('../assets/blue.jpg')}
+      style={styles.background}>
       <ScrollView style={styles.container}>
         <Text style={styles.title}>Statystyki</Text>
 

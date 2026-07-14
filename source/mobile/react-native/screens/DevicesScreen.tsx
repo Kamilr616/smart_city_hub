@@ -1,5 +1,13 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ImageBackground, ListRenderItem } from 'react-native';
+import React, {useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  ImageBackground,
+  ListRenderItem,
+} from 'react-native';
 
 type DeviceState = 'on' | 'off';
 interface Device {
@@ -11,15 +19,56 @@ interface Device {
 
 // Define the initial data
 const initialData: Device[] = [
-  { id: '1', name: 'Lampa uliczna', state: 'on', description: 'Identyfikator: 0' },
-  { id: '2', name: 'Lapma uliczna', state: 'on', description: 'Identyfikator: 8' },
-  { id: '3', name: 'Parter zielonu tyl	', state: 'on', description: 'Identyfikator: 23' },
-  { id: '4', name: 'Pietro bialy	', state: 'on', description: 'Identyfikator: 15' },
-  { id: '5', name: 'Swiatlo uliczne wystawa	', state: 'off', description: 'Identyfikator: 1' },
-  { id: '6', name: 'Parter zielony przod', state: 'off', description: 'Identyfikator: 5' },
-  { id: '7', name: 'Dach bialy', state: 'off', description: 'Identyfikator: 13' },
-  { id: '8', name: 'Parter kwiaciarnia', state: 'off', description: 'Identyfikator: 23' },
+  {
+    id: '1',
+    name: 'Lampa uliczna',
+    state: 'on',
+    description: 'Identyfikator: 0',
+  },
+  {
+    id: '2',
+    name: 'Lapma uliczna',
+    state: 'on',
+    description: 'Identyfikator: 8',
+  },
+  {
+    id: '3',
+    name: 'Parter zielonu tyl	',
+    state: 'on',
+    description: 'Identyfikator: 23',
+  },
+  {
+    id: '4',
+    name: 'Pietro bialy	',
+    state: 'on',
+    description: 'Identyfikator: 15',
+  },
+  {
+    id: '5',
+    name: 'Swiatlo uliczne wystawa	',
+    state: 'off',
+    description: 'Identyfikator: 1',
+  },
+  {
+    id: '6',
+    name: 'Parter zielony przod',
+    state: 'off',
+    description: 'Identyfikator: 5',
+  },
+  {id: '7', name: 'Dach bialy', state: 'off', description: 'Identyfikator: 13'},
+  {
+    id: '8',
+    name: 'Parter kwiaciarnia',
+    state: 'off',
+    description: 'Identyfikator: 23',
+  },
 ];
+
+const DeviceListHeader = () => (
+  <View style={styles.header}>
+    <Text style={styles.headerText}>Urządzenie:</Text>
+  </View>
+);
 
 const DevicesScreen: React.FC = () => {
   const [data, setData] = useState(initialData);
@@ -38,29 +87,34 @@ const DevicesScreen: React.FC = () => {
     setData(updatedData);
   };
 
-  const renderItem: ListRenderItem<Device> = ({ item }) => (
+  const renderItem: ListRenderItem<Device> = ({item}) => (
     <View style={styles.row}>
       <Text style={styles.name}>{item.name}</Text>
-      <TouchableOpacity onPress={() => toggleLightState(item.id)} style={[styles.stateButton, item.state === 'on' ? styles.on : styles.off]}>
-        <Text style={styles.stateButtonText}>{item.state === 'on' ? 'ON' : 'OFF'}</Text>
+      <TouchableOpacity
+        onPress={() => toggleLightState(item.id)}
+        style={[
+          styles.stateButton,
+          item.state === 'on' ? styles.on : styles.off,
+        ]}>
+        <Text style={styles.stateButtonText}>
+          {item.state === 'on' ? 'ON' : 'OFF'}
+        </Text>
       </TouchableOpacity>
       <Text style={styles.description}>{item.description}</Text>
     </View>
   );
 
   return (
-    <ImageBackground source={require('../assets/blue.jpg')} style={styles.background}>
+    <ImageBackground
+      source={require('../assets/blue.jpg')}
+      style={styles.background}>
       <View style={styles.container}>
         <Text style={styles.title}>SmartCity</Text>
         <FlatList
           data={data}
           renderItem={renderItem}
           keyExtractor={item => item.id}
-          ListHeaderComponent={() => (
-            <View style={styles.header}>
-              <Text style={styles.headerText}>Urządzenie:</Text>
-            </View>
-          )}
+          ListHeaderComponent={DeviceListHeader}
         />
       </View>
     </ImageBackground>
@@ -75,7 +129,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)', 
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
   },
   title: {
     fontSize: 25,
@@ -121,7 +175,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'red',
   },
   description: {
-    paddingLeft:15,
+    paddingLeft: 15,
     fontSize: 16,
     width: '50%',
   },

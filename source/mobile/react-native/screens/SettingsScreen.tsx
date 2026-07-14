@@ -1,5 +1,15 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ImageBackground, Modal, TextInput, ListRenderItem } from 'react-native';
+import React, {useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  ImageBackground,
+  Modal,
+  TextInput,
+  ListRenderItem,
+} from 'react-native';
 
 type DeviceState = 'on' | 'off';
 interface Device {
@@ -13,15 +23,21 @@ interface Device {
 }
 
 const initialData: Device[] = [
-  { id: '1', name: 'Lampa uliczna', state: 'on'},
-  { id: '2', name: 'Lapma uliczna', state: 'on'},
-  { id: '3', name: 'Parter zielonu tyl'},
-  { id: '4', name: 'Pietro bialy	', state: 'on'},
-  { id: '5', name: 'Swiatlo uliczne wystawa	'},
-  { id: '6', name: 'Parter zielony przod'},
-  { id: '7', name: 'Dach bialy'},
-  { id: '8', name: 'Parter kwiaciarnia'},
+  {id: '1', name: 'Lampa uliczna', state: 'on'},
+  {id: '2', name: 'Lapma uliczna', state: 'on'},
+  {id: '3', name: 'Parter zielonu tyl'},
+  {id: '4', name: 'Pietro bialy	', state: 'on'},
+  {id: '5', name: 'Swiatlo uliczne wystawa	'},
+  {id: '6', name: 'Parter zielony przod'},
+  {id: '7', name: 'Dach bialy'},
+  {id: '8', name: 'Parter kwiaciarnia'},
 ];
+
+const DeviceListHeader = () => (
+  <View style={styles.header}>
+    <Text style={styles.headerText}>Urządzenie:</Text>
+  </View>
+);
 
 const SettingsScreen: React.FC = () => {
   const [data, setData] = useState(initialData);
@@ -85,7 +101,7 @@ const SettingsScreen: React.FC = () => {
 
   // Function to add a new device
   const addNewDevice = () => {
-    const newDeviceWithId = { ...newDevice, id: (data.length + 1).toString() };
+    const newDeviceWithId = {...newDevice, id: (data.length + 1).toString()};
     setData([...data, newDeviceWithId]);
     setNewDevice({
       location: '',
@@ -98,17 +114,28 @@ const SettingsScreen: React.FC = () => {
     setAddModalVisible(false);
   };
 
-  const renderItem: ListRenderItem<Device> = ({ item }) => (
+  const renderItem: ListRenderItem<Device> = ({item}) => (
     <View style={styles.row}>
       <Text style={styles.name}>{item.name}</Text>
-      <TouchableOpacity onPress={() => toggleLightState(item.id)} style={[styles.stateButton, item.state === 'on' ? styles.on : styles.off]}>
-        <Text style={styles.stateButtonText}>{item.state === 'on' ? 'ON' : 'OFF'}</Text>
+      <TouchableOpacity
+        onPress={() => toggleLightState(item.id)}
+        style={[
+          styles.stateButton,
+          item.state === 'on' ? styles.on : styles.off,
+        ]}>
+        <Text style={styles.stateButtonText}>
+          {item.state === 'on' ? 'ON' : 'OFF'}
+        </Text>
       </TouchableOpacity>
       <View style={styles.options}>
-        <TouchableOpacity onPress={() => deleteLight(item.id)} style={styles.optionButton}>
+        <TouchableOpacity
+          onPress={() => deleteLight(item.id)}
+          style={styles.optionButton}>
           <Text style={styles.optionButtonText}>delete</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => openEditModal(item)} style={styles.optionButton}>
+        <TouchableOpacity
+          onPress={() => openEditModal(item)}
+          style={styles.optionButton}>
           <Text style={styles.optionButtonText}>edit</Text>
         </TouchableOpacity>
       </View>
@@ -116,18 +143,16 @@ const SettingsScreen: React.FC = () => {
   );
 
   return (
-    <ImageBackground source={require('../assets/blue.jpg')} style={styles.background}>
+    <ImageBackground
+      source={require('../assets/blue.jpg')}
+      style={styles.background}>
       <View style={styles.container}>
         <Text style={styles.title}>Admin Panel</Text>
         <FlatList
           data={data}
           renderItem={renderItem}
           keyExtractor={item => item.id}
-          ListHeaderComponent={() => (
-            <View style={styles.header}>
-              <Text style={styles.headerText}>Urządzenie:</Text>
-            </View>
-          )}
+          ListHeaderComponent={DeviceListHeader}
         />
 
         {selectedLight && (
@@ -137,8 +162,7 @@ const SettingsScreen: React.FC = () => {
             visible={editModalVisible}
             onRequestClose={() => {
               setEditModalVisible(!editModalVisible);
-            }}
-          >
+            }}>
             <View style={styles.modalView}>
               <Text style={styles.modalText}>Edit Light Name</Text>
               <TextInput
@@ -151,7 +175,9 @@ const SettingsScreen: React.FC = () => {
                 <TouchableOpacity style={styles.modalButton} onPress={saveEdit}>
                   <Text style={styles.modalButtonText}>Save</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.modalButton} onPress={() => setEditModalVisible(false)}>
+                <TouchableOpacity
+                  style={styles.modalButton}
+                  onPress={() => setEditModalVisible(false)}>
                   <Text style={styles.modalButtonText}>Cancel</Text>
                 </TouchableOpacity>
               </View>
@@ -159,7 +185,9 @@ const SettingsScreen: React.FC = () => {
           </Modal>
         )}
 
-        <TouchableOpacity style={styles.addButton} onPress={() => setAddModalVisible(true)}>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => setAddModalVisible(true)}>
           <Text style={styles.addButtonText}>+</Text>
         </TouchableOpacity>
 
@@ -169,45 +197,54 @@ const SettingsScreen: React.FC = () => {
           visible={addModalVisible}
           onRequestClose={() => {
             setAddModalVisible(!addModalVisible);
-          }}
-        >
+          }}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>Add new device</Text>
             <TextInput
               style={styles.input}
-              onChangeText={(text) => setNewDevice({ ...newDevice, location: text })}
+              onChangeText={text =>
+                setNewDevice({...newDevice, location: text})
+              }
               value={newDevice.location}
               placeholder="location"
             />
             <TextInput
               style={styles.input}
-              onChangeText={(text) => setNewDevice({ ...newDevice, name: text })}
+              onChangeText={text => setNewDevice({...newDevice, name: text})}
               value={newDevice.name}
               placeholder="name"
             />
             <TextInput
               style={styles.input}
-              onChangeText={(text) => setNewDevice({ ...newDevice, description: text })}
+              onChangeText={text =>
+                setNewDevice({...newDevice, description: text})
+              }
               value={newDevice.description}
               placeholder="description (can be empty)"
             />
             <TextInput
               style={styles.input}
-              onChangeText={(text) => setNewDevice({ ...newDevice, type: text })}
+              onChangeText={text => setNewDevice({...newDevice, type: text})}
               value={newDevice.type}
               placeholder="type"
             />
             <TextInput
               style={styles.input}
-              onChangeText={(text) => setNewDevice({ ...newDevice, deviceId: text })}
+              onChangeText={text =>
+                setNewDevice({...newDevice, deviceId: text})
+              }
               value={newDevice.deviceId}
               placeholder="deviceId"
             />
             <View style={styles.modalButtonContainer}>
-              <TouchableOpacity style={styles.modalButton} onPress={addNewDevice}>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={addNewDevice}>
                 <Text style={styles.modalButtonText}>Add</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.modalButton} onPress={() => setAddModalVisible(false)}>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={() => setAddModalVisible(false)}>
                 <Text style={styles.modalButtonText}>Cancel</Text>
               </TouchableOpacity>
             </View>

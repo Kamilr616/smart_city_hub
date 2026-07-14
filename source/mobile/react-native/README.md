@@ -10,12 +10,12 @@ The full system description is in the [repository README](../../../README.md).
 
 ## Run locally
 
-Set up the React Native environment for Android or iOS, then run:
+The retained native project targets iOS. Building it requires macOS with Xcode; an Android native project is not included in this repository.
 
 ```bash
 npm ci
 npm start
-npm run android  # or: npm run ios
+npm run ios
 ```
 
 Use `npm test` for the Jest test and `npm run lint` for the React Native lint configuration.

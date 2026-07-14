@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -12,14 +12,15 @@ import {
   Alert,
 } from 'react-native';
 
-import { useNavigation } from '@react-navigation/native';
-import { DrawerNavigationProp } from '@react-navigation/drawer';
-import type { RootDrawerParamList } from '../App';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { FIREBASE_AUTH } from '../FirebaseConfig';
+import {useNavigation} from '@react-navigation/native';
+import {DrawerNavigationProp} from '@react-navigation/drawer';
+import type {RootDrawerParamList} from '../App';
+import {signInWithEmailAndPassword} from 'firebase/auth';
+import {FIREBASE_AUTH} from '../FirebaseConfig';
 
 const LoginScreen: React.FC = () => {
-  const navigation = useNavigation<DrawerNavigationProp<RootDrawerParamList, 'Login'>>();
+  const navigation =
+    useNavigation<DrawerNavigationProp<RootDrawerParamList, 'Login'>>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -27,10 +28,13 @@ const LoginScreen: React.FC = () => {
     try {
       await signInWithEmailAndPassword(FIREBASE_AUTH, email, password);
       console.log('Zalogowano pomyślnie');
-      navigation.navigate('Ekran domowy', { refresh: true });
+      navigation.navigate('Ekran domowy', {refresh: true});
     } catch (error) {
       console.error(error);
-      Alert.alert('Błąd logowania', 'Wystąpił błąd podczas logowania. Spróbuj ponownie.');
+      Alert.alert(
+        'Błąd logowania',
+        'Wystąpił błąd podczas logowania. Spróbuj ponownie.',
+      );
     }
   };
 
@@ -46,8 +50,7 @@ const LoginScreen: React.FC = () => {
         style={styles.screenContainer}>
         <ImageBackground
           source={require('../assets/blue.jpg')}
-          style={styles.backgroundImage}
-        >
+          style={styles.backgroundImage}>
           <View style={styles.formContainer}>
             <Text style={styles.title}>Logowanie</Text>
             <TextInput
@@ -67,8 +70,12 @@ const LoginScreen: React.FC = () => {
             <TouchableOpacity onPress={handleLogin} style={styles.button}>
               <Text style={styles.buttonText}>Zaloguj</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleRegister} style={styles.registerButton}>
-              <Text style={styles.registerButtonText}>Kliknij aby się zarejsterować</Text>
+            <TouchableOpacity
+              onPress={handleRegister}
+              style={styles.registerButton}>
+              <Text style={styles.registerButtonText}>
+                Kliknij aby się zarejsterować
+              </Text>
             </TouchableOpacity>
           </View>
         </ImageBackground>
@@ -83,7 +90,7 @@ const styles = StyleSheet.create({
   },
   backgroundImage: {
     flex: 1,
-    height:850,
+    height: 850,
     resizeMode: 'cover',
   },
   formContainer: {
@@ -96,12 +103,11 @@ const styles = StyleSheet.create({
     color: '#29B1ED',
     marginBottom: 30,
   },
-  bottomtext:{
+  bottomtext: {
     fontSize: 19,
     paddingLeft: 20,
-    fontWeight:"bold",
+    fontWeight: 'bold',
     marginBottom: 45,
-    
   },
   input: {
     height: 40,
@@ -110,7 +116,7 @@ const styles = StyleSheet.create({
     marginBottom: 25,
     paddingHorizontal: 15,
     backgroundColor: 'rgba(255, 255, 255, 0)',
-    color: 'black', 
+    color: 'black',
   },
   button: {
     backgroundColor: '#29B1ED',
@@ -119,7 +125,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonText: {
-    fontSize:25,
+    fontSize: 25,
     color: 'white',
     fontWeight: 'bold',
   },

@@ -1,6 +1,9 @@
 import React from 'react';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import { NavigationContainer } from '@react-navigation/native';
+import {
+  createDrawerNavigator,
+  DrawerContentComponentProps,
+} from '@react-navigation/drawer';
+import {NavigationContainer} from '@react-navigation/native';
 import MainScreen from './screens/MainScreen';
 import DevicesScreen from './screens/DevicesScreen';
 import SettingsScreen from './screens/SettingsScreen';
@@ -14,7 +17,7 @@ import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 export type RootDrawerParamList = {
   Login: undefined;
   Registration: undefined;
-  'Ekran domowy': { refresh?: boolean } | undefined;
+  'Ekran domowy': {refresh?: boolean} | undefined;
   Urządzenia: undefined;
   Statystyki: undefined;
   Ustawienia: undefined;
@@ -23,13 +26,43 @@ export type RootDrawerParamList = {
 
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 
+type DrawerIconProps = {
+  color: string;
+  size: number;
+};
+
+const renderDrawerContent = (props: DrawerContentComponentProps) => (
+  <CustomDrawerContent {...props} />
+);
+const LoginIcon = ({color, size}: DrawerIconProps) => (
+  <FontAwesomeIcon name="sign-in" size={size} color={color} />
+);
+const RegistrationIcon = ({color, size}: DrawerIconProps) => (
+  <FontAwesomeIcon name="user-plus" size={size} color={color} />
+);
+const HomeIcon = ({color, size}: DrawerIconProps) => (
+  <FontAwesomeIcon name="home" size={size} color={color} />
+);
+const DevicesIcon = ({color, size}: DrawerIconProps) => (
+  <FontAwesomeIcon name="signal" size={size} color={color} />
+);
+const StatisticsIcon = ({color, size}: DrawerIconProps) => (
+  <FontAwesomeIcon name="dashboard" size={size} color={color} />
+);
+const SettingsIcon = ({color, size}: DrawerIconProps) => (
+  <FontAwesomeIcon name="gears" size={size} color={color} />
+);
+const AboutIcon = ({color, size}: DrawerIconProps) => (
+  <FontAwesomeIcon name="info-circle" size={size} color={color} />
+);
+
 const App: React.FC = () => {
   return (
     <NavigationContainer>
       <Drawer.Navigator
         initialRouteName="Login"
         useLegacyImplementation={false}
-        drawerContent={(props) => <CustomDrawerContent {...props} />}
+        drawerContent={renderDrawerContent}
         screenOptions={{
           headerStyle: {
             backgroundColor: '#29B1ED',
@@ -38,73 +71,58 @@ const App: React.FC = () => {
           headerTitleStyle: {
             fontWeight: 'bold',
           },
-        }}
-      >
+        }}>
         <Drawer.Screen
           name="Login"
           component={LoginScreen}
           options={{
-            drawerItemStyle: { display: 'none' },
+            drawerItemStyle: {display: 'none'},
             headerShown: false,
-            drawerIcon: ({ color, size }) => (
-              <FontAwesomeIcon name="sign-in" size={size} color={color} />
-            ),
+            drawerIcon: LoginIcon,
           }}
         />
         <Drawer.Screen
-          name='Registration'
+          name="Registration"
           component={RegistrationScreen}
           options={{
-            drawerItemStyle: { display: 'none' },
+            drawerItemStyle: {display: 'none'},
             headerShown: false,
-            drawerIcon: ({ color, size }) => (
-              <FontAwesomeIcon name="user-plus" size={size} color={color} />
-            ),
+            drawerIcon: RegistrationIcon,
           }}
         />
         <Drawer.Screen
           name="Ekran domowy"
           component={MainScreen}
           options={{
-            drawerIcon: ({ color, size }) => (
-              <FontAwesomeIcon name="home" size={size} color={color} />
-            ),
+            drawerIcon: HomeIcon,
           }}
         />
         <Drawer.Screen
           name="Urządzenia"
           component={DevicesScreen}
           options={{
-            drawerIcon: ({ color, size }) => (
-              <FontAwesomeIcon name="signal" size={size} color={color} />
-            ),
+            drawerIcon: DevicesIcon,
           }}
         />
         <Drawer.Screen
           name="Statystyki"
           component={StatisticsScreen}
           options={{
-            drawerIcon: ({ color, size }) => (
-              <FontAwesomeIcon name="dashboard" size={size} color={color} />
-            ),
+            drawerIcon: StatisticsIcon,
           }}
         />
         <Drawer.Screen
           name="Ustawienia"
           component={SettingsScreen}
           options={{
-            drawerIcon: ({ color, size }) => (
-              <FontAwesomeIcon name="gears" size={size} color={color} />
-            ),
+            drawerIcon: SettingsIcon,
           }}
         />
         <Drawer.Screen
           name="O nas"
           component={AboutUsScreen}
           options={{
-            drawerIcon: ({ color, size }) => (
-              <FontAwesomeIcon name="info-circle" size={size} color={color} />
-            ),
+            drawerIcon: AboutIcon,
           }}
         />
       </Drawer.Navigator>

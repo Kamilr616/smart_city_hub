@@ -1,20 +1,38 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, ImageBackground } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  ImageBackground,
+} from 'react-native';
 
 const AboutUsScreen: React.FC = () => {
   return (
-    <ImageBackground source={require('../assets/blue.jpg')} style={styles.background}>
+    <ImageBackground
+      source={require('../assets/blue.jpg')}
+      style={styles.background}>
       <View style={styles.container}>
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Text style={styles.title}>Aplikacja do obsługi inteligentnego miasteczka</Text>
+          <Text style={styles.title}>
+            Aplikacja do obsługi inteligentnego miasteczka
+          </Text>
           <Text style={styles.subtitle}>Autorzy:</Text>
           <Text style={styles.text}>Mateusz Ciszek</Text>
           <Text style={styles.text}>nr indeksu: 35191</Text>
           <Text style={styles.text}>Kamil Rataj</Text>
           <Text style={styles.text}>nr indeksu: 35712</Text>
-          <Text style={styles.subtitle}>Nazwa Projektu: Inteligentne Miasteczko</Text>
+          <Text style={styles.subtitle}>
+            Nazwa Projektu: Inteligentne Miasteczko
+          </Text>
           <Text style={styles.subtitle}>Opis aplikacji:</Text>
-          <Text style={styles.text}>Innowacyjna aplikacja mobilna stworzona w technologii React Native, zaprojektowana do obsługi makiety inteligentnego miasteczka. Głównym celem aplikacji jest zapewnienie użytkownikom możliwości monitorowania i zarządzania infrastrukturą miejską, wykorzystując zaawansowane rozwiązania.</Text>
+          <Text style={styles.text}>
+            Innowacyjna aplikacja mobilna stworzona w technologii React Native,
+            zaprojektowana do obsługi makiety inteligentnego miasteczka. Głównym
+            celem aplikacji jest zapewnienie użytkownikom możliwości
+            monitorowania i zarządzania infrastrukturą miejską, wykorzystując
+            zaawansowane rozwiązania.
+          </Text>
         </ScrollView>
       </View>
     </ImageBackground>

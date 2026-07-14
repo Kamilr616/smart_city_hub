@@ -1,6 +1,17 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, FlatList, Dimensions, ImageBackground, TouchableOpacity, Modal, ListRenderItem } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
+import React, {useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  FlatList,
+  Dimensions,
+  ImageBackground,
+  TouchableOpacity,
+  Modal,
+  ListRenderItem,
+} from 'react-native';
+import {LineChart} from 'react-native-chart-kit';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -29,17 +40,21 @@ const initialChartData = {
 };
 
 const initialFavoriteDevices: FavoriteDevice[] = [
-  { id: '1', name: 'Lampa uliczna', state: 'on' },
-  { id: '2', name: 'Parter czerwony	', state: 'off' },
-  { id: '3', name: 'Dach zewnatrz', state: 'off' },
-  { id: '4', name: 'Lampa pietro 2', state: 'off' },
-  { id: '5', name: 'Dach biały	', state: 'off' },
+  {id: '1', name: 'Lampa uliczna', state: 'on'},
+  {id: '2', name: 'Parter czerwony	', state: 'off'},
+  {id: '3', name: 'Dach zewnatrz', state: 'off'},
+  {id: '4', name: 'Lampa pietro 2', state: 'off'},
+  {id: '5', name: 'Dach biały	', state: 'off'},
 ];
 
 const MainScreen: React.FC = () => {
-  const [favoriteDevices, setFavoriteDevices] = useState(initialFavoriteDevices);
+  const [favoriteDevices, setFavoriteDevices] = useState(
+    initialFavoriteDevices,
+  );
   const [chartData, setChartData] = useState(initialChartData);
-  const [selectedDevice, setSelectedDevice] = useState<FavoriteDevice | null>(null);
+  const [selectedDevice, setSelectedDevice] = useState<FavoriteDevice | null>(
+    null,
+  );
   const [modalVisible, setModalVisible] = useState(false);
 
   const openModal = (device: FavoriteDevice) => {
@@ -67,7 +82,7 @@ const MainScreen: React.FC = () => {
 
   const updateChartData = (newState: DeviceState) => {
     const currentDayIndex = new Date().getDay() - 1; // getDay() returns 0 for Sunday, 1 for Monday, etc.
-    const updatedChartData = { ...chartData };
+    const updatedChartData = {...chartData};
 
     if (newState === 'on') {
       updatedChartData.datasets[0].data[currentDayIndex] += 1;
@@ -78,22 +93,32 @@ const MainScreen: React.FC = () => {
     setChartData(updatedChartData);
   };
 
-  const renderDevice: ListRenderItem<FavoriteDevice> = ({ item }) => (
-    <TouchableOpacity style={styles.deviceContainer} onPress={() => openModal(item)}>
+  const renderDevice: ListRenderItem<FavoriteDevice> = ({item}) => (
+    <TouchableOpacity
+      style={styles.deviceContainer}
+      onPress={() => openModal(item)}>
       <Text style={styles.deviceName}>{item.name}</Text>
-      <Text style={[styles.deviceState, item.state === 'on' ? styles.on : styles.off]}>{item.state.toUpperCase()}</Text>
+      <Text
+        style={[
+          styles.deviceState,
+          item.state === 'on' ? styles.on : styles.off,
+        ]}>
+        {item.state.toUpperCase()}
+      </Text>
     </TouchableOpacity>
   );
 
   return (
-    <ImageBackground source={require('../assets/blue.jpg')} style={styles.background}>
+    <ImageBackground
+      source={require('../assets/blue.jpg')}
+      style={styles.background}>
       <ScrollView style={styles.container}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Ulubione urządzenia</Text>
           <FlatList
             data={favoriteDevices}
             renderItem={renderDevice}
-            keyExtractor={(item) => item.id}
+            keyExtractor={item => item.id}
             horizontal={true}
             style={styles.deviceList}
           />
@@ -119,15 +144,22 @@ const MainScreen: React.FC = () => {
           visible={modalVisible}
           onRequestClose={() => {
             setModalVisible(!modalVisible);
-          }}
-        >
+          }}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>Control {selectedDevice.name}</Text>
-            <Text style={styles.modalText}>Current State: {selectedDevice.state.toUpperCase()}</Text>
-            <TouchableOpacity style={styles.modalButton} onPress={toggleDeviceState}>
-              <Text style={styles.modalButtonText}>{selectedDevice.state === 'on' ? 'Turn Off' : 'Turn On'}</Text>
+            <Text style={styles.modalText}>
+              Current State: {selectedDevice.state.toUpperCase()}
+            </Text>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={toggleDeviceState}>
+              <Text style={styles.modalButtonText}>
+                {selectedDevice.state === 'on' ? 'Turn Off' : 'Turn On'}
+              </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.modalButton} onPress={() => setModalVisible(false)}>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => setModalVisible(false)}>
               <Text style={styles.modalButtonText}>Cancel</Text>
             </TouchableOpacity>
           </View>
@@ -162,7 +194,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)', 
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   title: {
     fontSize: 24,
@@ -178,7 +210,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 10,
     textAlign: 'center',
-    color: "black",
+    color: 'black',
   },
   deviceContainer: {
     padding: 10,
