@@ -81,8 +81,8 @@ smart_city_hub/
 
 - Node.js 18+ and npm
 - A MongoDB Atlas account (or a local MongoDB instance)
-- For the firmware: Arduino IDE with ESP32 board support and `ArduinoJson` 7.x; the MCP23017 library source is included in the repository
-- For the mobile app: a React Native environment (Android Studio / Xcode) and a Firebase project
+- For the firmware: Arduino IDE with ESP32 board support and `ArduinoJson` 7.x; MCP23017 registers are controlled directly over I2C
+- For the retained mobile app: macOS with Xcode, a React Native environment, and a Firebase project
 
 ## Quick start
 
@@ -99,6 +99,7 @@ Copy `.env.example` to `.env`, then replace the placeholder values:
 PORT=4200
 JWT_SECRET_KEY=<random_secret>
 MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/<database>
+CORS_ORIGIN=http://localhost:5173
 INITIAL_ADMIN_EMAIL=admin@example.com
 INITIAL_ADMIN_NAME=admin
 INITIAL_ADMIN_PASSWORD=<at_least_12_characters>
@@ -157,11 +158,13 @@ The Vite development server is available at `http://localhost:5173` by default.
 
 Integration with the shared Node.js API was planned but not completed. The retained mobile prototype therefore uses its own **Firebase** backend (Auth + Firestore).
 
+Only the iOS native project is retained. Building it requires macOS with Xcode; this repository does not contain an Android native project.
+
 ```bash
 cd source/mobile/react-native
 npm ci
 npm start        # Metro bundler
-npm run android  # or: npm run ios
+npm run ios
 ```
 
 `npm ci` creates the ignored `firebaseConfig.local.ts` from the placeholder template when it is missing. Fill that local file with your Firebase project configuration before running the app.
