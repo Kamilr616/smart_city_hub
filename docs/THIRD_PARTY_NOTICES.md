@@ -16,35 +16,13 @@ The audio track in `media/lego-city-demo.mp4` uses an excerpt from:
 
 No endorsement by the author is implied.
 
-## Vendored MCP23017 firmware library
+## Project reference document
 
-`source/embedded/esp32_arduino/mcp23017-arduino-1.0.4/` contains version 1.0.4 of the MCP23017 Arduino library attributed in its metadata to `bheesma-10`. The upstream repository currently resolves to [AvinasheeTech/mcp23017-arduino](https://github.com/AvinasheeTech/mcp23017-arduino).
+The following PDF carries no separate license declaration found during this review:
 
-No license declaration or LICENSE file was found in the vendored copy or the upstream repository during the review on 2026-07-14. Consequently, no permission to redistribute or relicense this library should be assumed. Its copyright remains with its author(s). Obtain permission or replace/remove the vendored copy before redistributing it.
+- `smart-city-hub-report.pl.pdf` (course report: *Technologie Webowe w Aplikacjach internetu II — aplikacja do obsługi inteligentnego miasteczka*)
 
-## NXP reference documents
-
-The following files are NXP Semiconductors documentation and are not covered by the project's MIT license:
-
-- `Getting Started Guide for using MCUXpresso SDK online.pdf`
-- `Getting Started with MCUXpresso SDK for LPCXpresso55S69.pdf`
-- `Getting Started with MCUXpressoSDK and FreeRTOS OS.pdf`
-- `MCUXpresso SDK API Reference Manual_LPC55S69.pdf`
-- `MCUXpresso SDK ChangeLog_LPC55S69.pdf`
-- `MCUXpresso SDK Release Notes for LPCXpresso55S69.pdf`
-- `UM11158.pdf`
-
-Copyright and usage terms are those stated by NXP in each document and on the applicable NXP download page. Terms for source-code excerpts may differ from the copyright terms for a document as a whole. Verify the applicable NXP terms before copying or redistributing these files.
-
-## Course and project reference documents
-
-The following PDFs carry no separate license declaration found during this review:
-
-- `TWwAI - Projekt.pdf`
-- `Technologie Webowe w Aplikacjach internetu II - aplikacja do obsługi inteligentnego miasteczka..pdf`
-- `organizacja_zpsm_II.pdf`
-
-Copyright remains with the authors or institution identified in each document. Do not assume that the repository's MIT license grants redistribution rights for these PDFs.
+Copyright remains with the authors or institution identified in the document. Do not assume that the repository's MIT license grants redistribution rights for this PDF.
 
 ## Package-managed dependencies
 

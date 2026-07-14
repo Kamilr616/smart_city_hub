@@ -81,8 +81,8 @@ smart_city_hub/
 
 - Node.js 18+ i npm
 - Konto MongoDB Atlas (lub lokalna instancja MongoDB)
-- Do firmware: Arduino IDE ze wsparciem płytek ESP32 oraz `ArduinoJson` 7.x; kod biblioteki MCP23017 znajduje się w repozytorium
-- Do aplikacji mobilnej: środowisko React Native (Android Studio / Xcode) i projekt Firebase
+- Do firmware: Arduino IDE ze wsparciem płytek ESP32 oraz `ArduinoJson` 7.x; rejestry MCP23017 są obsługiwane bezpośrednio przez I2C
+- Do zachowanej aplikacji mobilnej: macOS z Xcode, środowisko React Native i projekt Firebase
 
 ## Szybki start
 
@@ -99,6 +99,7 @@ Skopiuj `.env.example` do `.env`, a następnie zastąp wartości przykładowe:
 PORT=4200
 JWT_SECRET_KEY=<losowy_sekret>
 MONGODB_URI=mongodb+srv://<user>:<haslo>@<cluster>.mongodb.net/<baza>
+CORS_ORIGIN=http://localhost:5173
 INITIAL_ADMIN_EMAIL=admin@example.com
 INITIAL_ADMIN_NAME=admin
 INITIAL_ADMIN_PASSWORD=<co_najmniej_12_znakow>
@@ -157,11 +158,13 @@ Serwer deweloperski Vite jest domyślnie dostępny pod adresem `http://localhost
 
 Integracja ze wspólnym API Node.js była planowana, ale nie została ukończona. Zachowany prototyp mobilny korzysta więc z własnego backendu **Firebase** (Auth + Firestore).
 
+Zachowano wyłącznie natywny projekt iOS. Jego zbudowanie wymaga macOS z Xcode; repozytorium nie zawiera natywnego projektu Android.
+
 ```bash
 cd source/mobile/react-native
 npm ci
 npm start        # bundler Metro
-npm run android  # lub: npm run ios
+npm run ios
 ```
 
 `npm ci` tworzy ignorowany `firebaseConfig.local.ts` z szablonu, jeżeli pliku brakuje. Przed uruchomieniem uzupełnij lokalny plik konfiguracją swojego projektu Firebase.
@@ -182,6 +185,7 @@ npm run android  # lub: npm run ios
 |-------|------|
 | **Kamil Rataj** ([@Kamilr616](https://github.com/Kamilr616), [LinkedIn](https://www.linkedin.com/in/kamil-r-153ab7121/)) | Autor i opiekun |
 | **Mateusz Ciszek** ([@Matix351](https://github.com/Matix351)) | Współautor |
+| **Marcin Golonka** ([@Golonka-Ma](https://github.com/Golonka-Ma), [LinkedIn](https://www.linkedin.com/in/marcin-golonka-4510a928b/)) | Autor prototypu React Native |
 
 ## Bezpieczeństwo
 

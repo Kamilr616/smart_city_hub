@@ -102,8 +102,20 @@ All routes are prefixed with `/api`. Legend: 🔓 public, 👤 requires JWT, �
 ## 6. ESP32 firmware
 
 - **Hardware:** ESP32 + 6× MCP23017 on the I2C bus (addresses `0x22`–`0x27`), 96 outputs in total; SDA=21, SCL=22; UART at 9600 baud.
-- **Operation:** after connecting to WiFi, the sketch periodically calls `GET /api/state/iot/all` (with a token in the `x-access-token` header), parses the JSON response (`ArduinoJson`), and sets the expander pins according to the received states.
+- **Operation:** after connecting to WiFi, the sketch periodically calls `GET /api/state/iot/all` (with a token in the `x-access-token` header), parses the exact 96-element JSON state array (`ArduinoJson`), and writes the required MCP23017 registers directly over I2C. Array position equals `deviceId`; missing devices are represented as `false`.
 - **Configuration:** copy `secrets.example.h` to the ignored `secrets.h` and set the WiFi SSID, API URL, and bearer token before flashing.
+
+### 6.1 Historical NXP/LPCXpresso references
+
+The following official NXP resources were collected during the project's research phase. They concern the LPCXpresso55S69/MCUXpresso platform and are not required to build the ESP32-based Smart City Hub firmware:
+
+- [LPCXpresso55S69 MCUXpresso SDK documentation](https://mcuxpresso.nxp.com/mcuxsdk/latest/html/boards/LPC/lpcxpresso55s69/index.html) — board-specific overview and documentation index
+- [Getting Started with an MCUXpresso SDK package](https://mcuxpresso.nxp.com/mcuxsdk/latest/html/gsd/package.html)
+- [MCUXpresso SDK release notes for LPCXpresso55S69](https://mcuxpresso.nxp.com/mcuxsdk/latest/html/boards/LPC/lpcxpresso55s69/releaseNotes/rnindex.html)
+- [MCUXpresso SDK changelog for LPCXpresso55S69](https://mcuxpresso.nxp.com/mcuxsdk/latest/html/boards/LPC/lpcxpresso55s69/changeLog/clindex.html)
+- [LPC55S69 driver API reference](https://mcuxpresso.nxp.com/mcuxsdk/latest/html/drivers/LPC/LPC5500/LPC55S69/index.html)
+- [FreeRTOS in MCUXpresso SDK](https://mcuxpresso.nxp.com/mcuxsdk/latest/html/rtos/freertos/index.html)
+- [LPCXpresso55S69 development-board page and UM11158](https://www.nxp.com/design/design-center/software/development-software/mcuxpresso-software-and-tools-/lpcxpresso-boards/lpcxpresso55s69-development-board%3ALPC55S69-EVK)
 
 ## 7. Environment configuration
 
@@ -112,6 +124,7 @@ All routes are prefixed with `/api`. Legend: 🔓 public, 👤 requires JWT, �
 | API | `PORT` | Server port (default 4200) |
 | API | `JWT_SECRET_KEY` | JWT signing secret |
 | API | `MONGODB_URI` | MongoDB Atlas connection string |
+| API | `CORS_ORIGIN` | Allowed web origin (default `http://localhost:5173`) |
 | API seed | `INITIAL_ADMIN_EMAIL` | Email used only by `npm run seed:admin` |
 | API seed | `INITIAL_ADMIN_NAME` | Login name used only by `npm run seed:admin` |
 | API seed | `INITIAL_ADMIN_PASSWORD` | Initial password (minimum 12 characters); remove it after seeding |
@@ -125,11 +138,13 @@ Copy each checked-in `.env.example` to `.env` before running the relevant compon
 
 ## 8. Known limitations / notes
 
-- The 96-device limit comes from the hardware (6 expanders × 16 outputs) and is reflected in the API configuration.
-- The API has focused sensor-route regression tests and the mobile project retains one React Native render smoke test. The web dashboard has no automated test suite. There is no Docker/CI configuration.
-- The web dashboard passes its ESLint task. The archived mobile tree's ESLint task currently fails, predominantly because its CRLF files conflict with the checked-in Prettier end-of-line rule; this formatting debt is not corrected automatically because it would rewrite most of that project.
+- The hardware supports IDs 0–95 (6 expanders × 16 outputs). The API enforces that range and unique device IDs, and returns a deterministic 96-element ESP32 payload.
+- API regression tests cover sensor routes, the web-to-API device contract, ID validation, and the ESP32 payload. The mobile project retains one React Native render smoke test; the web dashboard has no automated test suite. There is no Docker/CI configuration.
+- The web and mobile projects pass their ESLint tasks; the mobile TypeScript check also passes.
 - Firmware credentials are supplied through the ignored `secrets.h`; changing them still requires recompilation.
 - Planned integration of the mobile app with the Node.js API was not completed. The retained prototype uses Firebase, and the two backends are not synchronized.
+- Only an iOS native project is retained for the mobile prototype; building it requires macOS with Xcode. There is no Android native project in this repository.
+- `npm audit` still reports a moderate advisory in the legacy React Native 0.73 CLI dependency tree. npm's proposed automatic fix is a breaking React Native upgrade and should be handled as a separate migration.
 - GraphQL client/core packages are installed, but there is no active GraphQL schema or endpoint; REST is the implemented interface.
 
 ## 9. Licenses
