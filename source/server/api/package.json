@@ -9,7 +9,8 @@
     "dev": "ts-node ./lib/index.ts",
     "build": "tsc",
     "postbuild": "node scripts/copy-public.mjs",
-    "watch": "nodemon"
+    "watch": "nodemon",
+    "seed:admin": "ts-node ./lib/scripts/seedAdmin.ts"
   },
   "author": "Kamil Rataj",
   "license": "MIT",
