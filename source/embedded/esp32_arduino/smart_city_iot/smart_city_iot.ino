@@ -2,13 +2,17 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
-#include "MCP23017.h"
+#include <Wire.h>
 #include "secrets.h"
 
 #define I2C_SDA        21
 #define I2C_SCL        22
 #define USE_SERIAL Serial
 constexpr uint8_t EXPANDER_COUNT = 6;
+constexpr uint8_t MCP23017_PORT_A = 0x00;
+constexpr uint8_t MCP23017_PORT_B = 0x01;
+constexpr uint8_t MCP23017_IODIR_A = 0x00;
+constexpr uint8_t MCP23017_GPIO_A = 0x12;
 const uint8_t addresses[EXPANDER_COUNT] = {0x27, 0x26, 0x25, 0x24, 0x23, 0x22};
 
 void initWire(uint8_t sda, uint8_t scl) {
@@ -16,27 +20,20 @@ void initWire(uint8_t sda, uint8_t scl) {
     Wire.setClock(100000);
 }
 
-void iodir(uint8_t port, uint8_t direction, uint8_t address) {
+void writeMcpRegister(uint8_t address, uint8_t registerAddress, uint8_t value) {
     Wire.beginTransmission(address);
-    Wire.write(REGISTER_IODIRA | port);
-    Wire.write(direction);
-    Wire.endTransmission();
-}
-
-void write_gpio(uint8_t port, uint8_t data, uint8_t address) {
-    Wire.beginTransmission(address);
-    Wire.write(REGISTER_GPIOA | port);
-    Wire.write(data);
+    Wire.write(registerAddress);
+    Wire.write(value);
     Wire.endTransmission();
 }
 
 void initExpanders() {
     for (uint8_t i = 0; i < EXPANDER_COUNT; i++) {
         uint8_t address = addresses[i];
-        iodir(MCP23017_PORTA, MCP23017_IODIR_ALL_OUTPUT, address);
-        iodir(MCP23017_PORTB, MCP23017_IODIR_ALL_OUTPUT, address);
-        write_gpio(MCP23017_PORTA, 0x00, address);
-        write_gpio(MCP23017_PORTB, 0x00, address);
+        writeMcpRegister(address, MCP23017_IODIR_A + MCP23017_PORT_A, 0x00);
+        writeMcpRegister(address, MCP23017_IODIR_A + MCP23017_PORT_B, 0x00);
+        writeMcpRegister(address, MCP23017_GPIO_A + MCP23017_PORT_A, 0x00);
+        writeMcpRegister(address, MCP23017_GPIO_A + MCP23017_PORT_B, 0x00);
     }
 }
 
@@ -57,8 +54,8 @@ void writeExpanderPorts(const JsonArray &payload)
 
     for (uint8_t i = 0; i < EXPANDER_COUNT; i++)
     {
-        write_gpio(MCP23017_PORTA, portValues[2*i], addresses[i]);
-        write_gpio(MCP23017_PORTB, portValues[2*i + 1], addresses[i]);
+        writeMcpRegister(addresses[i], MCP23017_GPIO_A + MCP23017_PORT_A, portValues[2*i]);
+        writeMcpRegister(addresses[i], MCP23017_GPIO_A + MCP23017_PORT_B, portValues[2*i + 1]);
     }
 
     for (uint8_t i = 0; i < EXPANDER_COUNT; i++)
@@ -103,8 +100,8 @@ void loop() {
                 if (error) {
                     USE_SERIAL.print(F("deserializeJson() failed: "));
                     USE_SERIAL.println(error.f_str());
-                } else if (!doc.is<JsonArray>() || doc.size() < 96) {
-                    USE_SERIAL.println(F("Invalid state payload: expected at least 96 entries"));
+                } else if (!doc.is<JsonArray>() || doc.size() != 96) {
+                    USE_SERIAL.println(F("Invalid state payload: expected exactly 96 entries"));
                 } else {
                     JsonArray array = doc.as<JsonArray>();
                     writeExpanderPorts(array);
