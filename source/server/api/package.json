@@ -5,7 +5,7 @@
   "description": "server",
   "main": "index.js",
   "scripts": {
-    "test": "npm run build && node --test tests/sensor-routes.test.js",
+    "test": "npm run build && node --test tests/sensor-routes.test.js tests/device-integration.test.js",
     "dev": "ts-node ./lib/index.ts",
     "build": "tsc",
     "postbuild": "node scripts/copy-public.mjs",

@@ -6,6 +6,7 @@ interface Config {
     supportedSensorsNum: number;
     JwtSecret: string;
     databaseUrl: string;
+    corsOrigin: string;
 }
 
 const getEnvVariable = (key: string): string => {
@@ -21,5 +22,6 @@ export const config: Config = {
     supportedDevicesNum: 96,
     supportedSensorsNum: 2,
     JwtSecret: getEnvVariable('JWT_SECRET_KEY'),
-    databaseUrl: getEnvVariable('MONGODB_URI')
+    databaseUrl: getEnvVariable('MONGODB_URI'),
+    corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173'
 };

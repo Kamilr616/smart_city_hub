@@ -28,8 +28,11 @@ export default class DeviceService {
 
     public async createDeviceEntry(dataParams: IDevice) {
         try {
-            const deviceModel = new DeviceModel(dataParams);
-            await deviceModel.save();
+            return await DeviceModel.findOneAndUpdate(
+                {deviceId: dataParams.deviceId},
+                {$set: dataParams},
+                {new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true}
+            );
         } catch (error) {
             console.error('Wystąpił błąd podczas tworzenia urządzenia', error);
             throw new Error('Wystąpił błąd podczas tworzenia urządzenia');

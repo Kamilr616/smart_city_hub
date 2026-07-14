@@ -5,6 +5,7 @@ import Joi from 'joi';
 import {IDevice} from "../modules/models/device.model";
 import {admin} from "../middlewares/admin.middleware";
 import {auth} from "../middlewares/auth.middleware";
+import {config} from "../config";
 
 class DeviceController implements Controller {
     public path = '/api/device';
@@ -62,17 +63,17 @@ class DeviceController implements Controller {
     };
 
     private updateDevice = async (request: Request, response: Response, next: NextFunction) => {
-        const {location, name, description, type, id} = request.body;
+        const {location, name, description, type, deviceId} = request.body;
         const schema = Joi.object({
             location: Joi.string().allow('').required(),
             name: Joi.string().allow(''), // default value if not provided
             description: Joi.string().allow(''), // optional, allows empty string
             type: Joi.string(), // default value if not provided
-            deviceId: Joi.number().integer().required().valid()
+            deviceId: Joi.number().integer().min(0).max(config.supportedDevicesNum - 1).required()
         });
 
         try {
-            const validatedData = await schema.validateAsync({location, name, description, type, deviceId: id});
+            const validatedData = await schema.validateAsync({location, name, description, type, deviceId});
             const deviceData: IDevice = {
                 name: validatedData.name || 'outlet', // use outlet if not provided
                 location: validatedData.location,

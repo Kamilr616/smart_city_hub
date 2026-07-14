@@ -2,6 +2,26 @@ import DeviceStateModel from '../schemas/deviceState.schema';
 import { config } from "../../config";
 import DeviceModel from "../schemas/device.schema";
 
+export const buildIotStatePayload = (
+    deviceStates: Array<Partial<{deviceId: number; states: Array<{state: boolean}>}>>,
+    deviceCount: number
+): boolean[] => {
+    const payload = Array<boolean>(deviceCount).fill(false);
+
+    for (const deviceState of deviceStates) {
+        const {deviceId, states} = deviceState;
+        if (!Number.isInteger(deviceId) || deviceId === undefined || deviceId < 0 || deviceId >= deviceCount) {
+            continue;
+        }
+        if (!Array.isArray(states) || states.length === 0) {
+            continue;
+        }
+        payload[deviceId] = Boolean(states[states.length - 1].state);
+    }
+
+    return payload;
+};
+
 export default class DeviceStateService {
 
     public async getAllUserDeviceStates(role: string) {
@@ -114,12 +134,11 @@ export default class DeviceStateService {
 
     public async getAllLatestDeviceStatesService() {
         try {
-            const deviceStates = await DeviceStateModel.find({}, { __v: 0, _id: 0 });
-            return (deviceStates as Array<Record<string, any>>).map(deviceState => {
-                const states = deviceState.states as Array<Record<string, any>>;
-                const lastEntry = states[states.length - 1] || {};
-                return lastEntry.state;
-            });
+            const deviceStates = await DeviceStateModel.find(
+                {deviceId: {$gte: 0, $lt: config.supportedDevicesNum}},
+                {__v: 0, _id: 0}
+            ).lean();
+            return buildIotStatePayload(deviceStates, config.supportedDevicesNum);
         } catch (error) {
             throw new Error(`Query failed: ${error}`);
         }

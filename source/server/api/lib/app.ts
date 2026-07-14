@@ -14,15 +14,13 @@ class App {
         this.app = express();
         this.initializeMiddlewares();
         this.initializeControllers(controllers);
-        this.connectToDatabase().then(_ => console.log('Connected to database'));
-
     }
 
     private initializeMiddlewares(): void {
         this.app.use(bodyParser.json());
         this.app.use(morgan('dev'));
         this.app.use(cors({
-           origin: '*',
+           origin: config.corsOrigin,
            methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
            optionsSuccessStatus: 204,
            allowedHeaders: 'Content-Type,Authorization,x-access-token',
@@ -36,12 +34,8 @@ class App {
     }
 
     private async connectToDatabase(): Promise<void> {
-        try {
-            await mongoose.connect(config.databaseUrl);
-
-        } catch (error) {
-            console.error('Error connecting to MongoDB:', error);
-        }
+        await mongoose.connect(config.databaseUrl);
+        console.log('Connected to database');
 
         mongoose.connection.on('error', (error) => {
             console.error('MongoDB connection error:', error);
@@ -65,11 +59,11 @@ class App {
 
     }
 
-    public listen(): void {
+    public async listen(): Promise<void> {
+        await this.connectToDatabase();
         this.app.listen(config.port, () => {
             console.log(`App listening on the port ${config.port}`);
         });
-
     }
 }
 

@@ -12,4 +12,7 @@ const app: App = new App([
     new DeviceStateController()
 ]);
 
-app.listen();
+void app.listen().catch(error => {
+    console.error(`API startup failed: ${error instanceof Error ? error.message : error}`);
+    process.exitCode = 1;
+});

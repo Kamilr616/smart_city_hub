@@ -12,6 +12,9 @@ const DeviceStateSchema = new Schema<DeviceStateDocument>({
     deviceId: {
         type: Number,
         required: true,
+        unique: true,
+        min: 0,
+        max: 95,
         ref: 'Device'  // Reference to the Device collection
     },
     states: [{

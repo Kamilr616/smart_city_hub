@@ -4,6 +4,7 @@ import DeviceStateService from '../modules/services/deviceState.service';
 import Joi from 'joi';
 import {admin} from '../middlewares/admin.middleware';
 import {auth} from "../middlewares/auth.middleware";
+import {config} from "../config";
 
 class DeviceStateController implements Controller {
     public path = '/api/state';
@@ -65,7 +66,7 @@ class DeviceStateController implements Controller {
         const {id} = request.params; // Assuming id is the deviceId
         const schema = Joi.object({
             state: Joi.boolean().required(),
-            deviceId: Joi.number().integer().required()
+            deviceId: Joi.number().integer().min(0).max(config.supportedDevicesNum - 1).required()
         });
 
         try {
@@ -93,7 +94,7 @@ class DeviceStateController implements Controller {
         const deviceStates = request.body.deviceStates; // Array of {deviceId, state}
         // Define Joi schema for validation
         const schema = Joi.object({
-            deviceId: Joi.number().integer().required(),
+            deviceId: Joi.number().integer().min(0).max(config.supportedDevicesNum - 1).required(),
             state: Joi.boolean().required()
         });
         try {
@@ -113,7 +114,7 @@ class DeviceStateController implements Controller {
         const deviceStates = request.body.deviceStates; // Array of {deviceId, state}
         // Define Joi schema for validation
         const schema = Joi.object({
-            deviceId: Joi.number().integer().required(),
+            deviceId: Joi.number().integer().min(0).max(config.supportedDevicesNum - 1).required(),
             state: Joi.boolean().required()
         });
         try {
