@@ -14,6 +14,8 @@ Smart City Hub is an integrated system for managing and monitoring urban infrast
 
 The web dashboard and ESP32 firmware share the Node.js/MongoDB API. The React Native app was planned as another client of this system, but that integration was not completed; the retained mobile prototype uses Firebase Auth and Firestore independently.
 
+A third, read-only client — the [Digital Twin](https://github.com/Kamilr616/smart-city-digital-twin) web app — mirrors the physical LEGO model on screen by polling the same device-state endpoint as the ESP32 firmware with a JWT. It lives in its own repository.
+
 📄 A detailed description of the architecture and API is available in the [technical documentation](docs/DOCUMENTATION.md) ([Polish version](docs/DOCUMENTATION.pl.md)).
 
 **🗓️ Project period:** 2024
@@ -51,6 +53,7 @@ flowchart LR
     ESP["ESP32 + 6x MCP23017<br/>96 outputs"] <-->|"HTTP state polling"| API
     API <-->|"Mongoose"| DB[("MongoDB")]
     MOBILE["React Native app"] <-->|"Firebase SDK"| FIREBASE[("Auth + Firestore")]
+    Twin["Digital Twin (web)"] -->|"polls states with JWT"| API
 ```
 
 ## Repository structure
@@ -96,7 +99,7 @@ Copy `.env.example` to `.env`, then replace the placeholder values:
 PORT=4200
 JWT_SECRET_KEY=<random_secret>
 MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/<database>
-CORS_ORIGIN=http://localhost:5173
+CORS_ORIGIN=http://localhost:5173  # comma-separated list of allowed web origins
 INITIAL_ADMIN_EMAIL=admin@example.com
 INITIAL_ADMIN_NAME=admin
 INITIAL_ADMIN_PASSWORD=<at_least_12_characters>

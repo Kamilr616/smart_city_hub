@@ -20,7 +20,7 @@ class App {
         this.app.use(bodyParser.json());
         this.app.use(morgan('dev'));
         this.app.use(cors({
-           origin: config.corsOrigin,
+           origin: config.corsOrigins,
            methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
            optionsSuccessStatus: 204,
            allowedHeaders: 'Content-Type,Authorization,x-access-token',

@@ -6,7 +6,7 @@ interface Config {
     supportedSensorsNum: number;
     JwtSecret: string;
     databaseUrl: string;
-    corsOrigin: string;
+    corsOrigins: string[];
 }
 
 const getEnvVariable = (key: string): string => {
@@ -17,11 +17,21 @@ const getEnvVariable = (key: string): string => {
     return value;
 }
 
+const DEFAULT_CORS_ORIGINS = ['http://localhost:5173'];
+
+export const parseCorsOrigins = (value: string | undefined): string[] => {
+    const origins = (value || '')
+        .split(',')
+        .map((origin) => origin.trim())
+        .filter((origin) => origin.length > 0);
+    return origins.length > 0 ? origins : DEFAULT_CORS_ORIGINS;
+}
+
 export const config: Config = {
     port: process.env.PORT || '4200',
     supportedDevicesNum: 96,
     supportedSensorsNum: 2,
     JwtSecret: getEnvVariable('JWT_SECRET_KEY'),
     databaseUrl: getEnvVariable('MONGODB_URI'),
-    corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173'
+    corsOrigins: parseCorsOrigins(process.env.CORS_ORIGIN)
 };

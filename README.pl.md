@@ -14,6 +14,8 @@ Smart City Hub to zintegrowany system do zarządzania i monitorowania infrastruk
 
 Panel webowy i firmware ESP32 korzystają ze wspólnego API Node.js/MongoDB. Aplikacja React Native miała być kolejnym klientem tego systemu, ale integracja nie została ukończona; zachowany prototyp mobilny niezależnie korzysta z Firebase Auth i Firestore.
 
+Trzeci, wyłącznie do odczytu, klient — aplikacja webowa [Cyfrowy bliźniak](https://github.com/Kamilr616/smart-city-digital-twin) — odzwierciedla na ekranie fizyczną makietę LEGO, odpytując z tokenem JWT ten sam endpoint stanów urządzeń co firmware ESP32. Znajduje się we własnym repozytorium.
+
 📄 Szczegółowy opis architektury i API znajduje się w [dokumentacji technicznej](docs/DOCUMENTATION.pl.md) ([English version](docs/DOCUMENTATION.md)).
 
 **🗓️ Okres realizacji:** 2024
@@ -54,6 +56,7 @@ flowchart LR
     ESP["ESP32 + 6x MCP23017<br/>96 wyjść"] <-->|"odpytywanie HTTP"| API
     API <-->|"Mongoose"| DB[("MongoDB")]
     MOBILE["Aplikacja React Native"] <-->|"Firebase SDK"| FIREBASE[("Auth + Firestore")]
+    Twin["Cyfrowy bliźniak (web)"] -->|"odpytuje stany z JWT"| API
 ```
 
 ## Struktura repozytorium
@@ -99,7 +102,7 @@ Skopiuj `.env.example` do `.env`, a następnie zastąp wartości przykładowe:
 PORT=4200
 JWT_SECRET_KEY=<losowy_sekret>
 MONGODB_URI=mongodb+srv://<user>:<haslo>@<cluster>.mongodb.net/<baza>
-CORS_ORIGIN=http://localhost:5173
+CORS_ORIGIN=http://localhost:5173  # lista dozwolonych źródeł web, rozdzielona przecinkami
 INITIAL_ADMIN_EMAIL=admin@example.com
 INITIAL_ADMIN_NAME=admin
 INITIAL_ADMIN_PASSWORD=<co_najmniej_12_znakow>
