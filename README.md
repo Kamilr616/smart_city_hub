@@ -27,19 +27,8 @@ The system was built and demonstrated on a **physical LEGO city model** at the K
   <img src="docs/media/lego-city-connected.jpg" alt="Connected ESP32 lighting prototype on the LEGO model" width="49%"/>
 </p>
 
-<p align="center">
-  <img src="docs/media/lego-city.jpg" alt="Illuminated LEGO smart-city model" width="72%"/>
-</p>
-<p align="center">
-  <a href="https://www.youtube.com/watch?v=SQee5dXEI2U">
-    <img
-      src="https://img.youtube.com/vi/SQee5dXEI2U/hqdefault.jpg"
-      alt="▶ Watch the LEGO smart city demo"
-      width="720"
-    />
-  </a>
-</p>
-🎬 [download](docs/media/lego-city-demo.mp4) *(33 s, with music)*
+🎬 [[Watch the LEGO smart city demo]](https://www.youtube.com/watch?v=SQee5dXEI2U)
+🎬 [Download video](docs/media/lego-city-demo.mp4) *(33 s, with music)*
 
 Music: “Soft Corporate” by MusicLFiles (CC BY 4.0). See [Third-party notices](docs/THIRD_PARTY_NOTICES.md).
 
