@@ -17,9 +17,12 @@ flowchart LR
     ESP["ESP32 + 6× MCP23017"] -->|"polls states with JWT"| API
     API <-->|"Mongoose"| DB[(MongoDB)]
     MOBILE["React Native prototype"] --> FB["Firebase Auth + Firestore"]
+    Twin["Digital Twin (web)"] -->|"polls states with JWT"| API
 ```
 
 The original plan was to integrate the mobile app with the Node.js/MongoDB system. That work was not completed, so the retained mobile/Firebase data path remains separate and its data is not synchronized with the main system.
+
+A third, read-only client — the [Digital Twin](https://github.com/Kamilr616/smart-city-digital-twin) web app — mirrors the physical LEGO model on screen. It polls `GET /api/state/iot/all` with a JWT exactly like the ESP32 firmware, and it lives in its own repository.
 
 ## 2. Authentication and roles
 
@@ -124,7 +127,7 @@ The following official NXP resources were collected during the project's researc
 | API | `PORT` | Server port (default 4200) |
 | API | `JWT_SECRET_KEY` | JWT signing secret |
 | API | `MONGODB_URI` | MongoDB Atlas connection string |
-| API | `CORS_ORIGIN` | Allowed web origin (default `http://localhost:5173`) |
+| API | `CORS_ORIGIN` | Comma-separated list of allowed web origins (default `http://localhost:5173`) |
 | API seed | `INITIAL_ADMIN_EMAIL` | Email used only by `npm run seed:admin` |
 | API seed | `INITIAL_ADMIN_NAME` | Login name used only by `npm run seed:admin` |
 | API seed | `INITIAL_ADMIN_PASSWORD` | Initial password (minimum 12 characters); remove it after seeding |

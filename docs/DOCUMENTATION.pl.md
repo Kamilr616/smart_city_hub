@@ -17,9 +17,12 @@ flowchart LR
     ESP["ESP32 + 6× MCP23017"] -->|"odpytuje stany z JWT"| API
     API <-->|"Mongoose"| DB[(MongoDB)]
     MOBILE["Prototyp React Native"] --> FB["Firebase Auth + Firestore"]
+    Twin["Cyfrowy bliźniak (web)"] -->|"odpytuje stany z JWT"| API
 ```
 
 Pierwotny plan zakładał integrację aplikacji mobilnej z systemem Node.js/MongoDB. Prace nie zostały ukończone, dlatego zachowana ścieżka mobilna/Firebase pozostaje niezależna, a jej dane nie są synchronizowane z głównym systemem.
+
+Trzeci, wyłącznie do odczytu, klient — aplikacja webowa [Cyfrowy bliźniak](https://github.com/Kamilr616/smart-city-digital-twin) — odzwierciedla na ekranie fizyczną makietę LEGO. Odpytuje `GET /api/state/iot/all` z tokenem JWT dokładnie tak samo jak firmware ESP32 i znajduje się we własnym repozytorium.
 
 ## 2. Uwierzytelnianie i role
 
@@ -124,7 +127,7 @@ Poniższe oficjalne materiały NXP zebrano podczas prac badawczych nad projektem
 | API | `PORT` | Port serwera (domyślnie 4200) |
 | API | `JWT_SECRET_KEY` | Sekret do podpisywania JWT |
 | API | `MONGODB_URI` | Connection string MongoDB Atlas |
-| API | `CORS_ORIGIN` | Dozwolone źródło panelu webowego (domyślnie `http://localhost:5173`) |
+| API | `CORS_ORIGIN` | Lista dozwolonych źródeł panelu webowego, rozdzielona przecinkami (domyślnie `http://localhost:5173`) |
 | Seed API | `INITIAL_ADMIN_EMAIL` | E-mail używany wyłącznie przez `npm run seed:admin` |
 | Seed API | `INITIAL_ADMIN_NAME` | Nazwa logowania używana wyłącznie przez `npm run seed:admin` |
 | Seed API | `INITIAL_ADMIN_PASSWORD` | Hasło początkowe (minimum 12 znaków); usuń je po seedowaniu |
