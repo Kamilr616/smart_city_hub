@@ -30,8 +30,9 @@ The system was built and demonstrated on a **physical LEGO city model** at the K
 <p align="center">
   <img src="docs/media/lego-city.jpg" alt="Illuminated LEGO smart-city model" width="72%"/>
 </p>
+🎬 [Watch the demo on YouTube](https://www.youtube.com/watch?v=SQee5dXEI2U)
 
-🎬 [Watch the combined LEGO lighting demo](docs/media/lego-city-demo.mp4) *(33 s, with music)*
+🎬 [download](docs/media/lego-city-demo.mp4) *(33 s, with music)*
 
 Music: “Soft Corporate” by MusicLFiles (CC BY 4.0). See [Third-party notices](docs/THIRD_PARTY_NOTICES.md).
 
