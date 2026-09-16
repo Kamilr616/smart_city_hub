@@ -1,5 +1,6 @@
 import {config} from '../config';
 import Controller from '../interfaces/controller.interface';
+import {parseHistoryRequest} from '../modules/models/history.model';
 import {Request, Response, NextFunction, Router} from 'express';
 import {checkSensorIdParam, checkSensorLimitParam} from '../middlewares/deviceIdParam.middleware';
 import SensorService from '../modules/services/sensor.service';
@@ -18,7 +19,25 @@ class SensorController implements Controller {
         this.initializeRoutes();
     }
 
+
+    private getSensorHistory = async (request: Request, response: Response) => {
+        let range;
+        try {
+            range = parseHistoryRequest(request.params.id, request.query, config.supportedSensorsNum);
+        } catch {
+            response.status(400).json({error: 'Invalid history ID, ISO range or limit.'});
+            return;
+        }
+        try {
+            const {deviceId, from, to} = range;
+            response.status(200).json({deviceId, from, to, ...await this.sensorService.getSensorHistory(deviceId, range)});
+        } catch {
+            response.status(503).json({error: 'History unavailable.'});
+        }
+    };
+
     private initializeRoutes() {
+        this.router.get(`${this.path}/history/:id`, auth, this.getSensorHistory);
         this.router.get(this.path + '/catalog', this.getSensorCatalog);
         this.router.post(this.path + '/catalog', admin, this.updateSensorDefinition);
 

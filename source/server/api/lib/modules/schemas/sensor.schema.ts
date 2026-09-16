@@ -8,4 +8,6 @@ export const SensorSchema = new Schema({
    deviceId: {type: Number, required: true}
 });
 
+SensorSchema.index({deviceId: 1, readingDate: -1, _id: -1});
+
 export const SensorModel = model('SensorKR', SensorSchema);

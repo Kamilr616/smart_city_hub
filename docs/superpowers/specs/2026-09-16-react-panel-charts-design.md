@@ -1,0 +1,15 @@
+# React panel charts and repair
+User-authorized scope: expose registered sensors with measurement charts inspired by Kamilr616/TWWAI_zadania, repair existing React panel defects, redesign it responsively, show each device's state over time from stored states.
+
+Design: Polish light dashboard with dark navigation, emerald accent, responsive cards and readable charts. Routes /, /devices, /sensors, /locations, /devices/new, /users/new; retain /adminDashboard redirect. Overview summarizes actual inventories and latest data; devices allow filtering and safe pending-disabled controls; sensor catalog supplies labels/descriptions/units. Sensor charts use Chart.js via react-chartjs-2 with actual millisecond x coordinates, separate units, legend and tooltips. State chart is binary stepped history without invented off values. Each chart provides a tabular accessible fallback. Select 1h/24h/7d/30d ranges. No data and fetch failure are distinct.
+Navigation uses Devices and Locations; /cities redirects to /locations. Locations derives role-scoped areas from device and sensor metadata. The inert Control Panel button is removed. Mobile charts default to one selectable metric; combined metrics remain available.
+Optional sensor demo is explicitly labeled and browser-only, default off. Device history never uses simulated points.
+
+API contracts:
+GET /api/sensor/history/:id?from=ISO&to=ISO&limit=1000 (auth) -> {deviceId,from,to,readings:[{deviceId,temperature,humidity,pressure,readingDate}],truncated}.
+GET /api/state/history/:id?same-query (auth, device location authorization) -> {deviceId,from,to,initialState:boolean|null,states:[{state,timestamp}],truncated}.
+Range default24h; maximum31d; limit1..2000 default1000; ISO and integer validation; chronological order, newest bounded samples if truncated, initial state at from based on last prior stored observation. For truncated histories do not bridge omitted transitions as if complete. Only expose authorized device metadata/history; preserve token revocation checks and state bulkWrite.
+Fix latest-state empty history crash. Preserve existing endpoints.
+Client shared request helper normalizes VITE_API_URL optional /api/trailing slash, uses bearer token, abort signal and finite timeout; 401 expires session; no logging credentials. Storage malformed/expired JWT removed. Login accepts username or email. IsAdmin or role admin honored. Form labels and errors, duplicate submission prevention, only expected fields. Device create rejects existing IDs in UI rather than accidental overwrite; account form omits confirmPassword from request.
+
+Validation: backend Node tests for actual contracts/access; client pure helper tests and Playwright API-intercepted flows for login, expiry, filtering, writes, sensor/history charts, empty/error/unauthorized states and mobile layout. No production actuator writes during testing. Full API tests + panel lint/build + browser tests before PR. Update README and DOCUMENTATION in PL/EN and capture reviewed screenshots. User's prior rebase/admin merge preference applies if publishing this completed requested work; do not bypass failed checks.

@@ -1,4 +1,5 @@
 import Controller from '../interfaces/controller.interface';
+import {parseHistoryRequest} from '../modules/models/history.model';
 import {Request, Response, NextFunction, Router} from 'express';
 import DeviceStateService from '../modules/services/deviceState.service';
 import Joi from 'joi';
@@ -15,7 +16,30 @@ class DeviceStateController implements Controller {
         this.initializeRoutes();
     }
 
+
+    private getDeviceHistory = async (request: Request, response: Response) => {
+        let range;
+        try {
+            range = parseHistoryRequest(request.params.id, request.query, config.supportedDevicesNum);
+        } catch {
+            response.status(400).json({error: 'Invalid history ID, ISO range or limit.'});
+            return;
+        }
+        try {
+            const {deviceId, from, to} = range;
+            const history = await this.deviceStateService.getDeviceHistory(deviceId, response.locals.userRole, range);
+            if (!history) {
+                response.status(404).json({error: 'Device not found.'});
+                return;
+            }
+            response.status(200).json({deviceId, from, to, ...history});
+        } catch {
+            response.status(503).json({error: 'History unavailable.'});
+        }
+    };
+
     private initializeRoutes() {
+        this.router.get(`${this.path}/history/:id`, auth, this.getDeviceHistory);
         this.router.get(`${this.path}/iot/all`, auth, this.getAllLatestIotDeviceState); //TODO: NXP auth
         this.router.get(`${this.path}/user/latest`, auth, this.getAllLatestUserDeviceState);
         this.router.get(`${this.path}/latest`, admin, this.getAllLatestDeviceState);

@@ -72,10 +72,10 @@ smart_city_hub/
 
 ## Features
 
-- **Device control** — up to 96 digital outputs (6 MCP23017 expanders × 16 pins) controlled remotely from the web dashboard; the ESP32 periodically polls the API for states and drives the outputs.
-- **Sensor readings** — temperature, pressure, and humidity stored in the database with a reading date and device ID.
+- **Devices and locations** — the role-aware `Devices` view replaces the former `Home Lights` screen; `Locations` is derived from the devices and sensors available to the signed-in account.
+- **Device control and history** — up to 96 digital outputs (6 MCP23017 expanders × 16 pins) can be controlled remotely, with per-device charts based on stored `DeviceState.states` entries.
+- **Sensor readings and charts** — temperature, humidity, and pressure are shown for 1 hour, 24 hours, 7 days, or 30 days.
 - **Roles and authentication** — JWT login with separate `admin` / `user` roles; admins manage users and devices, users control their assigned devices.
-- **State history** — every device keeps a timestamped on/off history.
 
 ## Requirements
 
@@ -160,15 +160,21 @@ Copy `.env.example` to `.env` and adjust it if the API uses a different address:
 VITE_API_URL=http://localhost:4200/api
 ```
 
+`VITE_API_URL` may include or omit the trailing `/api`; the client normalizes both forms to one API prefix.
+
 Run:
 
 ```bash
 npm run dev      # Vite dev server
 npm run build    # production build to dist/
 npm run preview  # preview the production build
+npm test         # frontend unit tests
+npm run test:e2e # Playwright dashboard tests with a mocked API
 ```
 
 The Vite development server is available at `http://localhost:5173` by default.
+
+The dashboard refreshes live data every 30 seconds. Sensor charts use real API readings by default; the optional DEMO toggle starts off and generates browser-only samples without API writes. Without connected ESP hardware, registered sensors have no real measurements to chart. Device histories preserve an unknown state before the first observation and leave an omitted interval blank when the API reports truncated results. The Playwright suite mocks API responses and does not write to a real backend.
 
 ### 3. ESP32 firmware
 
@@ -198,7 +204,7 @@ npm run ios
 |---|---|
 | Backend | Node.js, Express 4, TypeScript, Mongoose 8, JWT, bcrypt, Joi |
 | Database | MongoDB (Atlas) |
-| Web | React 18, Vite, React Router 6, axios, Tailwind CSS, react-toastify |
+| Web | React 18, Vite, React Router 6, Chart.js, axios, Tailwind CSS, Playwright |
 | Mobile | React Native 0.73, React Navigation, Firebase (Auth, Firestore) |
 | Embedded | ESP32 (Arduino), MCP23017, ArduinoJson, WiFi + HTTPClient |
 
