@@ -143,7 +143,7 @@ Statyczny output obsługuje `/` niezależnie od MongoDB. Vercel buduje handler s
 
 Ustaw `JWT_SECRET_KEY`, `MONGODB_URI` i `CORS_ORIGIN` dla Preview oraz Production. `PORT` służy wyłącznie lokalnie. W MongoDB Atlas zezwól na dostęp sieciowy dla faktycznego egressu wdrożenia Vercel; szeroka reguła `0.0.0.0/0` nie jest z założenia wymagana.
 
-Przed promocją uruchom `npm test` w `source/server/api`. Polecenia `vercel link`, `vercel pull --yes --environment=preview` i `vercel build` uruchom z katalogu głównego repozytorium, wybierając projekt API. CLI sam uwzględnia Root Directory projektu (`source/server/api`); uruchomienie go wewnątrz tego katalogu powoduje podwojenie ścieżki. Potwierdź, że `.vercel/output/functions` zawiera funkcję API, a `.vercel/output/config.json` trasuje `/api/*`, po czym wykonaj testy dymne Preview:
+Przed promocją uruchom `npm test` w `source/server/api`. Polecenia `vercel link`, `vercel pull --yes --environment=preview` i `vercel build --local-config source/server/api/vercel.json` uruchom z katalogu głównego repozytorium, wybierając projekt API. CLI sam uwzględnia Root Directory projektu (`source/server/api`); uruchomienie go wewnątrz tego katalogu powoduje podwojenie ścieżki. Potwierdź, że `.vercel/output/functions` zawiera funkcję API, a `.vercel/output/config.json` trasuje `/api/*`, po czym wykonaj testy dymne Preview:
 
 - `GET /` zwraca statyczny HTML ze statusem 200, również gdy baza jest niedostępna.
 - `GET /api/state/iot/all` bez tokenu zwraca aplikacyjne 401, gdy baza jest dostępna.
