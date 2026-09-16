@@ -1,20 +1,68 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My App</title>
+    <meta name="description" content="Smart City Hub — projekt IoT na makiecie LEGO. Panel sterowania, Digital Twin, repozytoria i kontakt z autorem.">
+    <title>Smart City Hub — API</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #f7f7f7; color: #111827; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.6; }
+        main { max-width: 780px; margin: 48px auto; padding: 36px; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; }
+        h1 { margin: 0 0 12px; font-size: 30px; line-height: 1.25; font-weight: 650; }
+        h2 { margin: 0 0 16px; font-size: 19px; font-weight: 600; }
+        p { margin: 0 0 12px; color: #4b5563; }
+        .label { margin-bottom: 8px; font-size: 14px; color: #6b7280; }
+        section, footer { margin-top: 28px; padding-top: 24px; border-top: 1px solid #e5e7eb; }
+        a { color: #1e3a8a; text-underline-offset: 3px; }
+        a:hover { text-decoration-thickness: 2px; }
+        a:focus-visible { outline: 3px solid #2563eb; outline-offset: 4px; }
+        .applications { display: flex; flex-wrap: wrap; gap: 12px; }
+        .button { display: inline-block; padding: 10px 16px; border: 1px solid #d1d5db; border-radius: 5px; text-decoration: none; font-weight: 500; }
+        .button:hover { background: #eff6ff; }
+        .primary { background: #111; border-color: #111; color: #fff; }
+        .primary:hover { background: #374151; }
+        ul { margin: 0; padding-left: 20px; }
+        li + li { margin-top: 14px; }
+        li span { display: block; color: #4b5563; font-size: 14px; }
+        footer p { margin-bottom: 8px; }
+        .profiles { display: flex; flex-wrap: wrap; gap: 20px; }
+        @media (max-width: 600px) {
+            main { margin: 20px 12px; padding: 24px 20px; }
+            h1 { font-size: 26px; }
+            .applications a { flex: 1 1 100%; text-align: center; }
+        }
+    </style>
 </head>
 <body>
-    <div class="title" onclick="window.location.reload()">
-        <h1>Smart City Hub Server</h1>
-</div>
-    <div class="read-the-docs">
-        <p>
-            SmartCityHub is a project aiming to develop an integrated system for managing and monitoring urban
-            infrastructure, leveraging technologies such as embedded modules, Node.js server, and mobile
-            applications.
-        </p>
-    </div>
+    <main>
+        <header>
+            <p class="label">API projektu</p>
+            <h1>Smart City Hub</h1>
+            <p>Projekt IoT do sterowania i monitorowania urządzeń na makiecie miasta LEGO. Łączy API Node.js/Express i MongoDB, panel React oraz moduły ESP32.</p>
+            <p>Digital Twin odwzorowuje makietę w przeglądarce. Panel umożliwia sterowanie urządzeniami, podgląd czujników i przeglądanie historii stanów.</p>
+        </header>
+        <section aria-labelledby="apps-title">
+            <h2 id="apps-title">Aplikacje</h2>
+            <nav class="applications" aria-label="Aplikacje projektu">
+                <a class="button primary" href="https://smart-city-hub-seven.vercel.app/">Panel sterowania</a>
+                <a class="button" href="https://kamilr616.github.io/smart-city-digital-twin/">Digital Twin</a>
+            </nav>
+        </section>
+        <section aria-labelledby="repositories-title">
+            <h2 id="repositories-title">Repozytoria GitHub</h2>
+            <ul>
+                <li><a href="https://github.com/Kamilr616/smart_city_hub">Smart City Hub</a><span>API, panel React, aplikacja mobilna i firmware ESP32.</span></li>
+                <li><a href="https://github.com/Kamilr616/smart-city-digital-twin">Smart City Digital Twin</a><span>Wizualizacja makiety i stanów urządzeń w przeglądarce.</span></li>
+            </ul>
+        </section>
+        <footer aria-label="Autor projektu">
+            <p>Autor: <strong>Kamil Rataj</strong></p>
+            <nav class="profiles" aria-label="Profile autora">
+                <a href="https://github.com/Kamilr616">GitHub — Kamilr616</a>
+                <a href="https://www.linkedin.com/in/kamil-r-153ab7121/">LinkedIn — Kamil Rataj</a>
+            </nav>
+        </footer>
+    </main>
 </body>
 </html>
