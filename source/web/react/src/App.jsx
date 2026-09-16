@@ -11,6 +11,9 @@ import SensorPanel from './components/SensorPanel';
 import AddDevice from './AddDevice';
 import AddNewUser from './AddNewUser';
 import './App.css';
+import Users from './components/Users';
+import DeviceEdit from './components/DeviceEdit';
+import EspTokens from './components/EspTokens';
 
 function NewDevice() {
   const { refresh } = useOutletContext();
@@ -31,16 +34,24 @@ export default function App() {
           <Route index element={<Overview />} />
           <Route path="/devices" element={<Devices />} />
           <Route
+            path="/devices/:deviceId/edit"
+            element={isAdmin ? <DeviceEdit /> : <Navigate to="/" replace />}
+          />
+          <Route
+            path="/users"
+            element={isAdmin ? <Users /> : <Navigate to="/" replace />}
+          />
+          <Route
+            path="/esp-tokens"
+            element={isAdmin ? <EspTokens /> : <Navigate to="/" replace />}
+          />
+          <Route
             path="/sensors"
             element={
               <>
                 <div className="page-heading">
                   <div>
-                    <p className="eyebrow">DANE ŚRODOWISKOWE</p>
                     <h1>Czujniki</h1>
-                    <p>
-                      Pomiary, trendy i historia warunków w Twojej makiecie.
-                    </p>
                   </div>
                 </div>
                 <SensorPanel />

@@ -3,6 +3,7 @@ import {parseHistoryRequest} from '../modules/models/history.model';
 import {Request, Response, NextFunction, Router} from 'express';
 import DeviceStateService from '../modules/services/deviceState.service';
 import Joi from 'joi';
+import {iotAuth} from '../middlewares/iotAuth.middleware';
 import {admin} from '../middlewares/admin.middleware';
 import {auth} from "../middlewares/auth.middleware";
 import {config} from "../config";
@@ -40,7 +41,7 @@ class DeviceStateController implements Controller {
 
     private initializeRoutes() {
         this.router.get(`${this.path}/history/:id`, auth, this.getDeviceHistory);
-        this.router.get(`${this.path}/iot/all`, auth, this.getAllLatestIotDeviceState); //TODO: NXP auth
+        this.router.get(`${this.path}/iot/all`, iotAuth, this.getAllLatestIotDeviceState);
         this.router.get(`${this.path}/user/latest`, auth, this.getAllLatestUserDeviceState);
         this.router.get(`${this.path}/latest`, admin, this.getAllLatestDeviceState);
         this.router.get(`${this.path}/all`, admin, this.getAllDeviceStateData);
@@ -58,7 +59,17 @@ class DeviceStateController implements Controller {
     };
 
     private getAllLatestIotDeviceState = async (request: Request, response: Response, next: NextFunction) => {
-        response.status(200).json(await this.deviceStateService.getAllLatestDeviceStatesService());
+        const location = response.locals.iotCredential === 'esp'
+            ? response.locals.iotLocation
+            : response.locals.userRole === 'admin' ? undefined : response.locals.userRole;
+        const unrestricted = response.locals.iotCredential !== 'esp' && response.locals.userRole === 'admin';
+        if (!unrestricted && (typeof location !== 'string' || !location.trim())) {
+            response.status(403).json({error: 'Location access required.'});
+            return;
+        }
+        try {
+            response.status(200).json(await this.deviceStateService.getAllLatestDeviceStatesService(location));
+        } catch {response.status(503).json({error: 'Device states unavailable.'});}
     };
 
     private getAllDeviceStateData = async (request: Request, response: Response, next: NextFunction) => {

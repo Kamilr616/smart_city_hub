@@ -1,8 +1,14 @@
 import jwt from 'jsonwebtoken';
+import {randomBytes} from 'crypto';
+import {ClientSession} from 'mongoose';
 import TokenModel from '../schemas/token.schema';
 import {config} from '../../config';
 
 class TokenService {
+    public async removeForUser(userId: string, session?: ClientSession) {
+        return TokenModel.deleteMany({userId}, {session});
+    }
+
     public async create(user: any) {
         const access = 'auth';
         const userData = {
@@ -10,14 +16,16 @@ class TokenService {
             name: user.email,
             role: user.role,
             isAdmin: user.isAdmin,
-            access: access
+            access: access,
+            sessionVersion: user.sessionVersion || 0
         };
 
         const value = jwt.sign(
             userData,
             config.JwtSecret,
             {
-                expiresIn: '30d'
+                expiresIn: '30d',
+                jwtid: randomBytes(16).toString('hex')
             });
 
         try {

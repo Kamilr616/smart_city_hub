@@ -10,6 +10,7 @@ const SensorController = require('../dist/controllers/sensor.controller').defaul
 const StateController = require('../dist/controllers/deviceState.controller').default;
 const StateService = require('../dist/modules/services/deviceState.service').default;
 const TokenModel = require('../dist/modules/schemas/token.schema').default;
+const UserModel = require('../dist/modules/schemas/user.schema').default;
 const DeviceModel = require('../dist/modules/schemas/device.schema').default;
 const StateModel = require('../dist/modules/schemas/deviceState.schema').default;
 const {SensorModel} = require('../dist/modules/schemas/sensor.schema');
@@ -41,7 +42,10 @@ async function fixture(t, {states = [], readings = [], location = 'district-a', 
   const server = http.createServer(app);
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   t.after(() => new Promise(resolve => server.close(resolve)));
+  let currentUser;
+  t.mock.method(UserModel, 'findById', async () => currentUser);
   return async (path, user = {role: 'district-a'}) => {
+    currentUser = user ? {_id: 'test-user', name: 'Test', email: 'test@example.com', active: true, ...user} : null;
     const headers = user ? {authorization: `Bearer ${jwt.sign({userId: 'test-user', ...user}, process.env.JWT_SECRET_KEY, {expiresIn: '1h'})}`} : {};
     const response = await fetch(`http://127.0.0.1:${server.address().port}${path}`, {headers});
     const text = await response.text();

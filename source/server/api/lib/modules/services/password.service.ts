@@ -1,12 +1,13 @@
 import PasswordModel  from '../schemas/password.schema';
 import bcrypt from 'bcrypt';
+import {ClientSession} from 'mongoose';
 
 class PasswordService {
-   public async createOrUpdate(data: any) {
-       const result = await PasswordModel.findOneAndUpdate({ userId: data.userId }, { $set: { password: data.password } }, { new: true });
+   public async createOrUpdate(data: any, session?: ClientSession) {
+       const result = await PasswordModel.findOneAndUpdate({ userId: data.userId }, { $set: { password: data.password } }, { new: true, session });
        if (!result) {
            const dataModel = new PasswordModel({ userId: data.userId, password: data.password });
-           return await dataModel.save();
+           return await dataModel.save({session});
        }
        return result;
    }
