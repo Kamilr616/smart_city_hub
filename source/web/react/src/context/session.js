@@ -1,4 +1,4 @@
-﻿import { jwtDecode } from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 export function parseSession(value, now = Date.now()) {
   try {
@@ -45,15 +45,15 @@ export function devicePayload(data, devices) {
     deviceId < 0 ||
     deviceId > 95
   )
-    invalid('Identyfikator musi być liczbą całkowitą od 0 do 95.');
-  if (!data.location?.trim()) invalid('Podaj lokalizację urządzenia.');
+    invalid('The ID must be a whole number from 0 to 95.');
+  if (!data.location?.trim()) invalid('Enter the device location.');
   if (!Array.isArray(devices))
     invalid(
-      'Nie udało się sprawdzić dostępności identyfikatora. Spróbuj ponownie.',
+      'Unable to check whether the ID is available. Please try again.',
     );
   if (devices.some((device) => Number(device.deviceId) === deviceId))
     invalid(
-      'Ten identyfikator jest już zajęty. Wybierz inny, aby zachować istniejące urządzenie.',
+      'This ID is already in use. Choose another to preserve the existing device.',
     );
   return {
     deviceId,
@@ -71,9 +71,9 @@ export function userPayload(data) {
     !data.role.trim() ||
     !data.password
   )
-    invalid('Uzupełnij wszystkie wymagane pola.');
+    invalid('Complete all required fields.');
   if (data.password !== data.confirmPassword)
-    invalid('Hasła muszą być takie same.');
+    invalid('Passwords must match.');
   return {
     name: data.name.trim(),
     email: data.email.trim(),

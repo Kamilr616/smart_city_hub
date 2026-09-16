@@ -1,4 +1,4 @@
-﻿import test from 'node:test';
+import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   buildSensorSeries,
@@ -156,5 +156,5 @@ test('browser demo adapts to long ranges and preserves the selected sensor ident
 
 test('missing timestamps are not formatted as the Unix epoch', () => {
   for (const value of [null, undefined, '', 'invalid'])
-    assert.equal(formatTimestamp(value), 'Brak pomiaru');
+    assert.equal(formatTimestamp(value), 'No reading');
 });

@@ -51,7 +51,7 @@ export default function App() {
               <>
                 <div className="page-heading">
                   <div>
-                    <h1>Czujniki</h1>
+                    <h1>Sensors</h1>
                   </div>
                 </div>
                 <SensorPanel />

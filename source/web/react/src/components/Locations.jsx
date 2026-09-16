@@ -12,14 +12,14 @@ export default function Locations() {
       <div className="page-heading">
         <div>
           <h1>Locations</h1>
-          <p>Obszary makiety dostępne dla Twojego konta.</p>
+          <p>Model areas available to your account.</p>
         </div>
-        <span className="count-pill">{locations.length} lokalizacji</span>
+        <span className="count-pill">{locations.length} locations</span>
       </div>
       {Object.keys(errors).length > 0 && (
         <p className="error-message" role="alert">
-          Lista lokalizacji może być niepełna. Nie udało się odświeżyć
-          wszystkich danych.
+          The location list may be incomplete. Some data could not be
+          refreshed.
         </p>
       )}
       <div className="locations-grid">
@@ -34,33 +34,33 @@ export default function Locations() {
                 <span className="location-symbol">
                   <Icon name="locations" />
                 </span>
-                <span className="badge">Dostępna</span>
+                <span className="badge">Available</span>
               </div>
               <h2>{location}</h2>
               <p>
-                Rola dostępu: <strong>{location}</strong>
+                Access role: <strong>{location}</strong>
               </p>
               <div className="location-stats">
                 <div>
                   <strong>{list.length}</strong>
-                  <span>urządzeń</span>
+                  <span>devices</span>
                 </div>
                 <div>
                   <strong>
                     {sensors.filter((s) => s.location === location).length}
                   </strong>
-                  <span>czujników</span>
+                  <span>sensors</span>
                 </div>
                 <div>
                   <strong>{enabled}</strong>
-                  <span>włączonych</span>
+                  <span>on</span>
                 </div>
               </div>
               <Link
                 className="button button-secondary full-width"
                 to={'/devices?location=' + encodeURIComponent(location)}
               >
-                Zobacz urządzenia <Icon name="arrow" />
+                View devices <Icon name="arrow" />
               </Link>
             </article>
           );
@@ -69,8 +69,8 @@ export default function Locations() {
       {!locations.length && (
         <div className="panel empty-state">
           {loading
-            ? 'Pobieranie lokalizacji…'
-            : 'Brak lokalizacji przypisanych do dostępnych urządzeń i czujników.'}
+            ? 'Loading locations…'
+            : 'No locations are assigned to the available devices and sensors.'}
         </div>
       )}
     </>
