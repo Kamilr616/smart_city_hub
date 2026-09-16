@@ -17,14 +17,14 @@ const getEnvVariable = (key: string): string => {
     return value;
 }
 
-const DEFAULT_CORS_ORIGINS = ['http://localhost:5173'] as const;
+const DEFAULT_CORS_ORIGINS = ['http://localhost:5173'];
 
 export const parseCorsOrigins = (value: string | undefined): string[] => {
     const origins = (value || '')
         .split(',')
         .map((origin) => origin.trim())
         .filter((origin) => origin.length > 0);
-    return origins.length > 0 ? origins : [...DEFAULT_CORS_ORIGINS];
+    return origins.length > 0 ? origins : DEFAULT_CORS_ORIGINS;
 }
 
 export const config: Config = {

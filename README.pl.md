@@ -102,8 +102,7 @@ Skopiuj `.env.example` do `.env`, a następnie zastąp wartości przykładowe:
 PORT=4200
 JWT_SECRET_KEY=<losowy_sekret>
 MONGODB_URI=mongodb+srv://<user>:<haslo>@<cluster>.mongodb.net/<baza>
-# Lista dozwolonych źródeł web, rozdzielona przecinkami.
-CORS_ORIGIN=http://localhost:5173,http://localhost:5174
+CORS_ORIGIN=http://localhost:5173  # lista dozwolonych źródeł web, rozdzielona przecinkami
 INITIAL_ADMIN_EMAIL=admin@example.com
 INITIAL_ADMIN_NAME=admin
 INITIAL_ADMIN_PASSWORD=<co_najmniej_12_znakow>

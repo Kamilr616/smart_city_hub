@@ -99,8 +99,7 @@ Copy `.env.example` to `.env`, then replace the placeholder values:
 PORT=4200
 JWT_SECRET_KEY=<random_secret>
 MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/<database>
-# Comma-separated list of allowed web origins.
-CORS_ORIGIN=http://localhost:5173,http://localhost:5174
+CORS_ORIGIN=http://localhost:5173  # comma-separated list of allowed web origins
 INITIAL_ADMIN_EMAIL=admin@example.com
 INITIAL_ADMIN_NAME=admin
 INITIAL_ADMIN_PASSWORD=<at_least_12_characters>

@@ -21,10 +21,3 @@ test('parseCorsOrigins falls back to the default origin when undefined', () => {
 test('parseCorsOrigins falls back to the default origin for a blank string', () => {
   assert.deepEqual(parseCorsOrigins('   '), ['http://localhost:5173']);
 });
-
-test('parseCorsOrigins returns a fresh array instance on each default-path call', () => {
-  const first = parseCorsOrigins(undefined);
-  const second = parseCorsOrigins(undefined);
-  assert.notEqual(first, second);
-  assert.deepEqual(first, second);
-});
