@@ -5,6 +5,8 @@ import {Request, Response, NextFunction, Router} from 'express';
 import {checkSensorIdParam, checkSensorLimitParam} from '../middlewares/deviceIdParam.middleware';
 import SensorService from '../modules/services/sensor.service';
 import Joi from 'joi';
+import {iotAuth, iotSensorAccess} from '../middlewares/iotAuth.middleware';
+import {SensorDefinitionModel} from '../modules/schemas/sensorDefinition.schema';
 import {admin} from "../middlewares/admin.middleware";
 import {ISensor} from "../modules/models/sensor.model";
 import {auth} from "../middlewares/auth.middleware";
@@ -48,7 +50,7 @@ class SensorController implements Controller {
         this.router.get(`${this.path}/all/:num`, admin, checkSensorLimitParam, this.getPeriodSensorData);
         this.router.get(`${this.path}/all`, this.getPeriodAllSensorData); //auth
         this.router.get(`${this.path}/:id`, admin, checkSensorIdParam, this.getAllSingleSensorData);
-        this.router.post(`${this.path}/iot/update`, admin, this.addMultipleSensorData);  //TODO: NXP auth
+        this.router.post(`${this.path}/iot/update`, iotAuth, iotSensorAccess, this.addMultipleSensorData);
         this.router.post(`${this.path}/update/:id`, admin, checkSensorIdParam, this.addSingleSensorData);
         this.router.delete(`${this.path}/all`, admin, this.cleanAllSensorData);
         this.router.delete(`${this.path}/:id`, admin, checkSensorIdParam, this.cleanSingleSensorData);
@@ -177,6 +179,14 @@ class SensorController implements Controller {
         try {
             // Sprawdzamy, czy dane wejściowe pasują do określonego schematu
             const validatedData = await schema.validateAsync(sensorData);
+            if (response.locals.iotCredential === 'esp') {
+                const sensors = await SensorDefinitionModel.find({location: response.locals.iotLocation}).select('deviceId').lean();
+                const allowed = new Set(sensors.map(sensor => sensor.deviceId));
+                if (validatedData.some((data: {deviceId: number}) => !allowed.has(data.deviceId))) {
+                    response.status(403).json({error: 'Sensor outside ESP token location.'});
+                    return;
+                }
+            }
             // Przetwarzamy każdy pomiar
             const createdData = await Promise.all(validatedData.map(async (data: any) => {
                 const {air} = data;

@@ -2,6 +2,7 @@
 import { Navigate, useNavigate } from 'react-router-dom';
 import { UserContext } from './context/auth';
 import { apiRequest, getApiErrorMessage } from './api';
+import kiLogo from './assets/ki_LOGO_b.svg';
 
 export default function Login() {
   const { user, setUser } = useContext(UserContext);
@@ -49,10 +50,12 @@ export default function Login() {
   return (
     <main className="auth-page">
       <section className="auth-card" aria-labelledby="login-title">
-        <div className="auth-brand">Smart City Hub</div>
-        <p className="eyebrow">Twoje miasto, pod kontrolą</p>
-        <h1 id="login-title">Witaj ponownie</h1>
-        <p>Zaloguj się, aby zobaczyć urządzenia i pomiary w swoim mieście.</p>
+        <div className="auth-brand">
+          <img src={kiLogo} alt="KI" />
+          Smart City Hub
+        </div>
+        <h1 id="login-title">Logowanie</h1>
+        <p>Podaj dane swojego konta.</p>
         <form onSubmit={submit} className="form-grid" aria-busy={pending}>
           <div className="field">
             <label htmlFor="login">Nazwa użytkownika lub e-mail</label>

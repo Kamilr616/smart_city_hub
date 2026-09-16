@@ -3,6 +3,11 @@ import {config} from "../../config";
 import {IDevice} from "../models/device.model";
 
 export default class DeviceService {
+    public async updateMetadata(deviceId: number, metadata: Partial<Pick<IDevice, 'name' | 'location' | 'type' | 'description'>>) {
+        return DeviceModel.findOneAndUpdate({deviceId}, {$set: {...metadata, editDate: new Date()}},
+            {new: true, runValidators: true});
+    }
+
 
     public async getAllUserDevices(loc: string) {
         try {

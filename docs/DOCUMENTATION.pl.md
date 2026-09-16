@@ -14,7 +14,7 @@ System składa się z czterech komponentów:
 ```mermaid
 flowchart LR
     WEB["Panel webowy React"] -->|"REST + JWT"| API["API Express / TypeScript"]
-    ESP["ESP32 + 6× MCP23017"] -->|"odpytuje stany z JWT"| API
+    ESP["ESP32 + 6× MCP23017"] -->|"odpytuje stany z tokenem ESP"| API
     API <-->|"Mongoose"| DB[(MongoDB)]
     MOBILE["Prototyp React Native"] --> FB["Firebase Auth + Firestore"]
     Twin["Cyfrowy bliźniak (web)"] -->|"odpytuje stany z JWT"| API
@@ -22,7 +22,7 @@ flowchart LR
 
 Pierwotny plan zakładał integrację aplikacji mobilnej z systemem Node.js/MongoDB. Prace nie zostały ukończone, dlatego zachowana ścieżka mobilna/Firebase pozostaje niezależna, a jej dane nie są synchronizowane z głównym systemem.
 
-Trzeci, wyłącznie do odczytu, klient — aplikacja webowa [Cyfrowy bliźniak](https://github.com/Kamilr616/smart-city-digital-twin) — odzwierciedla na ekranie fizyczną makietę LEGO. Odpytuje `GET /api/state/iot/all` z tokenem JWT dokładnie tak samo jak firmware ESP32 i znajduje się we własnym repozytorium.
+Trzeci, wyłącznie do odczytu, klient — aplikacja webowa [Cyfrowy bliźniak](https://github.com/Kamilr616/smart-city-digital-twin) — odzwierciedla na ekranie fizyczną makietę LEGO. Znajduje się we własnym repozytorium i odpytuje `GET /api/state/iot/all` z tokenem JWT. Płytki ESP32 mogą korzystać z osobnych danych dostępowych ograniczonych do lokalizacji.
 
 ## 2. Uwierzytelnianie i role
 
@@ -41,6 +41,7 @@ Trzeci, wyłącznie do odczytu, klient — aplikacja webowa [Cyfrowy bliźniak](
 | **User** | `email` (unikalny), `name` (unikalny), `role` (domyślnie `user`), `active`, `isAdmin` | Konta użytkowników |
 | **Password** | `userId`, `password` (hash bcrypt) | Hasła, osobno od użytkowników |
 | **Token** | `userId`, `value` | Tokeny sesji |
+| **EspToken** | `name`, `location`, `tokenHash`, `createdAt`, `expiresAt`, `revokedAt` | Wygasające i odwoływalne tokeny lokalizacji; tylko hash |
 | **Device** | `deviceId` (Number), `location`, `name` (domyślnie `outlet`), `type`, `description`, `editDate` | Metadane urządzeń (maks. 96) |
 | **DeviceState** | `deviceId` (ref: Device), `states[]` — `{state: Boolean, timestamp: Date}` | Historia włączeń/wyłączeń |
 | **Sensor** | `deviceId`, `temperature`, `pressure`, `humidity`, `readingDate` | Odczyty sensorów |
@@ -53,6 +54,8 @@ Prefiks wszystkich tras: `/api`. Oznaczenia: 🔓 publiczny, 👤 wymaga JWT, �
 
 | Metoda | Ścieżka | Dostęp | Opis |
 |---|---|---|---|
+| GET | `/list` | 🛡️ | Lista kont użytkowników |
+| PATCH | `/:id` | 🛡️ | Edycja konta i unieważnienie jego sesji |
 | POST | `/create` | 🛡️ | Utworzenie użytkownika |
 | POST | `/auth` | 🔓 | Logowanie, zwraca JWT |
 | DELETE | `/logout` | 👤 | Wylogowanie i unieważnienie bieżącego tokenu |
@@ -67,6 +70,7 @@ Prefiks wszystkich tras: `/api`. Oznaczenia: 🔓 publiczny, 👤 wymaga JWT, �
 | GET | `/all/:id` | 🛡️ | Wszystkie wpisy dla urządzenia |
 | GET | `/:id` | 🛡️ | Pojedyncze urządzenie |
 | POST | `/update` | 🛡️ | Dodanie / aktualizacja urządzenia |
+| PATCH | `/:id` | 🛡️ | Edycja metadanych bez zmiany ID ani historii stanów |
 | DELETE | `/all` | 🛡️ | Usunięcie wszystkich urządzeń |
 | DELETE | `/:id` | 🛡️ | Usunięcie urządzenia |
 
@@ -74,7 +78,7 @@ Prefiks wszystkich tras: `/api`. Oznaczenia: 🔓 publiczny, 👤 wymaga JWT, �
 
 | Metoda | Ścieżka | Dostęp | Opis |
 |---|---|---|---|
-| GET | `/iot/all` | 👤 | Aktualne stany wszystkich urządzeń — używane przez ESP32 |
+| GET | `/iot/all` | 👤 lub ESP | 96 stanów ograniczonych do roli/lokalizacji; JWT admina może odczytać wszystkie |
 | GET | `/user/latest` | 👤 | Najnowsze stany urządzeń użytkownika |
 | GET | `/history/:id` | 👤 | Historia stanów uprawnionego urządzenia w zadanym czasie |
 | GET | `/latest` | 🛡️ | Najnowsze stany (wszystkie) |
@@ -93,13 +97,37 @@ Prefiks wszystkich tras: `/api`. Oznaczenia: 🔓 publiczny, 👤 wymaga JWT, �
 | GET | `/all` | 🔓 | Najnowsze 20 odczytów każdego skonfigurowanego sensora |
 | GET | `/all/:num` | 🛡️ | Ostatnie dodatnie *num* odczytów każdego skonfigurowanego sensora |
 | GET | `/:id` | 🛡️ | Odczyty sensora |
-| POST | `/iot/update` | 🛡️ | Walidacja i zbiorczy zapis odczytów sensorów |
+| POST | `/iot/update` | 🛡️ lub ESP | Zbiorczy zapis; ESP tylko dla zarejestrowanych czujników swojej lokalizacji |
 | POST | `/update/:id` | 🛡️ | Aktualizacja odczytu |
 | DELETE | `/all`, `/:id` | 🛡️ | Usunięcie odczytów |
 
 Obie trasy historii wymagają zweryfikowanego JWT, który nadal znajduje się w magazynie tokenów. Parametry query `from` i `to` są znacznikami czasu ISO ze strefą czasową; zakres musi być dodatni i nie może przekraczać 31 dni. Ich pominięcie wybiera poprzednie 24 godziny. `limit` przyjmuje 1–2000, domyślnie 1000. Wyniki są chronologiczne i zawierają `truncated`, gdy istnieją dalsze pasujące obserwacje.
 
 Historia stanów dodatkowo autoryzuje urządzenie według lokalizacji: rola zwykłego użytkownika musi odpowiadać `Device.location`, a administrator może odczytać każde urządzenie. Dostęp administratora uznaje zarówno `role: admin`, jak i obsługiwany claim `isAdmin`. Pole `initialState` zawiera ostatni zapisany stan sprzed `from` albo `null`, gdy stan jest nieznany. Przy skróconym wyniku klient nie może łączyć pominiętego okresu z tym stanem bazowym.
+
+### Operacje administratora
+
+`GET /api/user/list` zwraca tablicę `{_id, name, email, role, isAdmin, active}` bez haseł i tokenów sesji. `PATCH /api/user/:id` przyjmuje co najmniej jedno z pól `name`, `email`, `role`, `isAdmin`, `active`, `password`; `:id` to identyfikator MongoDB użytkownika. Nazwa i rola to niepuste ciągi do 100 znaków, e-mail do 254 znaków, a flagi mają typ boolean. Nieznane pola są odrzucane. Hasło wymaga co najmniej 12 znaków i najwyżej 72 bajtów UTF-8; pominięcie `password` zachowuje istniejący hash.
+
+Każda udana edycja konta unieważnia wszystkie jego sesje. Zapis hasła, zmiany konta i unieważnienie sesji działają w transakcji MongoDB, więc aktualizacja kont wymaga MongoDB Atlas albo replica set, a nie pojedynczego serwera standalone. Nieaktywne konto nie może się logować ani używać istniejących sesji. Odebranie sobie dostępu administracyjnego, dezaktywacja własnego konta lub usunięcie ostatniego aktywnego administratora jest odrzucane kodem 409. Powtórzona nazwa/e-mail również zwraca 409, błędne dane 400, a brak konta 404.
+
+`PATCH /api/device/:id` zmienia wyłącznie `name`, `type`, `description` i `location`; `:id` to numeryczny identyfikator urządzenia (0–95). Pole `deviceId` jest niezmienne. Edycja metadanych zachowuje historię stanów i aktualizuje `editDate`; przeniesienie urządzenia zmienia lokalizację mającą do niego dostęp.
+
+### Tokeny ESP — `/api/esp-tokens`
+
+| Metoda | Ścieżka | Dostęp | Opis |
+|---|---|---|---|
+| GET | `/` | 🛡️ | Lista metadanych bez wartości tokenów i hashy |
+| POST | `/` | 🛡️ | Utworzenie tokenu lokalizacji; wartość zwracana tylko raz |
+| DELETE | `/:id` | 🛡️ | Unieważnienie według identyfikatora MongoDB tokenu |
+
+Tworzenie przyjmuje `{name, location, expiresInDays}`: nazwa i lokalizacja są niepustymi ciągami do 120 znaków; ważność jest liczbą całkowitą od 1 do 365 dni. Lokalizacja musi występować w metadanych urządzeń lub katalogu czujników; `admin` i `*` nie są dozwolonym zakresem. Odpowiedź 201 to `{token, key}`, gdzie `key` zawiera `{id, name, location, createdAt, expiresAt, revokedAt}`. Lista zwraca tablicę tych metadanych, a unieważnienie zaktualizowany obiekt. Brak daty unieważnienia oznacza `null`.
+
+Nieprzezroczysty token składa się z prefiksu `sch_` i 64 losowych znaków szesnastkowych. MongoDB przechowuje wyłącznie jego hash SHA-256. Wartość trzeba skopiować przy tworzeniu: później nie można jej odzyskać. Token wygasły lub unieważniony zwraca 401. Nieznany identyfikator tokenu podczas unieważniania zwraca 404, a błędne dane 400.
+
+Tokeny ESP są przyjmowane wyłącznie przez `GET /api/state/iot/all` i `POST /api/sensor/iot/update`, w nagłówku `Authorization: Bearer <token>` albo dotychczasowym `x-access-token: Bearer <token>`. Nie uwierzytelniają tras panelu ani ogólnych operacji administratora. Trasa stanów zachowuje tablicę 96 elementów indeksowaną przez `deviceId`; brakujące urządzenia i każde urządzenie spoza lokalizacji tokenu otrzymują `false`. JWT zwykłego użytkownika również ogranicza odczyt do jego roli/lokalizacji; JWT administratora może odczytać wszystkie lokalizacje.
+
+Zapis pomiarów zachowuje body `{sensorData: [{deviceId, air: {temperature, pressure, humidity}}]}`. Każdy czujnik w partii ESP musi być zarejestrowany w lokalizacji tokenu; obca lokalizacja albo niezarejestrowany czujnik odrzuca całą partię kodem 403 przed zapisem. Nadal można wysyłać pomiary z JWT administratora. Zachowany szkic sterujący wyjściami jedynie odpytuje stany; wysyłanie pomiarów wymaga firmware czujnika.
 
 ## 5. Panel webowy — przepływ
 
@@ -109,13 +137,15 @@ Historia stanów dodatkowo autoryzuje urządzenie według lokalizacji: rola zwyk
 4. `Locations` powstaje z lokalizacji urządzeń i czujników dostępnych dla konta, bez osobnego magazynu lokalizacji.
 5. Wykresy czujników pobierają `GET /api/sensor/history/:id` dla temperatury, wilgotności i ciśnienia z 1 godziny, 24 godzin, 7 dni lub 30 dni. Domyślnie pokazują dane rzeczywiste. Opcjonalny tryb DEMO jest początkowo wyłączony i tworzy próbki wyłącznie w pamięci przeglądarki; nie wywołuje trasy zapisu.
 
+6. Administrator używa widoku `Użytkownicy` do listowania i edycji kont, `Devices` do edycji metadanych urządzeń oraz `Tokeny ESP` do tworzenia tokenów, sprawdzania ważności i unieważniania. Wartość tokenu pojawia się tylko raz po utworzeniu. Interfejs zachowuje pierwotną białą i szarą paletę, niebieską nawigację, czarne przyciski, logo KI i krótkie nagłówki.
+
 Wykresy zachowują brakujące wartości zamiast wymyślać pomiary. Stan urządzenia sprzed pierwszej zapisanej obserwacji pozostaje nieznany, a skrócona historia pozostawia pusty pominięty okres początkowy. Rejestracja czujnika tworzy tylko metadane: bez podłączonego ESP nie pojawią się prawdziwe odczyty.
 
 ## 6. Firmware ESP32
 
 - **Sprzęt:** ESP32 + 6× MCP23017 na magistrali I2C (adresy `0x22`–`0x27`), łącznie 96 wyjść; SDA=21, SCL=22; UART 9600 baud.
-- **Działanie:** po połączeniu z WiFi szkic cyklicznie wykonuje `GET /api/state/iot/all` (z tokenem w nagłówku `x-access-token`), parsuje dokładnie 96-elementową tablicę stanów JSON (`ArduinoJson`) i zapisuje potrzebne rejestry MCP23017 bezpośrednio przez I2C. Pozycja w tablicy odpowiada `deviceId`, a brakujące urządzenia są reprezentowane przez `false`.
-- **Konfiguracja:** skopiuj `secrets.example.h` do ignorowanego pliku `secrets.h`, a następnie ustaw SSID WiFi, adres API oraz token bearer przed wgraniem firmware.
+- **Działanie:** po połączeniu z WiFi szkic cyklicznie wykonuje `GET /api/state/iot/all` (z tokenem w nagłówku `x-access-token`), parsuje dokładnie 96-elementową tablicę stanów JSON (`ArduinoJson`) i zapisuje potrzebne rejestry MCP23017 bezpośrednio przez I2C. Pozycja w tablicy odpowiada `deviceId`, a brakujące urządzenia i urządzenia spoza lokalizacji tokenu są reprezentowane przez `false`.
+- **Konfiguracja:** skopiuj `secrets.example.h` do ignorowanego pliku `secrets.h`, a następnie ustaw SSID WiFi, adres API oraz `API_TOKEN` przed wgraniem firmware. Utwórz token w `Tokeny ESP` i wpisz `"Bearer "` oraz pełną wartość `sch_...`. Dotychczasowy szkic wysyła ten ciąg przez `x-access-token`; wygaśnięcie lub unieważnienie wymaga nowego tokenu i ponownego wgrania firmware.
 
 ### 6.1 Historyczne materiały NXP/LPCXpresso
 

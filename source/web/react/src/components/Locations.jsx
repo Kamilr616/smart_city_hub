@@ -11,7 +11,6 @@ export default function Locations() {
     <>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">LOKALIZACJE I ROLE</p>
           <h1>Locations</h1>
           <p>Obszary makiety dostępne dla Twojego konta.</p>
         </div>

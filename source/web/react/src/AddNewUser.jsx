@@ -57,7 +57,6 @@ export default function AddNewUser() {
 
   return (
     <section className="form-panel" aria-labelledby="user-form-title">
-      <p className="eyebrow">Dostęp do miasta</p>
       <h1 id="user-form-title">Dodaj użytkownika</h1>
       <p>
         Przypisz konto do lokalizacji urządzeń. Rola „admin” nadaje uprawnienia
@@ -112,6 +111,8 @@ export default function AddNewUser() {
             name="password"
             type="password"
             autoComplete="new-password"
+            minLength={12}
+            maxLength={72}
             required
             disabled={pending}
             value={form.password}

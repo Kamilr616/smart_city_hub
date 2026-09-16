@@ -40,3 +40,15 @@ npm run test:e2e
 - Device charts use persisted `DeviceState.states`. Unknown state before the first observation remains blank, and truncated history does not bridge the omitted leading interval.
 
 History requests use authenticated `GET /api/sensor/history/:id` and `GET /api/state/history/:id` calls with ISO `from`/`to` values and `limit=1000`. The API defaults to 24 hours when the range is omitted, accepts at most 31 days, and permits limits from 1 to 2000. State history is additionally authorized against the device location.
+
+## Administrator views
+
+- **User administration** — `Użytkownicy` lists accounts and lets administrators edit name, email, role/location, administrator access, active status, and an optional new password. Saving an edit revokes that account’s sessions; inactive accounts cannot log in.
+- **Device metadata** — administrators edit a device’s name, type, description, and location. Its ID and saved state history remain unchanged.
+- **ESP credentials** — `Tokeny ESP` creates credentials for one existing location with an expiry of 1–365 days. The value is shown once; the API stores its hash and supports revocation.
+
+New passwords require at least 12 characters and at most 72 UTF-8 bytes. Leaving the new-password field empty keeps the current password. User edits revoke all sessions for the edited account, including the current session when editing yourself. Self-deactivation, removing your own administrator access, and removing the last active administrator are rejected. User updates require MongoDB Atlas or a replica set for transactions.
+
+Account actions use `GET /api/user/list`, `PATCH /api/user/:id`, and `POST /api/user/create`; device edits use `PATCH /api/device/:id`. ESP management uses `GET`/`POST /api/esp-tokens` and `DELETE /api/esp-tokens/:id`. ESP token values are shown only after creation, are not stored in browser session storage, and are stored only as hashes in MongoDB. Configure firmware with `API_TOKEN="Bearer sch_..."` using the complete generated token. These tokens grant only location-scoped state polling and registered-sensor ingestion, not dashboard or general administrator access.
+
+The panel retains the original white/gray palette, blue navigation, black buttons, and KI logo, with concise headings and responsive forms and tables.

@@ -108,8 +108,9 @@ test('serverless entrypoint preserves the API without starting a process', async
     const active = new Map();
     t.mock.method(User, 'findOne', async filter => {
       assert.deepEqual(filter, {$or: [{email: 'demo'}, {name: 'demo'}]});
-      return {_id: userId, id: userId.toString(), email: 'demo@example.com', role: 'user', isAdmin: false};
+      return {_id: userId, id: userId.toString(), email: 'demo@example.com', role: 'admin', isAdmin: true};
     });
+    t.mock.method(User, 'findById', async () => ({_id: userId, name: 'demo', email: 'demo@example.com', role: 'admin', isAdmin: true, active: true}));
     t.mock.method(Password, 'findOne', async filter => {
       assert.equal(filter.userId, userId.toString());
       return {password};
