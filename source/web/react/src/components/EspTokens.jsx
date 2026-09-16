@@ -3,7 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import { apiRequest, getApiErrorMessage } from '../api';
 import { UserContext } from '../context/auth';
 
-const dateLabel = (value) => new Date(value).toLocaleString('pl-PL');
+const dateLabel = (value) => new Date(value).toLocaleString('en-GB');
 
 export default function EspTokens() {
   const { user } = useContext(UserContext);
@@ -80,7 +80,7 @@ export default function EspTokens() {
       days < 1 ||
       days > 365
     ) {
-      setError('Podaj nazwę, wybierz lokalizację i ważność od 1 do 365 dni.');
+      setError('Enter a name, select a location and set a validity period of 1 to 365 days.');
       return;
     }
     const controller = new AbortController();
@@ -105,7 +105,7 @@ export default function EspTokens() {
       setKeys((previous) => [result.key, ...previous]);
       setForm((previous) => ({ ...previous, name: '' }));
       setMessage(
-        'Token został utworzony. Skopiuj go przed zamknięciem tego widoku.',
+        'The token has been created. Copy it before closing this view.',
       );
     } catch (failure) {
       if (failure.name !== 'AbortError') setError(getApiErrorMessage(failure));
@@ -118,7 +118,7 @@ export default function EspTokens() {
   async function revoke(key) {
     if (
       mutation.current ||
-      !window.confirm('Unieważnić token „' + key.name + '”? ESP utraci dostęp.')
+      !window.confirm('Revoke token “' + key.name + '”? The ESP device will lose access.')
     )
       return;
     const controller = new AbortController();
@@ -137,7 +137,7 @@ export default function EspTokens() {
         previous.map((item) => (item.id === key.id ? result : item)),
       );
       setSecret((previous) => (previous?.id === key.id ? null : previous));
-      setMessage('Token został unieważniony.');
+      setMessage('The token has been revoked.');
     } catch (failure) {
       if (failure.name !== 'AbortError') setError(getApiErrorMessage(failure));
     } finally {
@@ -149,16 +149,16 @@ export default function EspTokens() {
   async function copy(value) {
     try {
       await navigator.clipboard.writeText(value);
-      setMessage('Skopiowano do schowka.');
+      setMessage('Copied to clipboard.');
     } catch {
-      setError('Nie udało się skopiować. Zaznacz tekst i skopiuj go ręcznie.');
+      setError('Could not copy. Select the text and copy it manually.');
     }
   }
 
   if (!isAdmin)
     return (
       <p role="alert" className="error-message">
-        Brak uprawnień administratora.
+        Administrator access required.
       </p>
     );
   const snippet = secret
@@ -167,13 +167,13 @@ export default function EspTokens() {
   return (
     <>
       <div className="page-heading">
-        <h1>Tokeny ESP</h1>
+        <h1>ESP tokens</h1>
         <button
           className="button button-secondary"
           onClick={refresh}
           disabled={loading || pending}
         >
-          Odśwież
+          Refresh
         </button>
       </div>
       {error && (
@@ -187,11 +187,11 @@ export default function EspTokens() {
         </p>
       )}
       <section className="form-panel" aria-labelledby="esp-create-title">
-        <h2 id="esp-create-title">Nowy token</h2>
-        <p>Odczyt stanów i zapis pomiarów tylko w wybranej lokalizacji.</p>
+        <h2 id="esp-create-title">New token</h2>
+        <p>Read states and submit readings only for the selected location.</p>
         <form className="form-grid" onSubmit={create} aria-busy={pending}>
           <label className="field">
-            <span>Nazwa tokenu</span>
+            <span>Token name</span>
             <input
               required
               maxLength={120}
@@ -203,7 +203,7 @@ export default function EspTokens() {
             />
           </label>
           <div className="field">
-            <label htmlFor="esp-location">Lokalizacja</label>
+            <label htmlFor="esp-location">Location</label>
             <select
               id="esp-location"
               required
@@ -213,14 +213,14 @@ export default function EspTokens() {
                 setForm({ ...form, location: event.target.value })
               }
             >
-              <option value="">Wybierz lokalizację</option>
+              <option value="">Select a location</option>
               {locations.map((location) => (
                 <option key={location}>{location}</option>
               ))}
             </select>
           </div>
           <label className="field">
-            <span>Ważność (dni)</span>
+            <span>Validity (days)</span>
             <input
               type="number"
               min="1"
@@ -236,13 +236,13 @@ export default function EspTokens() {
           </label>
           {inventoryFailed && (
             <p role="alert" className="error-message">
-              Nie można pobrać lokalizacji. Odśwież stronę i spróbuj ponownie.
+              Could not load locations. Refresh the page and try again.
             </p>
           )}
           {!inventoryLoading && !inventoryFailed && !locations.length && (
             <p>
-              Dodaj urządzenie lub czujnik z lokalizacją przed utworzeniem
-              tokenu.
+              Add a device or sensor with a location before creating a
+              token.
             </p>
           )}
           <button
@@ -256,7 +256,7 @@ export default function EspTokens() {
               !locations.length
             }
           >
-            {pending ? 'Zapisywanie…' : 'Generuj token'}
+            {pending ? 'Saving…' : 'Generate token'}
           </button>
         </form>
       </section>
@@ -265,13 +265,13 @@ export default function EspTokens() {
           className="form-panel esp-secret"
           aria-labelledby="esp-secret-title"
         >
-          <h2 id="esp-secret-title">Token utworzony</h2>
+          <h2 id="esp-secret-title">Token created</h2>
           <p>
-            Pełny token jest widoczny tylko teraz. Zapisz go w lokalnym pliku
-            secrets.h.
+            The full token is only visible now. Save it in your local
+            secrets.h file.
           </p>
           <div className="field">
-            <label htmlFor="esp-secret">Nowy token ESP</label>
+            <label htmlFor="esp-secret">New ESP token</label>
             <textarea
               id="esp-secret"
               readOnly
@@ -285,11 +285,11 @@ export default function EspTokens() {
               className="button button-secondary"
               onClick={() => copy(secret.token)}
             >
-              Kopiuj token
+              Copy token
             </button>
           </div>
           <div className="field">
-            <label htmlFor="esp-firmware">Ustawienie firmware</label>
+            <label htmlFor="esp-firmware">Firmware setting</label>
             <textarea
               id="esp-firmware"
               readOnly
@@ -303,7 +303,7 @@ export default function EspTokens() {
               className="button button-secondary"
               onClick={() => copy(snippet)}
             >
-              Kopiuj API_TOKEN
+              Copy API_TOKEN
             </button>
             <button
               className="button button-secondary"
@@ -312,22 +312,22 @@ export default function EspTokens() {
                 setMessage('');
               }}
             >
-              Zamknij token
+              Close token
             </button>
           </div>
         </section>
       )}
-      <section className="panel" aria-label="Lista tokenów ESP">
+      <section className="panel" aria-label="ESP token list">
         <div className="table-wrap">
           <table className="data-table admin-table">
             <thead>
               <tr>
-                <th>Nazwa</th>
-                <th>Lokalizacja</th>
-                <th>Utworzono</th>
-                <th>Wygasa</th>
+                <th>Name</th>
+                <th>Location</th>
+                <th>Created</th>
+                <th>Expires</th>
                 <th>Status</th>
-                <th>Akcje</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -347,20 +347,20 @@ export default function EspTokens() {
                         }
                       >
                         {key.revokedAt
-                          ? 'Unieważniony'
+                          ? 'Revoked'
                           : expired
-                            ? 'Wygasły'
-                            : 'Aktywny'}
+                            ? 'Expired'
+                            : 'Active'}
                       </span>
                     </td>
                     <td>
                       <button
                         className="delete-button"
                         disabled={pending || loading || Boolean(key.revokedAt)}
-                        aria-label={'Unieważnij: ' + key.name}
+                        aria-label={'Revoke: ' + key.name}
                         onClick={() => revoke(key)}
                       >
-                        Unieważnij
+                        Revoke
                       </button>
                     </td>
                   </tr>
@@ -371,7 +371,7 @@ export default function EspTokens() {
         </div>
         {!keys.length && (
           <p className="empty-state">
-            {loading ? 'Pobieranie tokenów…' : 'Brak tokenów ESP.'}
+            {loading ? 'Loading tokens…' : 'No ESP tokens.'}
           </p>
         )}
       </section>

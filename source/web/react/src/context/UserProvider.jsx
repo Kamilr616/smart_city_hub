@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { apiRequest, subscribeUnauthorized } from '../api';
 import { UserContext } from './auth';
@@ -33,7 +33,7 @@ export function UserProvider({ children }) {
       if (!session) {
         expireSession();
         throw Object.assign(
-          new Error('Nieprawidłowa lub wygasła sesja. Zaloguj się ponownie.'),
+          new Error('Your session is invalid or has expired. Please sign in again.'),
           { code: 'VALIDATION' },
         );
       }

@@ -137,7 +137,7 @@ Zapis pomiarów zachowuje body `{sensorData: [{deviceId, air: {temperature, pres
 4. `Locations` powstaje z lokalizacji urządzeń i czujników dostępnych dla konta, bez osobnego magazynu lokalizacji.
 5. Wykresy czujników pobierają `GET /api/sensor/history/:id` dla temperatury, wilgotności i ciśnienia z 1 godziny, 24 godzin, 7 dni lub 30 dni. Domyślnie pokazują dane rzeczywiste. Opcjonalny tryb DEMO jest początkowo wyłączony i tworzy próbki wyłącznie w pamięci przeglądarki; nie wywołuje trasy zapisu.
 
-6. Administrator używa widoku `Użytkownicy` do listowania i edycji kont, `Devices` do edycji metadanych urządzeń oraz `Tokeny ESP` do tworzenia tokenów, sprawdzania ważności i unieważniania. Wartość tokenu pojawia się tylko raz po utworzeniu. Interfejs zachowuje pierwotną białą i szarą paletę, niebieską nawigację, czarne przyciski, logo KI i krótkie nagłówki.
+6. Administrator używa widoku `Users` do listowania i edycji kont, `Devices` do edycji metadanych urządzeń oraz `ESP tokens` do tworzenia tokenów, sprawdzania ważności i unieważniania. Wartość tokenu pojawia się tylko raz po utworzeniu. Interfejs zachowuje pierwotną białą i szarą paletę, niebieską nawigację, czarne przyciski, logo KI i krótkie nagłówki.
 
 Wykresy zachowują brakujące wartości zamiast wymyślać pomiary. Stan urządzenia sprzed pierwszej zapisanej obserwacji pozostaje nieznany, a skrócona historia pozostawia pusty pominięty okres początkowy. Rejestracja czujnika tworzy tylko metadane: bez podłączonego ESP nie pojawią się prawdziwe odczyty.
 
@@ -145,7 +145,7 @@ Wykresy zachowują brakujące wartości zamiast wymyślać pomiary. Stan urządz
 
 - **Sprzęt:** ESP32 + 6× MCP23017 na magistrali I2C (adresy `0x22`–`0x27`), łącznie 96 wyjść; SDA=21, SCL=22; UART 9600 baud.
 - **Działanie:** po połączeniu z WiFi szkic cyklicznie wykonuje `GET /api/state/iot/all` (z tokenem w nagłówku `x-access-token`), parsuje dokładnie 96-elementową tablicę stanów JSON (`ArduinoJson`) i zapisuje potrzebne rejestry MCP23017 bezpośrednio przez I2C. Pozycja w tablicy odpowiada `deviceId`, a brakujące urządzenia i urządzenia spoza lokalizacji tokenu są reprezentowane przez `false`.
-- **Konfiguracja:** skopiuj `secrets.example.h` do ignorowanego pliku `secrets.h`, a następnie ustaw SSID WiFi, adres API oraz `API_TOKEN` przed wgraniem firmware. Utwórz token w `Tokeny ESP` i wpisz `"Bearer "` oraz pełną wartość `sch_...`. Dotychczasowy szkic wysyła ten ciąg przez `x-access-token`; wygaśnięcie lub unieważnienie wymaga nowego tokenu i ponownego wgrania firmware.
+- **Konfiguracja:** skopiuj `secrets.example.h` do ignorowanego pliku `secrets.h`, a następnie ustaw SSID WiFi, adres API oraz `API_TOKEN` przed wgraniem firmware. Utwórz token w `ESP tokens` i wpisz `"Bearer "` oraz pełną wartość `sch_...`. Dotychczasowy szkic wysyła ten ciąg przez `x-access-token`; wygaśnięcie lub unieważnienie wymaga nowego tokenu i ponownego wgrania firmware.
 
 ### 6.1 Historyczne materiały NXP/LPCXpresso
 

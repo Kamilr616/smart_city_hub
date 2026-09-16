@@ -80,9 +80,11 @@ smart_city_hub/
 - **Odczyty i wykresy czujników** — temperatura, wilgotność i ciśnienie są prezentowane dla 1 godziny, 24 godzin, 7 dni lub 30 dni.
 - **Role i uwierzytelnianie** — logowanie JWT z osobnymi rolami `admin` / `user`; admin zarządza użytkownikami i urządzeniami, użytkownik steruje przypisanymi urządzeniami.
 
-- **Zarządzanie użytkownikami** — widok `Użytkownicy` zawiera listę kont i edycję nazwy, e-maila, roli/lokalizacji, uprawnień administratora, aktywności oraz opcjonalnego nowego hasła. Zapis edycji unieważnia sesje tego konta; nieaktywne konto nie może się zalogować.
+- Interfejs panelu jest w języku angielskim, z formatowaniem dat i liczb en-GB. Nazwy, opisy i identyfikatory lokalizacji wpisane przez użytkowników są wyświetlane zgodnie z zapisem.
+
+- **Zarządzanie użytkownikami** — widok `Users` zawiera listę kont i edycję nazwy, e-maila, roli/lokalizacji, uprawnień administratora, aktywności oraz opcjonalnego nowego hasła. Zapis edycji unieważnia sesje tego konta; nieaktywne konto nie może się zalogować.
 - **Metadane urządzeń** — administrator edytuje nazwę, typ, opis i lokalizację urządzenia. Identyfikator oraz zapisana historia stanów pozostają bez zmian.
-- **Dane dostępowe ESP** — widok `Tokeny ESP` tworzy tokeny dla jednej istniejącej lokalizacji, ważne od 1 do 365 dni. Wartość jest pokazywana tylko raz; API przechowuje jej hash i pozwala unieważnić token.
+- **Dane dostępowe ESP** — widok `ESP tokens` tworzy tokeny dla jednej istniejącej lokalizacji, ważne od 1 do 365 dni. Wartość jest pokazywana tylko raz; API przechowuje jej hash i pozwala unieważnić token.
 
 ## Wymagania
 
@@ -189,7 +191,7 @@ Panel zachowuje pierwotną białą i szarą paletę, niebieską nawigację, czar
 
 1. Otwórz `source/embedded/esp32_arduino/smart_city_iot/smart_city_iot.ino` w Arduino IDE.
 2. Skopiuj `secrets.example.h` do ignorowanego przez Git pliku `secrets.h` w tym samym katalogu.
-3. Jako administrator otwórz `Tokeny ESP`, wybierz istniejącą lokalizację płytki i ważność 1–365 dni, a następnie skopiuj token pokazywany tylko raz. W `secrets.h` ustaw dane WiFi, URL API oraz `API_TOKEN` w postaci `"Bearer "` i pełnego wygenerowanego tokenu `sch_...`. Szkic wysyła tę wartość w nagłówku `x-access-token`.
+3. Jako administrator otwórz `ESP tokens`, wybierz istniejącą lokalizację płytki i ważność 1–365 dni, a następnie skopiuj token pokazywany tylko raz. W `secrets.h` ustaw dane WiFi, URL API oraz `API_TOKEN` w postaci `"Bearer "` i pełnego wygenerowanego tokenu `sch_...`. Szkic wysyła tę wartość w nagłówku `x-access-token`.
 4. Skompiluj i wgraj na płytkę ESP32 (magistrala I2C: SDA=21, SCL=22, serial 9600 baud).
 
 Token ESP pozwala wyłącznie odczytywać `GET /api/state/iot/all` oraz wysyłać odczyty do `POST /api/sensor/iot/update` dla czujników zarejestrowanych w jego lokalizacji. Odpowiedź stanów nadal jest 96-elementową tablicą; pozycje spoza lokalizacji tokenu mają wartość `false`. Token nie daje dostępu do panelu ani ogólnych uprawnień administratora. Token wygasły lub unieważniony należy zastąpić w `secrets.h` i ponownie wgrać firmware.

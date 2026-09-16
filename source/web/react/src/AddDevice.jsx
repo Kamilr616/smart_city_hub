@@ -53,7 +53,7 @@ export default function AddDevice({ onSaved }) {
       });
       if (controller.signal.aborted) return;
       setForm(empty);
-      setSuccess('Urządzenie zostało dodane.');
+      setSuccess('The device has been added.');
       onSaved?.(saved);
     } catch (failure) {
       if (failure.name !== 'AbortError') setError(getApiErrorMessage(failure));
@@ -65,11 +65,11 @@ export default function AddDevice({ onSaved }) {
 
   return (
     <section className="form-panel" aria-labelledby="device-form-title">
-      <h1 id="device-form-title">Dodaj urządzenie</h1>
-      <p>Wybierz wolny identyfikator i przypisz urządzenie do lokalizacji.</p>
+      <h1 id="device-form-title">Add device</h1>
+      <p>Choose an available ID and assign the device to a location.</p>
       <form onSubmit={submit} className="form-grid" aria-busy={pending}>
         <div className="field">
-          <label htmlFor="deviceId">Identyfikator urządzenia (0–95)</label>
+          <label htmlFor="deviceId">Device ID (0–95)</label>
           <input
             className="input"
             id="deviceId"
@@ -85,7 +85,7 @@ export default function AddDevice({ onSaved }) {
           />
         </div>
         <div className="field">
-          <label htmlFor="device-name">Nazwa urządzenia</label>
+          <label htmlFor="device-name">Device name</label>
           <input
             className="input"
             id="device-name"
@@ -94,11 +94,11 @@ export default function AddDevice({ onSaved }) {
             disabled={pending}
             value={form.name}
             onChange={change}
-            placeholder="np. Oświetlenie rynku"
+            placeholder="e.g. Town square lighting"
           />
         </div>
         <div className="field">
-          <label htmlFor="device-location">Lokalizacja</label>
+          <label htmlFor="device-location">Location</label>
           <input
             className="input"
             id="device-location"
@@ -107,11 +107,11 @@ export default function AddDevice({ onSaved }) {
             disabled={pending}
             value={form.location}
             onChange={change}
-            placeholder="np. house1"
+            placeholder="e.g. house1"
           />
         </div>
         <div className="field">
-          <label htmlFor="device-type">Typ urządzenia</label>
+          <label htmlFor="device-type">Device type</label>
           <input
             className="input"
             id="device-type"
@@ -120,11 +120,11 @@ export default function AddDevice({ onSaved }) {
             disabled={pending}
             value={form.type}
             onChange={change}
-            placeholder="np. light"
+            placeholder="e.g. light"
           />
         </div>
         <div className="field">
-          <label htmlFor="device-description">Opis (opcjonalnie)</label>
+          <label htmlFor="device-description">Description (optional)</label>
           <textarea
             className="input"
             id="device-description"
@@ -146,7 +146,7 @@ export default function AddDevice({ onSaved }) {
           </p>
         )}
         <button className="button" type="submit" disabled={pending}>
-          {pending ? 'Zapisywanie…' : 'Dodaj urządzenie'}
+          {pending ? 'Saving…' : 'Add device'}
         </button>
       </form>
     </section>

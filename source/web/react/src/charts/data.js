@@ -5,19 +5,19 @@
   '30d': 2592000000,
 };
 export const RANGE_OPTIONS = [
-  ['1h', 'Ostatnia godzina'],
-  ['24h', 'Ostatnie 24 godziny'],
-  ['7d', 'Ostatnie 7 dni'],
-  ['30d', 'Ostatnie 30 dni'],
+  ['1h', 'Last hour'],
+  ['24h', 'Last 24 hours'],
+  ['7d', 'Last 7 days'],
+  ['30d', 'Last 30 days'],
 ];
 export const METRICS = [
-  { key: 'temperature', label: 'Temperatura', unit: '°C', color: '#d97706' },
-  { key: 'humidity', label: 'Wilgotność', unit: '%', color: '#0284c7' },
-  { key: 'pressure', label: 'Ciśnienie', unit: 'hPa', color: '#7c3aed' },
+  { key: 'temperature', label: 'Temperature', unit: '°C', color: '#d97706' },
+  { key: 'humidity', label: 'Humidity', unit: '%', color: '#0284c7' },
+  { key: 'pressure', label: 'Pressure', unit: 'hPa', color: '#7c3aed' },
 ];
 
 export function historyRange(range, now = Date.now()) {
-  if (!ranges[range]) throw new RangeError('Nieznany zakres czasu.');
+  if (!ranges[range]) throw new RangeError('Unknown time range.');
   return {
     from: new Date(now - ranges[range]).toISOString(),
     to: new Date(now).toISOString(),
@@ -74,16 +74,16 @@ export function isStaleReading(reading, now = Date.now()) {
 }
 
 export function formatTimestamp(value) {
-  if (value == null || value === '') return 'Brak pomiaru';
+  if (value == null || value === '') return 'No reading';
   const timestamp = new Date(value);
   return Number.isFinite(timestamp.getTime())
-    ? timestamp.toLocaleString('pl-PL')
-    : 'Brak pomiaru';
+    ? timestamp.toLocaleString('en-GB')
+    : 'No reading';
 }
 
 export function formatMetric(value) {
   return typeof value === 'number' && Number.isFinite(value)
-    ? value.toLocaleString('pl-PL', { maximumFractionDigits: 2 })
+    ? value.toLocaleString('en-GB', { maximumFractionDigits: 2 })
     : '—';
 }
 

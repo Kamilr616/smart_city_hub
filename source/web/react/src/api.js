@@ -1,4 +1,4 @@
-﻿export function normalizeApiUrl(value = '') {
+export function normalizeApiUrl(value = '') {
   const root = value.trim().replace(/\/+$/, '');
   return root.endsWith('/api') ? root : `${root}/api`;
 }
@@ -13,15 +13,15 @@ export function subscribeUnauthorized(listener) {
 export function getApiErrorMessage(error) {
   if (error?.code === 'VALIDATION') return error.message;
   if (error?.code === 'TIMEOUT')
-    return 'Serwer nie odpowiedział na czas. Spróbuj ponownie.';
-  if (error?.status === 401) return 'Sesja wygasła. Zaloguj się ponownie.';
+    return 'The server did not respond in time. Please try again.';
+  if (error?.status === 401) return 'Your session has expired. Please sign in again.';
   if (error?.status === 403)
-    return 'Nie masz uprawnień do wykonania tej operacji.';
-  if (error?.status === 404) return 'Nie znaleziono danych.';
+    return 'You do not have permission to perform this action.';
+  if (error?.status === 404) return 'No data found.';
   if (error?.status === 409)
-    return 'Dane już istnieją. Sprawdź identyfikator lub adres e-mail.';
-  if (error?.status === 400) return 'Sprawdź poprawność wprowadzonych danych.';
-  return 'Nie udało się połączyć z serwerem lub pobrać danych. Spróbuj ponownie.';
+    return 'This record already exists. Check the ID or email address.';
+  if (error?.status === 400) return 'Check the information you entered.';
+  return 'Unable to connect to the server or load data. Please try again.';
 }
 
 // Plain objects and arrays become JSON; strings and browser body types pass through.

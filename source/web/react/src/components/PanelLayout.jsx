@@ -5,9 +5,9 @@ import { useInventory } from '../hooks/useInventory';
 import Icon from './Icon';
 import kiLogo from '../assets/ki_LOGO_b.svg';
 const links = [
-  ['/', 'Przegląd', 'overview'],
+  ['/', 'Overview', 'overview'],
   ['/devices', 'Devices', 'devices'],
-  ['/sensors', 'Czujniki', 'sensors'],
+  ['/sensors', 'Sensors', 'sensors'],
   ['/locations', 'Locations', 'locations'],
 ];
 export default function PanelLayout() {
@@ -16,19 +16,19 @@ export default function PanelLayout() {
   const location = useLocation();
   const isAdmin = Boolean(user.isAdmin || user.role === 'admin');
   const current =
-    links.find(([url]) => url === location.pathname)?.[1] || 'Administracja';
+    links.find(([url]) => url === location.pathname)?.[1] || 'Administration';
   return (
     <div className="app-shell">
       <aside className="sidebar">
         <NavLink
           to="/"
           className="brand"
-          aria-label="Smart City Hub — przegląd"
+          aria-label="Smart City Hub — overview"
         >
           <img src={kiLogo} alt="KI" className="brand-logo" />
           <span>Smart City Hub</span>
         </NavLink>
-        <nav aria-label="Nawigacja główna">
+        <nav aria-label="Main navigation">
           {links.map(([to, label, icon]) => (
             <NavLink
               key={to}
@@ -45,19 +45,19 @@ export default function PanelLayout() {
         </nav>
         {isAdmin && (
           <>
-            <span className="nav-label admin-label">Administracja</span>
-            <nav aria-label="Administracja">
+            <span className="nav-label admin-label">Administration</span>
+            <nav aria-label="Administration">
               <NavLink to="/devices/new" className="nav-link">
                 <Icon name="add" />
-                Dodaj urządzenie
+                Add device
               </NavLink>
               <NavLink to="/users" className="nav-link">
                 <Icon name="users" />
-                Użytkownicy
+                Users
               </NavLink>
               <NavLink to="/esp-tokens" className="nav-link">
                 <Icon name="devices" />
-                Tokeny ESP
+                ESP tokens
               </NavLink>
             </nav>
           </>
@@ -69,10 +69,10 @@ export default function PanelLayout() {
           <div>
             <strong>{isAdmin ? 'Administrator' : user.role}</strong>
             <span>
-              {isAdmin ? 'Wszystkie lokalizacje' : 'Dostęp do lokalizacji'}
+              {isAdmin ? 'All locations' : 'Location access'}
             </span>
           </div>
-          <button onClick={logout} className="icon-button" aria-label="Wyloguj">
+          <button onClick={logout} className="icon-button" aria-label="Log out">
             <Icon name="logout" />
           </button>
         </div>
@@ -91,10 +91,10 @@ export default function PanelLayout() {
             >
               <i />
               {Object.keys(inventory.errors).length
-                ? 'Problem z połączeniem'
+                ? 'Connection problem'
                 : inventory.loading
-                  ? 'Odświeżanie'
-                  : 'Dane aktualne'}
+                  ? 'Refreshing'
+                  : 'Data up to date'}
             </span>
             <span className="role-pill">
               {isAdmin ? 'Administrator' : user.role}
@@ -106,8 +106,8 @@ export default function PanelLayout() {
         </main>
         <footer className="page-footer">
           <span>
-            Ostatnia próba odświeżenia:{' '}
-            {inventory.updated?.toLocaleTimeString('pl-PL') || '—'}
+            Last refresh attempt:{' '}
+            {inventory.updated?.toLocaleTimeString('en-GB') || '—'}
           </span>
         </footer>
       </div>

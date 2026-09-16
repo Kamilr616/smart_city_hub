@@ -35,7 +35,7 @@ function UserEditor({ account, onSaved, onCancel }) {
     if (request.current) return;
     setError('');
     if (form.password !== form.confirmPassword) {
-      setError('Hasła muszą być takie same.');
+      setError('Passwords must match.');
       return;
     }
     const controller = new AbortController();
@@ -69,15 +69,15 @@ function UserEditor({ account, onSaved, onCancel }) {
       className="form-panel user-editor"
       aria-labelledby="edit-user-title"
     >
-      <h2 id="edit-user-title">Edytuj użytkownika: {account.name}</h2>
+      <h2 id="edit-user-title">Edit user: {account.name}</h2>
       <p>
         {own
-          ? 'Zapis zmian własnego konta zakończy Twoją sesję.'
-          : 'Po zapisaniu zmian użytkownik będzie musiał zalogować się ponownie.'}
+          ? 'Saving changes to your own account will sign you out.'
+          : 'The user will need to sign in again after you save changes.'}
       </p>
       <form onSubmit={submit} aria-busy={pending}>
         <div className="field">
-          <label htmlFor="edit-user-name">Nazwa użytkownika</label>
+          <label htmlFor="edit-user-name">Username</label>
           <input
             id="edit-user-name"
             name="name"
@@ -89,7 +89,7 @@ function UserEditor({ account, onSaved, onCancel }) {
           />
         </div>
         <div className="field">
-          <label htmlFor="edit-user-email">Adres e-mail</label>
+          <label htmlFor="edit-user-email">Email address</label>
           <input
             id="edit-user-email"
             name="email"
@@ -102,7 +102,7 @@ function UserEditor({ account, onSaved, onCancel }) {
           />
         </div>
         <div className="field">
-          <label htmlFor="edit-user-role">Lokalizacja / rola</label>
+          <label htmlFor="edit-user-role">Location / role</label>
           <input
             id="edit-user-role"
             name="role"
@@ -131,10 +131,10 @@ function UserEditor({ account, onSaved, onCancel }) {
             onChange={change}
             disabled={pending || own}
           />{' '}
-          Konto aktywne
+          Active account
         </label>
         <div className="field">
-          <label htmlFor="edit-user-password">Nowe hasło (opcjonalnie)</label>
+          <label htmlFor="edit-user-password">New password (optional)</label>
           <input
             id="edit-user-password"
             type="password"
@@ -147,12 +147,12 @@ function UserEditor({ account, onSaved, onCancel }) {
             disabled={pending}
           />
           <small>
-            Pozostaw puste, aby zachować hasło. Nowe hasło: co najmniej 12
-            znaków.
+            Leave blank to keep the current password. New passwords need at least 12
+            characters.
           </small>
         </div>
         <div className="field">
-          <label htmlFor="edit-user-confirm">Powtórz nowe hasło</label>
+          <label htmlFor="edit-user-confirm">Confirm new password</label>
           <input
             id="edit-user-confirm"
             type="password"
@@ -170,7 +170,7 @@ function UserEditor({ account, onSaved, onCancel }) {
         )}
         <div className="actions">
           <button className="button" disabled={pending}>
-            {pending ? 'Zapisywanie…' : 'Zapisz zmiany'}
+            {pending ? 'Saving…' : 'Save changes'}
           </button>
           <button
             type="button"
@@ -178,7 +178,7 @@ function UserEditor({ account, onSaved, onCancel }) {
             disabled={pending}
             onClick={onCancel}
           >
-            Anuluj
+            Cancel
           </button>
         </div>
       </form>
@@ -231,17 +231,17 @@ export default function Users() {
   return (
     <>
       <div className="page-heading">
-        <h1>Użytkownicy</h1>
+        <h1>Users</h1>
         <div className="actions">
           <button
             className="button button-secondary"
             onClick={load}
             disabled={loading || Boolean(selected)}
           >
-            Odśwież użytkowników
+            Refresh users
           </button>
           <Link className="button" to="/users/new">
-            Dodaj użytkownika
+            Add user
           </Link>
         </div>
       </div>
@@ -258,25 +258,25 @@ export default function Users() {
       <section className="panel">
         <div className="toolbar">
           <label className="field search-field">
-            <span>Szukaj użytkownika</span>
+            <span>Search users</span>
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Nazwa, e-mail lub rola"
+              placeholder="Name, email or role"
             />
           </label>
         </div>
-        {loading && <p role="status">Pobieranie użytkowników…</p>}
+        {loading && <p role="status">Loading users…</p>}
         <div className="table-scroll">
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Nazwa</th>
-                <th>E-mail</th>
-                <th>Lokalizacja / rola</th>
-                <th>Dostęp</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Location / role</th>
+                <th>Access</th>
                 <th>Status</th>
-                <th>Opcje</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -288,20 +288,20 @@ export default function Users() {
                   <td>
                     {account.isAdmin || account.role === 'admin'
                       ? 'Administrator'
-                      : 'Użytkownik'}
+                      : 'User'}
                   </td>
-                  <td>{account.active !== false ? 'Aktywny' : 'Nieaktywny'}</td>
+                  <td>{account.active !== false ? 'Active' : 'Inactive'}</td>
                   <td>
                     <button
                       className="button button-secondary"
-                      aria-label={'Edytuj: ' + account.name}
+                      aria-label={'Edit: ' + account.name}
                       disabled={Boolean(selected)}
                       onClick={() => {
                         setSelected(account);
                         setMessage('');
                       }}
                     >
-                      Edytuj
+                      Edit
                     </button>
                   </td>
                 </tr>
@@ -312,8 +312,8 @@ export default function Users() {
         {!loading && !filtered.length && (
           <p className="empty-state">
             {error
-              ? 'Lista niedostępna.'
-              : 'Brak użytkowników pasujących do wyszukiwania.'}
+              ? 'List unavailable.'
+              : 'No users match your search.'}
           </p>
         )}
       </section>
@@ -324,7 +324,7 @@ export default function Users() {
           onCancel={() => setSelected(null)}
           onSaved={async () => {
             setSelected(null);
-            setMessage('Zmiany zostały zapisane.');
+            setMessage('Changes have been saved.');
             await load();
           }}
         />

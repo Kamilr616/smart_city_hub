@@ -32,6 +32,8 @@ npm run test:e2e
 
 ## Dashboard behavior
 
+The interface uses English for navigation, forms, messages, charts, and date/number formatting (en-GB). Names, descriptions, and location identifiers entered by users are displayed as stored.
+
 - Inventory data refreshes every 30 seconds. Regular users see devices and sensors for their role/location; administrators, including accounts identified by `isAdmin`, see all available locations.
 - `Locations` is derived from the available device and sensor metadata.
 - Sensor charts show temperature, humidity, and pressure for 1 hour, 24 hours, 7 days, or 30 days. Live API data is the default.
@@ -43,9 +45,9 @@ History requests use authenticated `GET /api/sensor/history/:id` and `GET /api/s
 
 ## Administrator views
 
-- **User administration** — `Użytkownicy` lists accounts and lets administrators edit name, email, role/location, administrator access, active status, and an optional new password. Saving an edit revokes that account’s sessions; inactive accounts cannot log in.
+- **User administration** — `Users` lists accounts and lets administrators edit name, email, role/location, administrator access, active status, and an optional new password. Saving an edit revokes that account’s sessions; inactive accounts cannot log in.
 - **Device metadata** — administrators edit a device’s name, type, description, and location. Its ID and saved state history remain unchanged.
-- **ESP credentials** — `Tokeny ESP` creates credentials for one existing location with an expiry of 1–365 days. The value is shown once; the API stores its hash and supports revocation.
+- **ESP credentials** — `ESP tokens` creates credentials for one existing location with an expiry of 1–365 days. The value is shown once; the API stores its hash and supports revocation.
 
 New passwords require at least 12 characters and at most 72 UTF-8 bytes. Leaving the new-password field empty keeps the current password. User edits revoke all sessions for the edited account, including the current session when editing yourself. Self-deactivation, removing your own administrator access, and removing the last active administrator are rejected. User updates require MongoDB Atlas or a replica set for transactions.
 

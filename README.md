@@ -77,9 +77,11 @@ smart_city_hub/
 - **Sensor readings and charts** — temperature, humidity, and pressure are shown for 1 hour, 24 hours, 7 days, or 30 days.
 - **Roles and authentication** — JWT login with separate `admin` / `user` roles; admins manage users and devices, users control their assigned devices.
 
-- **User administration** — `Użytkownicy` lists accounts and lets administrators edit name, email, role/location, administrator access, active status, and an optional new password. Saving an edit revokes that account’s sessions; inactive accounts cannot log in.
+- The dashboard interface is in English, with en-GB date and number formatting. User-entered names, descriptions, and location identifiers are displayed as stored.
+
+- **User administration** — `Users` lists accounts and lets administrators edit name, email, role/location, administrator access, active status, and an optional new password. Saving an edit revokes that account’s sessions; inactive accounts cannot log in.
 - **Device metadata** — administrators edit a device’s name, type, description, and location. Its ID and saved state history remain unchanged.
-- **ESP credentials** — `Tokeny ESP` creates credentials for one existing location with an expiry of 1–365 days. The value is shown once; the API stores its hash and supports revocation.
+- **ESP credentials** — `ESP tokens` creates credentials for one existing location with an expiry of 1–365 days. The value is shown once; the API stores its hash and supports revocation.
 
 ## Requirements
 
@@ -186,7 +188,7 @@ The panel retains the original white/gray palette, blue navigation, black button
 
 1. Open `source/embedded/esp32_arduino/smart_city_iot/smart_city_iot.ino` in the Arduino IDE.
 2. Copy `secrets.example.h` to the git-ignored `secrets.h` in the same directory.
-3. As an administrator, open `Tokeny ESP`, choose the board’s existing location and an expiry of 1–365 days, then copy the token shown once. Set WiFi credentials and API URL in `secrets.h`, and set `API_TOKEN` to `"Bearer "` followed by the complete generated `sch_...` token. The sketch sends this value in `x-access-token`.
+3. As an administrator, open `ESP tokens`, choose the board’s existing location and an expiry of 1–365 days, then copy the token shown once. Set WiFi credentials and API URL in `secrets.h`, and set `API_TOKEN` to `"Bearer "` followed by the complete generated `sch_...` token. The sketch sends this value in `x-access-token`.
 4. Compile and flash to the ESP32 board (I2C bus: SDA=21, SCL=22, serial at 9600 baud).
 
 ESP tokens can only read `GET /api/state/iot/all` and submit readings to `POST /api/sensor/iot/update` for sensors registered in their location. The state response stays a 96-element array; slots outside the token’s location are `false`. Tokens do not grant dashboard or general administrator access. Expired or revoked tokens must be replaced in `secrets.h` and the firmware reflashed.

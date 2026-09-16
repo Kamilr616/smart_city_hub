@@ -41,9 +41,9 @@ export default function Devices() {
     if (
       remove &&
       !window.confirm(
-        'Usunąć urządzenie „' +
+        'Delete device “' +
           device.name +
-          '”? Historia pomiarów pozostanie w bazie.',
+          '”? Reading history will remain in the database.',
       )
     )
       return;
@@ -71,7 +71,7 @@ export default function Devices() {
           },
         });
       setMessage(
-        remove ? 'Urządzenie usunięte.' : 'Stan urządzenia został zapisany.',
+        remove ? 'Device deleted.' : 'Device state saved.',
       );
       await refresh();
     } catch (error) {
@@ -99,12 +99,12 @@ export default function Devices() {
             disabled={loading}
           >
             <Icon name="refresh" />
-            Odśwież
+            Refresh
           </button>
           {isAdmin && (
             <Link className="button" to="/devices/new">
               <Icon name="add" />
-              Nowe urządzenie
+              Add device
             </Link>
           )}
         </div>
@@ -112,31 +112,31 @@ export default function Devices() {
       <section className="panel">
         <div className="toolbar">
           <label className="search-field field">
-            <span>Szukaj urządzenia</span>
+            <span>Search devices</span>
             <input
-              placeholder="Nazwa, opis lub ID…"
+              placeholder="Name, description or ID…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </label>
           <label className="field">
-            <span>Lokalizacja</span>
+            <span>Location</span>
             <select
               value={location}
               onChange={(e) => changeParam('location', e.target.value)}
             >
-              <option value="">Wszystkie lokalizacje</option>
+              <option value="">All locations</option>
               {locations.map((city) => (
                 <option key={city}>{city}</option>
               ))}
             </select>
           </label>
-          <span className="results-count">{filtered.length} urządzeń</span>
+          <span className="results-count">{filtered.length} devices</span>
         </div>
         {(errors.devices || errors.states || error) && (
           <p className="error-message" role="alert">
-            {error || errors.devices || errors.states} Możesz ponowić pobieranie
-            przyciskiem „Odśwież”.
+            {error || errors.devices || errors.states} Use Refresh to try loading
+            the data again.
           </p>
         )}
         {message && (
@@ -167,15 +167,15 @@ export default function Devices() {
                 </span>
                 <div className="device-details">
                   <div className="device-title">
-                    <h2>{device.name || 'Urządzenie ' + device.deviceId}</h2>
+                    <h2>{device.name || 'Device ' + device.deviceId}</h2>
                     <span className="device-id">#{device.deviceId}</span>
                   </div>
-                  <p>{device.description || 'Brak opisu urządzenia.'}</p>
+                  <p>{device.description || 'No device description.'}</p>
                   <span className="device-meta">
-                    {device.location} · {device.type || 'urządzenie'}
+                    {device.location} · {device.type || 'device'}
                     {state?.timestamp
                       ? ' · ' +
-                        new Date(state.timestamp).toLocaleString('pl-PL')
+                        new Date(state.timestamp).toLocaleString('en-GB')
                       : ''}
                   </span>
                 </div>
@@ -190,19 +190,19 @@ export default function Devices() {
                   }
                 >
                   {state?.state === true
-                    ? 'Włączone'
+                    ? 'On'
                     : state?.state === false
-                      ? 'Wyłączone'
-                      : 'Brak stanu'}
+                      ? 'Off'
+                      : 'No state'}
                 </span>
                 <div className="device-actions">
                   {isAdmin && (
                     <Link
                       className="button button-secondary"
                       to={`/devices/${device.deviceId}/edit`}
-                      aria-label={'Edytuj: ' + device.name}
+                      aria-label={'Edit: ' + device.name}
                     >
-                      Edytuj
+                      Edit
                     </Link>
                   )}
                   <button
@@ -210,10 +210,10 @@ export default function Devices() {
                     onClick={() =>
                       changeParam('device', String(device.deviceId))
                     }
-                    aria-label={'Historia: ' + device.name}
+                    aria-label={'History: ' + device.name}
                   >
                     <Icon name="sensors" />
-                    Historia
+                    History
                   </button>
                   <button
                     className={
@@ -225,24 +225,24 @@ export default function Devices() {
                       busy || Boolean(errors.states) || Boolean(errors.devices)
                     }
                     aria-label={
-                      (state?.state === true ? 'Wyłącz: ' : 'Włącz: ') +
+                      (state?.state === true ? 'Turn off: ' : 'Turn on: ') +
                       device.name
                     }
                   >
                     {busy
-                      ? 'Zapisywanie…'
+                      ? 'Saving…'
                       : state?.state === true
-                        ? 'Wyłącz'
-                        : 'Włącz'}
+                        ? 'Turn off'
+                        : 'Turn on'}
                   </button>
                   {isAdmin && (
                     <button
                       className="delete-button"
                       onClick={() => mutate(device, true)}
                       disabled={busy}
-                      aria-label={'Usuń: ' + device.name}
+                      aria-label={'Delete: ' + device.name}
                     >
-                      Usuń
+                      Delete
                     </button>
                   )}
                 </div>
@@ -253,10 +253,10 @@ export default function Devices() {
         {!filtered.length && (
           <div className="empty-state">
             {loading
-              ? 'Pobieranie urządzeń…'
+              ? 'Loading devices…'
               : errors.devices
-                ? 'Lista urządzeń jest niedostępna.'
-                : 'Brak urządzeń pasujących do filtrów.'}
+                ? 'The device list is unavailable.'
+                : 'No devices match the filters.'}
           </div>
         )}
       </section>
@@ -266,7 +266,7 @@ export default function Devices() {
             className="text-link history-close"
             onClick={() => changeParam('device', null)}
           >
-            Zamknij historię ×
+            Close history ×
           </button>
           <DeviceHistory
             device={selectedDevice}

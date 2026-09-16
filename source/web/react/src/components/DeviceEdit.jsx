@@ -39,7 +39,7 @@ function Editor({ device, onSaved }) {
       });
       if (controller.signal.aborted) return;
       await onSaved();
-      setSuccess('Zmiany zostały zapisane.');
+      setSuccess('Changes have been saved.');
     } catch (failure) {
       if (failure.name !== 'AbortError') setError(getApiErrorMessage(failure));
     } finally {
@@ -50,13 +50,13 @@ function Editor({ device, onSaved }) {
   return (
     <form onSubmit={submit} aria-busy={pending}>
       <div className="field">
-        <label htmlFor="edit-device-id">ID urządzenia</label>
+        <label htmlFor="edit-device-id">Device ID</label>
         <input id="edit-device-id" value={device.deviceId} readOnly />
       </div>
       {[
-        ['name', 'Nazwa urządzenia', 100],
-        ['location', 'Lokalizacja', 100],
-        ['type', 'Typ urządzenia', 100],
+        ['name', 'Device name', 100],
+        ['location', 'Location', 100],
+        ['type', 'Device type', 100],
       ].map(([name, label, max]) => (
         <div className="field" key={name}>
           <label htmlFor={'edit-device-' + name}>{label}</label>
@@ -72,7 +72,7 @@ function Editor({ device, onSaved }) {
         </div>
       ))}
       <div className="field">
-        <label htmlFor="edit-device-description">Opis</label>
+        <label htmlFor="edit-device-description">Description</label>
         <textarea
           id="edit-device-description"
           name="description"
@@ -94,10 +94,10 @@ function Editor({ device, onSaved }) {
       )}
       <div className="actions">
         <button className="button" disabled={pending}>
-          {pending ? 'Zapisywanie…' : 'Zapisz zmiany'}
+          {pending ? 'Saving…' : 'Save changes'}
         </button>
         <Link className="button button-secondary" to="/devices">
-          Wróć do urządzeń
+          Back to devices
         </Link>
       </div>
     </form>
@@ -132,7 +132,7 @@ export default function DeviceEdit() {
         setResult({
           device,
           loading: false,
-          error: device ? '' : 'Nie znaleziono urządzenia.',
+          error: device ? '' : 'Device not found.',
         });
       })
       .catch((error) => {
@@ -147,9 +147,9 @@ export default function DeviceEdit() {
   }, [deviceId, user.token, retry]);
   return (
     <section className="form-panel">
-      <h1>Edytuj urządzenie</h1>
-      <p>ID i historia stanów pozostają bez zmian.</p>
-      {result.loading && <p role="status">Pobieranie urządzenia…</p>}
+      <h1>Edit device</h1>
+      <p>The ID and state history will stay the same.</p>
+      {result.loading && <p role="status">Loading device…</p>}
       {result.error && (
         <>
           <p role="alert" className="error-message">
@@ -159,7 +159,7 @@ export default function DeviceEdit() {
             className="button button-secondary"
             onClick={() => setRetry((n) => n + 1)}
           >
-            Ponów
+            Retry
           </button>
         </>
       )}

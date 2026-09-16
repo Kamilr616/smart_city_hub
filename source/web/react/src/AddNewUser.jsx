@@ -46,7 +46,7 @@ export default function AddNewUser() {
       });
       if (controller.signal.aborted) return;
       setForm(empty);
-      setSuccess('Konto użytkownika zostało utworzone.');
+      setSuccess('The user account has been created.');
     } catch (failure) {
       if (failure.name !== 'AbortError') setError(getApiErrorMessage(failure));
     } finally {
@@ -57,14 +57,14 @@ export default function AddNewUser() {
 
   return (
     <section className="form-panel" aria-labelledby="user-form-title">
-      <h1 id="user-form-title">Dodaj użytkownika</h1>
+      <h1 id="user-form-title">Add user</h1>
       <p>
-        Przypisz konto do lokalizacji urządzeń. Rola „admin” nadaje uprawnienia
-        administratora.
+        Assign the account to a device location. The “admin” role grants
+        administrator privileges.
       </p>
       <form onSubmit={submit} className="form-grid" aria-busy={pending}>
         <div className="field">
-          <label htmlFor="user-name">Nazwa użytkownika</label>
+          <label htmlFor="user-name">Username</label>
           <input
             className="input"
             id="user-name"
@@ -77,7 +77,7 @@ export default function AddNewUser() {
           />
         </div>
         <div className="field">
-          <label htmlFor="user-email">Adres e-mail</label>
+          <label htmlFor="user-email">Email address</label>
           <input
             className="input"
             id="user-email"
@@ -91,7 +91,7 @@ export default function AddNewUser() {
           />
         </div>
         <div className="field">
-          <label htmlFor="user-role">Lokalizacja / rola</label>
+          <label htmlFor="user-role">Location / role</label>
           <input
             className="input"
             id="user-role"
@@ -100,11 +100,11 @@ export default function AddNewUser() {
             disabled={pending}
             value={form.role}
             onChange={change}
-            placeholder="np. house1"
+            placeholder="e.g. house1"
           />
         </div>
         <div className="field">
-          <label htmlFor="user-password">Hasło</label>
+          <label htmlFor="user-password">Password</label>
           <input
             className="input"
             id="user-password"
@@ -120,7 +120,7 @@ export default function AddNewUser() {
           />
         </div>
         <div className="field">
-          <label htmlFor="confirm-password">Powtórz hasło</label>
+          <label htmlFor="confirm-password">Confirm password</label>
           <input
             className="input"
             id="confirm-password"
@@ -144,7 +144,7 @@ export default function AddNewUser() {
           </p>
         )}
         <button className="button" type="submit" disabled={pending}>
-          {pending ? 'Tworzenie konta…' : 'Utwórz konto'}
+          {pending ? 'Creating account…' : 'Create account'}
         </button>
       </form>
     </section>

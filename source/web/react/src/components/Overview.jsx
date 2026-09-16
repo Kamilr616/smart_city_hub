@@ -17,7 +17,7 @@ export default function Overview() {
     <>
       <div className="page-heading">
         <div>
-          <h1>Przegląd</h1>
+          <h1>Overview</h1>
         </div>
         <button
           className="button button-secondary"
@@ -25,36 +25,36 @@ export default function Overview() {
           disabled={loading}
         >
           <Icon name="refresh" />
-          Odśwież
+          Refresh
         </button>
       </div>
       {!!Object.keys(errors).length && (
         <p role="alert" className="error-message">
-          Nie udało się odświeżyć części danych. Sprawdź połączenie i spróbuj
-          ponownie.
+          Some data could not be refreshed. Check your connection and try
+          again.
         </p>
       )}
-      <section className="summary-grid" aria-label="Podsumowanie">
+      <section className="summary-grid" aria-label="Summary">
         {[
           [
-            'Urządzenia',
+            'Devices',
             errors.devices ? '—' : devices.length,
-            'Zarejestrowane urządzenia',
+            'Registered devices',
             'devices',
           ],
           [
-            'Włączone',
+            'On',
             errors.states ? '—' : on,
-            known.length + ' ze znanym stanem',
+            known.length + ' with a known state',
             'overview',
           ],
           [
-            'Czujniki',
+            'Sensors',
             errors.sensors ? '—' : sensors.length,
-            'Punkty pomiarowe',
+            'Measurement points',
             'sensors',
           ],
-          ['Locations', locations.length, 'Dostępne lokalizacje', 'locations'],
+          ['Locations', locations.length, 'Available locations', 'locations'],
         ].map(([label, value, detail, icon]) => (
           <article className="summary-card" key={label}>
             <div className="summary-top">
@@ -70,10 +70,10 @@ export default function Overview() {
         <section className="panel">
           <div className="panel-heading">
             <div>
-              <h2>Czujniki</h2>
+              <h2>Sensors</h2>
             </div>
             <Link className="text-link" to="/sensors">
-              Wykresy <Icon name="arrow" />
+              Charts <Icon name="arrow" />
             </Link>
           </div>
           <div className="sensor-preview-list">
@@ -95,8 +95,8 @@ export default function Overview() {
                     <span>
                       {sensor.location} ·{' '}
                       {r?.readingDate
-                        ? new Date(r.readingDate).toLocaleString('pl-PL')
-                        : 'Oczekiwanie na pierwszy pomiar'}
+                        ? new Date(r.readingDate).toLocaleString('en-GB')
+                        : 'Waiting for the first reading'}
                     </span>
                   </div>
                   <b>
@@ -111,8 +111,8 @@ export default function Overview() {
             {!sensors.length && (
               <p className="empty-state">
                 {loading
-                  ? 'Pobieranie czujników…'
-                  : 'Nie ma dostępnych czujników.'}
+                  ? 'Loading sensors…'
+                  : 'No sensors are available.'}
               </p>
             )}
           </div>
@@ -134,26 +134,26 @@ export default function Overview() {
                 <strong>{city}</strong>
               </span>
               <b>
-                {devices.filter((d) => d.location === city).length} urządzeń
+                {devices.filter((d) => d.location === city).length} devices
               </b>
               <Icon name="arrow" />
             </Link>
           ))}
           {!locations.length && (
-            <p className="empty-state">Brak dostępnych lokalizacji.</p>
+            <p className="empty-state">No locations are available.</p>
           )}
           <Link to="/locations" className="text-link all-locations">
-            Wszystkie lokalizacje <Icon name="arrow" />
+            All locations <Icon name="arrow" />
           </Link>
         </section>
       </div>
       <section className="panel">
         <div className="panel-heading">
           <div>
-            <h2>Urządzenia</h2>
+            <h2>Devices</h2>
           </div>
           <Link className="text-link" to="/devices">
-            Wszystkie urządzenia <Icon name="arrow" />
+            All devices <Icon name="arrow" />
           </Link>
         </div>
         <div className="quick-devices">
@@ -180,10 +180,10 @@ export default function Overview() {
                   }
                 >
                   {state === true
-                    ? 'Włączone'
+                    ? 'On'
                     : state === false
-                      ? 'Wyłączone'
-                      : 'Brak stanu'}
+                      ? 'Off'
+                      : 'No state'}
                 </span>
               </Link>
             );
@@ -191,8 +191,8 @@ export default function Overview() {
           {!devices.length && (
             <p className="empty-state">
               {loading
-                ? 'Pobieranie urządzeń…'
-                : 'Brak zarejestrowanych urządzeń.'}
+                ? 'Loading devices…'
+                : 'No registered devices.'}
             </p>
           )}
         </div>

@@ -32,7 +32,7 @@ const sensors = [
   },
   {
     deviceId: 1,
-    name: 'Czujnik przy garażu',
+    name: 'Sensor przy garażu',
     location: 'city',
     description: 'Pomiary garażu',
   },
@@ -171,13 +171,13 @@ test('device filters reset and missing state remains unknown', async ({
 }) => {
   await setup(page);
   await page.goto('/devices');
-  await expect(page.getByText('Brak stanu', { exact: true })).toBeVisible();
-  await page.getByLabel('Lokalizacja').selectOption('harbour');
+  await expect(page.getByText('No state', { exact: true })).toBeVisible();
+  await page.getByLabel('Location').selectOption('harbour');
   await expect(
     page.getByText('Latarnia portowa', { exact: true }),
   ).toBeVisible();
   await expect(page.getByText('Pet Shop', { exact: true })).toHaveCount(0);
-  await page.getByLabel('Lokalizacja').selectOption('');
+  await page.getByLabel('Location').selectOption('');
   await expect(page.getByText('Pet Shop', { exact: true })).toBeVisible();
 });
 test('device history uses stored states and exposes table', async ({
@@ -185,12 +185,12 @@ test('device history uses stored states and exposes table', async ({
 }) => {
   await setup(page);
   await page.goto('/devices');
-  await page.getByRole('button', { name: 'Historia: Pet Shop' }).click();
+  await page.getByRole('button', { name: 'History: Pet Shop' }).click();
   await expect(
-    page.getByRole('heading', { name: /Historia.*Pet Shop/ }),
+    page.getByRole('heading', { name: /State history.*Pet Shop/ }),
   ).toBeVisible();
   await expect(page.locator('canvas')).toBeVisible();
-  await page.getByText('Pokaż historię w tabeli').click();
+  await page.getByText('Show history as a table').click();
   await expect(page.getByRole('table')).toBeVisible();
 });
 test('sensors show actual measurements and empty history distinctly', async ({
@@ -198,11 +198,11 @@ test('sensors show actual measurements and empty history distinctly', async ({
 }) => {
   await setup(page);
   await page.goto('/sensors');
-  await expect(page.getByText('22,4 °C', { exact: true })).toBeVisible();
+  await expect(page.getByText('22.4 °C', { exact: true })).toBeVisible();
   await expect(page.locator('canvas')).toBeVisible();
-  await page.getByLabel('Czujnik', { exact: true }).selectOption('1');
+  await page.getByLabel('Sensor', { exact: true }).selectOption('1');
   await expect(
-    page.getByText(/Brak pomiarów w wybranym okresie/),
+    page.getByText(/No readings in the selected period/),
   ).toBeVisible();
   await expect(page.locator('canvas')).toHaveCount(0);
 });
@@ -218,17 +218,17 @@ test('ordinary users only see their city and no admin forms', async ({
     page.getByRole('heading', { name: 'harbour', exact: true }),
   ).toHaveCount(0);
   await expect(
-    page.getByRole('link', { name: 'Dodaj urządzenie', exact: true }),
+    page.getByRole('link', { name: 'Add device', exact: true }),
   ).toHaveCount(0);
   await page.goto('/users/new');
   await expect(
-    page.getByRole('heading', { name: 'Nowy użytkownik' }),
+    page.getByRole('heading', { name: 'Add user' }),
   ).toHaveCount(0);
 });
 test('expired session returns to login', async ({ page }) => {
   await setup(page, { exp: 1 });
   await page.goto('/devices');
-  await expect(page.getByLabel('Nazwa użytkownika lub e-mail')).toBeVisible();
+  await expect(page.getByLabel('Username or email')).toBeVisible();
 });
 test('failed fetch shows recovery instead of an endless spinner', async ({
   page,
@@ -239,12 +239,12 @@ test('failed fetch shows recovery instead of an endless spinner', async ({
   );
   await page.goto('/devices');
   await expect(page.getByRole('alert')).toBeVisible();
-  await expect(page.getByRole('button', { name: /Odśwież/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Refresh/ })).toBeVisible();
 });
 test('desktop and mobile layout remain usable', async ({ page }, testInfo) => {
   await setup(page);
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Przegląd' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible();
   await page.screenshot({
     path: testInfo.outputPath('overview-desktop.png'),
     fullPage: true,
@@ -258,12 +258,12 @@ test('desktop and mobile layout remain usable', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/devices');
   await expect(
-    page.getByRole('button', { name: 'Historia: Pet Shop' }),
+    page.getByRole('button', { name: 'History: Pet Shop' }),
   ).toBeVisible();
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth),
   ).toBeLessThanOrEqual(390);
-  await page.getByRole('button', { name: 'Historia: Pet Shop' }).click();
+  await page.getByRole('button', { name: 'History: Pet Shop' }).click();
   await expect(page.locator('canvas')).toBeVisible();
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth),
@@ -278,14 +278,14 @@ test('desktop and mobile layout remain usable', async ({ page }, testInfo) => {
     await page.evaluate(() => document.documentElement.scrollWidth),
   ).toBeLessThanOrEqual(390);
   await expect(
-    page.getByLabel('Parametr wykresu', { exact: true }),
+    page.getByLabel('Chart parameter', { exact: true }),
   ).toHaveValue('temperature');
   await page.screenshot({
     path: testInfo.outputPath('sensors-mobile.png'),
     fullPage: true,
   });
   await page
-    .getByLabel('Parametr wykresu', { exact: true })
+    .getByLabel('Chart parameter', { exact: true })
     .selectOption('all');
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth),
@@ -302,24 +302,24 @@ test('sensor demo is optional, labeled and never writes measurements', async ({
   });
   await page.goto('/sensors?sensor=1');
   const toggle = page.getByRole('checkbox', {
-    name: 'Tryb demonstracyjny (DEMO)',
+    name: 'Demo mode (DEMO)',
   });
   await expect(toggle).not.toBeChecked();
-  await expect(page.getByLabel('Czujnik', { exact: true })).toHaveValue('1');
+  await expect(page.getByLabel('Sensor', { exact: true })).toHaveValue('1');
   await expect(
-    page.getByText(/Brak pomiarów w wybranym okresie/),
+    page.getByText(/No readings in the selected period/),
   ).toBeVisible();
   await toggle.check();
   await expect(
-    page.getByRole('heading', { name: 'DEMO · Przykładowy wykres' }),
+    page.getByRole('heading', { name: 'DEMO · Sample chart' }),
   ).toBeVisible();
   await expect(page.locator('canvas')).toHaveAttribute('aria-label', /^DEMO/);
-  await page.getByLabel('Zakres czasu', { exact: true }).selectOption('7d');
-  await page.getByText('Pokaż pomiary w tabeli').click();
+  await page.getByLabel('Time range', { exact: true }).selectOption('7d');
+  await page.getByText('Show readings as a table').click();
   await expect(page.getByRole('table')).toContainText('DEMO');
   await toggle.uncheck();
   await expect(
-    page.getByText(/Brak pomiarów w wybranym okresie/),
+    page.getByText(/No readings in the selected period/),
   ).toBeVisible();
   expect(writes).toBe(0);
 });
@@ -329,17 +329,17 @@ test('login accepts a username and unauthorized requests end the session', async
   await setup(page);
   await page.addInitScript(() => sessionStorage.clear());
   await page.goto('/login');
-  await page.getByLabel('Nazwa użytkownika lub e-mail').fill('operator');
-  await page.getByLabel('Hasło', { exact: true }).fill('fixture-password');
-  await page.getByRole('button', { name: 'Zaloguj się', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Przegląd' })).toBeVisible();
+  await page.getByLabel('Username or email').fill('operator');
+  await page.getByLabel('Password', { exact: true }).fill('fixture-password');
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible();
   await page.route('**/api/device/user/get', (route) =>
     route.fulfill({ status: 401, json: { error: 'Expired' } }),
   );
   await page.getByRole('link', { name: 'Devices', exact: true }).click();
-  await page.getByRole('button', { name: 'Odśwież', exact: true }).click();
+  await page.getByRole('button', { name: 'Refresh', exact: true }).click();
   await expect(
-    page.getByRole('button', { name: 'Zaloguj się', exact: true }),
+    page.getByRole('button', { name: 'Sign in', exact: true }),
   ).toBeVisible();
 });
 test('device write disables repeat requests while pending', async ({
@@ -357,11 +357,11 @@ test('device write disables repeat requests while pending', async ({
     held = route;
   });
   await page.goto('/devices');
-  await page.getByRole('button', { name: 'Historia: Pet Shop' }).click();
+  await page.getByRole('button', { name: 'History: Pet Shop' }).click();
   await expect(page.locator('canvas')).toBeVisible();
   const before = historyCalls;
   const button = page.getByRole('button', {
-    name: 'Wyłącz: Pet Shop',
+    name: 'Turn off: Pet Shop',
     exact: true,
   });
   await button.click();
@@ -369,7 +369,7 @@ test('device write disables repeat requests while pending', async ({
   await expect.poll(() => calls).toBe(1);
   await held.fulfill({ json: { message: 'Updated' } });
   await expect(button).toBeEnabled();
-  await expect(page.getByRole('status')).toContainText('zapisany');
+  await expect(page.getByRole('status')).toContainText('saved');
   expect(calls).toBe(1);
   await expect.poll(() => historyCalls).toBeGreaterThan(before);
 });
@@ -392,20 +392,20 @@ test('adding a device protects existing metadata and refreshes the list', async 
     return route.fulfill({ json: { message: 'Saved' } });
   });
   await page.goto('/devices/new');
-  await page.getByLabel('Identyfikator urządzenia').fill('0');
-  await page.getByLabel('Nazwa urządzenia').fill('Testowa latarnia');
-  await page.getByLabel('Lokalizacja', { exact: true }).fill('city');
-  await page.getByLabel('Typ urządzenia').fill('lamp');
+  await page.getByLabel('Device ID').fill('0');
+  await page.getByLabel('Device name').fill('Testowa latarnia');
+  await page.getByLabel('Location', { exact: true }).fill('city');
+  await page.getByLabel('Device type').fill('lamp');
   await page
-    .getByRole('button', { name: 'Dodaj urządzenie', exact: true })
+    .getByRole('button', { name: 'Add device', exact: true })
     .click();
-  await expect(page.getByRole('alert')).toContainText('już zajęty');
+  await expect(page.getByRole('alert')).toContainText('already in use');
   expect(writes).toBe(0);
-  await page.getByLabel('Identyfikator urządzenia').fill('3');
+  await page.getByLabel('Device ID').fill('3');
   await page
-    .getByRole('button', { name: 'Dodaj urządzenie', exact: true })
+    .getByRole('button', { name: 'Add device', exact: true })
     .click();
-  await expect(page.getByRole('status')).toContainText('dodane');
+  await expect(page.getByRole('status')).toContainText('added');
   await page.getByRole('link', { name: 'Devices', exact: true }).click();
   await expect(
     page.getByRole('heading', { name: 'Testowa latarnia', exact: true }),
