@@ -172,10 +172,10 @@ W katalogu głównym repozytorium uruchom (podczas łączenia wybierz projekt AP
 npm --prefix source/server/api test
 vercel link
 vercel pull --yes --environment=preview
-vercel build
+vercel build --local-config source/server/api/vercel.json
 ```
 
-Polecenia CLI Vercela uruchamiaj z katalogu głównego repozytorium: CLI sam uwzględnia Root Directory projektu (`source/server/api`). Uruchomienie `vercel build` wewnątrz katalogu backendu powoduje podwojenie tej ścieżki.
+Polecenia CLI Vercela uruchamiaj z katalogu głównego repozytorium: CLI sam uwzględnia Root Directory projektu (`source/server/api`). Uruchomienie `vercel build --local-config source/server/api/vercel.json` wewnątrz katalogu backendu powoduje podwojenie tej ścieżki.
 
 `npm test` obejmuje typecheck, build, regresje tras, testy współdzielenia i ponawiania połączenia z bazą, pasywny import handlera serverless, preflight CORS, odpowiedzi przy awarii bazy oraz logowanie bcrypt z wydaniem i unieważnieniem JWT. Wynik gotowy do wdrożenia wymaga też sprawdzenia `.vercel/output/functions` i `.vercel/output/config.json`, a następnie testów dymnych pod rzeczywistym URL-em Preview. Sprawdź co najmniej `GET /` (200 ze statycznym HTML-em nawet bez bazy) i `GET /api/state/iot/all` bez tokenu (aplikacyjne 401, gdy baza jest dostępna). Nie commituj `.vercel` ani pobranych plików środowiskowych.
 

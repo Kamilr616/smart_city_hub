@@ -172,10 +172,10 @@ From the repository root, run (select the API project when linking):
 npm --prefix source/server/api test
 vercel link
 vercel pull --yes --environment=preview
-vercel build
+vercel build --local-config source/server/api/vercel.json
 ```
 
-Run Vercel CLI commands from the repository root: the CLI applies the project's `source/server/api` Root Directory itself. Running `vercel build` inside the backend directory duplicates that path.
+Run Vercel CLI commands from the repository root: the CLI applies the project's `source/server/api` Root Directory itself. Running `vercel build --local-config source/server/api/vercel.json` inside the backend directory duplicates that path.
 
 `npm test` includes type checking, the build, route regressions, database connection reuse/retry coverage, passive serverless-handler import, CORS preflight, database-failure responses, and bcrypt login with JWT issuance and revocation. A deployable result also requires inspection of `.vercel/output/functions` and `.vercel/output/config.json`, followed by smoke tests against a real Preview URL. Verify at least `GET /` (200 static HTML even without the database) and `GET /api/state/iot/all` without a token (application 401 when the database is available). Do not commit `.vercel` or downloaded environment files.
 
