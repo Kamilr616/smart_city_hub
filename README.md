@@ -170,6 +170,31 @@ npm run ios
 
 `npm ci` creates the ignored `firebaseConfig.local.ts` from the placeholder template when it is missing. Fill that local file with your Firebase project configuration before running the app.
 
+## Deploy on Vercel (API)
+
+The API also runs as a Vercel serverless function. Local development is unchanged — `npm run dev` still starts the long-running Express server.
+
+Project settings:
+
+| Setting | Value |
+|---|---|
+| Root Directory | `source/server/api` |
+| Function entry | `api/index.ts` |
+| Rewrite | `vercel.json` sends `/api/(.*)` to the function; everything else stays static |
+
+The function builds the Express application once per cold start and reuses a single cached Mongoose connection across invocations. If the database cannot be reached, it answers `503 {"error": "Database unavailable"}` instead of hanging.
+
+Environment variables to set in the Vercel project:
+
+| Variable | Value |
+|---|---|
+| `MONGODB_URI` | Atlas connection string; the `mongodb+srv://` form works on Vercel |
+| `JWT_SECRET_KEY` | JWT signing secret |
+| `CORS_ORIGIN` | Comma-separated origins, including `https://kamilr616.github.io` and the deployed dashboard origin |
+| `PORT` | Not used by the serverless runtime; it only affects a local run |
+
+MongoDB Atlas **Network Access** must allow `0.0.0.0/0`, or use the Atlas–Vercel integration, because the egress IP addresses of serverless functions are dynamic.
+
 ## Tech stack
 
 | Layer | Technologies |

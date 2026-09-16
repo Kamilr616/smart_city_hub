@@ -139,6 +139,22 @@ Przed uruchomieniem komponentu skopiuj właściwy wersjonowany plik `.env.exampl
 
 Pliki `.env` nie są wersjonowane (`.gitignore`). Nigdy nie commituj początkowego hasła administratora.
 
+### 7.1 Wdrożenie na Vercel (API)
+
+API może być hostowane na Vercel jako funkcja serverless; lokalne `npm run dev` pozostaje bez zmian.
+
+| Ustawienie | Wartość |
+|---|---|
+| Root Directory | `source/server/api` |
+| Punkt wejścia funkcji | `api/index.ts` (domyślny eksport `(req, res)`) |
+| Rewrite | `vercel.json`: `/api/(.*)` → `/api`, dzięki czemu funkcję wywołują tylko ścieżki API, a `public/` pozostaje statyczne |
+
+`api/index.ts` wywołuje `createApp()` z `lib/server.ts` raz na zimny start i przy każdym wywołaniu czeka na `connectToDatabase()`. Ten helper buforuje oczekujące połączenie Mongoose w zmiennej modułu oraz w `globalThis`, więc ciepła instancja używa jednego połączenia, a nieudana próba jest usuwana z bufora i ponawiana przy kolejnym żądaniu. Gdy połączenia nie da się nawiązać, funkcja zwraca `503 {"error": "Database unavailable"}`.
+
+Wymagane zmienne środowiskowe w projekcie Vercel: `MONGODB_URI` (forma `mongodb+srv://` działa na Vercel), `JWT_SECRET_KEY` oraz `CORS_ORIGIN` jako lista rozdzielona przecinkami zawierająca `https://kamilr616.github.io` i źródło wdrożonego panelu. `PORT` nie jest używany przez środowisko serverless.
+
+W MongoDB Atlas sekcja **Network Access** musi dopuszczać `0.0.0.0/0` albo być podłączona przez integrację Atlas–Vercel, ponieważ adresy IP wyjściowe funkcji serverless są dynamiczne.
+
 ## 8. Znane ograniczenia / uwagi
 
 - Sprzęt obsługuje identyfikatory 0–95 (6 ekspanderów × 16 wyjść). API wymusza ten zakres i unikalność identyfikatorów oraz zwraca deterministyczną, 96-elementową odpowiedź dla ESP32.

@@ -139,6 +139,22 @@ Copy each checked-in `.env.example` to `.env` before running the relevant compon
 
 `.env` files are not versioned (`.gitignore`). Never commit the initial administrator password.
 
+### 7.1 Deploy on Vercel (API)
+
+The API can be hosted on Vercel as a serverless function; a local `npm run dev` is unaffected.
+
+| Setting | Value |
+|---|---|
+| Root Directory | `source/server/api` |
+| Function entry | `api/index.ts` (default export `(req, res)`) |
+| Rewrite | `vercel.json`: `/api/(.*)` → `/api`, so only API paths invoke the function and `public/` stays static |
+
+`api/index.ts` calls `createApp()` from `lib/server.ts` once per cold start and awaits `connectToDatabase()` on every invocation. That helper caches the pending Mongoose connection in a module variable and on `globalThis`, so a warm instance reuses one connection and a failed attempt is dropped from the cache and retried on the next request. When the connection cannot be established, the function answers `503 {"error": "Database unavailable"}`.
+
+Required environment variables in the Vercel project: `MONGODB_URI` (the `mongodb+srv://` form works on Vercel), `JWT_SECRET_KEY`, and `CORS_ORIGIN` as a comma-separated list containing `https://kamilr616.github.io` and the deployed dashboard origin. `PORT` is unused by the serverless runtime.
+
+MongoDB Atlas **Network Access** must allow `0.0.0.0/0` or be wired through the Atlas–Vercel integration, because serverless function egress IP addresses are dynamic.
+
 ## 8. Known limitations / notes
 
 - The hardware supports IDs 0–95 (6 expanders × 16 outputs). The API enforces that range and unique device IDs, and returns a deterministic 96-element ESP32 payload.
