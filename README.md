@@ -119,10 +119,33 @@ Run the API:
 npm run dev     # development mode (ts-node)
 npm run watch   # development mode with auto-restart (nodemon)
 npm run build   # compile TypeScript to dist/
-npm test        # build and run API route regression tests
+npm test        # build and run API, serverless, and authentication regression tests
 ```
 
 The API listens on `http://localhost:4200` by default.
+
+#### Deploy the API to Vercel
+
+Create the Vercel project with these backend settings:
+
+| Setting | Value |
+|---|---|
+| Root Directory | `source/server/api` |
+| Framework Preset | Other |
+| Install Command | `npm ci` |
+| Build Command | `npm run typecheck && npm run build` |
+| Output Directory | `dist/public` |
+
+The static output serves `/` independently of MongoDB. Vercel builds the serverless handler from `api/index.ts`, while `vercel.json` rewrites `/api/:path*` to `/api`; do not use `dist` as the Root Directory.
+
+Set `JWT_SECRET_KEY`, `MONGODB_URI`, and `CORS_ORIGIN` for Preview and Production. `PORT` is local-only. In MongoDB Atlas, allow network access for the deployment's actual Vercel egress; a broad `0.0.0.0/0` rule is not inherently required.
+
+Before promotion, run `npm test`, then `vercel pull --yes --environment=preview` and `vercel build` from `source/server/api`. Confirm that `.vercel/output/functions` contains the API function and that `.vercel/output/config.json` routes `/api/*`, then smoke-test Preview:
+
+- `GET /` returns static HTML with status 200, including when the database is unavailable.
+- `GET /api/state/iot/all` without a token returns the application's 401 when the database is reachable.
+
+A platform 404 indicates function detection or routing trouble. An application 404 on an unknown API route, or a 401 from the protected route, confirms that Express handled the request. A generic JSON 503 with the `Database unavailable` error means the function ran but could not connect to MongoDB. Build artifacts and Preview smoke tests are required deployment verification.
 
 ### 2. Web dashboard
 
