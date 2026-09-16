@@ -2,7 +2,22 @@ import { SensorModel } from '../schemas/sensor.schema';
 import {config} from "../../config";
 import {ISensor} from "../models/sensor.model";
 
+import {SensorDefinitionModel, SensorDefinition} from '../schemas/sensorDefinition.schema';
+
 export default class SensorService {
+    public async getSensorCatalog() {
+        return SensorDefinitionModel.find({}, {_id: 0, __v: 0}).sort({deviceId: 1}).lean();
+    }
+
+    public async upsertSensorDefinition(data: SensorDefinition) {
+        return SensorDefinitionModel.findOneAndUpdate(
+            {deviceId: data.deviceId},
+            {$set: data},
+            {new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true,
+                projection: {_id: 0, __v: 0}}
+        ).lean();
+    }
+
 
     public async createSensorData(SensorParams: ISensor) {
         try {

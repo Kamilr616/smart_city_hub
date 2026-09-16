@@ -1,0 +1,14 @@
+[
+  {
+    "deviceId": 0,
+    "name": "Stacja pogodowa",
+    "description": "Punkt pomiarowy przy głównej ulicy makiety LEGO: temperatura, wilgotność i ciśnienie. Fizyczny czujnik nie jest obecnie podłączony; Digital Twin udostępnia osobno oznaczoną symulację.",
+    "location": "city"
+  },
+  {
+    "deviceId": 1,
+    "name": "Czujnik przy garażu",
+    "description": "Punkt pomiarowy przy budynku Corner Garage: temperatura, wilgotność i ciśnienie. Fizyczny czujnik nie jest obecnie podłączony; Digital Twin udostępnia osobno oznaczoną symulację.",
+    "location": "city"
+  }
+]
