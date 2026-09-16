@@ -1,195 +1,157 @@
-import { useContext, useState } from "react";
-import { UserContext } from "./context/auth";
-import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-const AddDevice = () => {
-  const { user } = useContext(UserContext);
+﻿import { useContext, useEffect, useRef, useState } from 'react';
+import PropTypes from 'prop-types';
+import { UserContext } from './context/auth';
+import { apiRequest, getApiErrorMessage } from './api';
+import { devicePayload } from './context/session';
 
-  const [deviceData, setDeviceData] = useState({
-    location: "",
-    name: "",
-    description: "",
-    type: "",
-    deviceId: "",
-  });
-
-  const submitDevice = async (e) => {
-    e.preventDefault();
-
-    //login
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/device/update`,
-        deviceData,
-        {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
-        }
-      );
-      if (response.data) toast("Device added successfully.");
-
-      setDeviceData({
-        location: "",
-        name: "",
-        description: "",
-        type: "",
-        deviceId: "",
-      });
-    } catch (error) {
-      toast("Something went wrong.");
-      console.log(error);
-    }
-  };
-  return (
-    <>
-      <ToastContainer />
-
-      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-            Add New Device
-          </h2>
-        </div>
-
-        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form
-            className="space-y-6"
-            action="#"
-            method="POST"
-            onSubmit={submitDevice}
-          >
-            <div>
-              {/* <label
-                    htmlFor="email"
-                    className="block text-sm font-medium leading-6 text-gray-900"
-                  >
-                    Email address
-                  </label> */}
-              <div className="mt-2">
-                <input
-                  placeholder="location"
-                  id="location"
-                  name="location"
-                  type="location"
-                  autoComplete="location"
-                  required
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  value={deviceData.location}
-                  onChange={(e) =>
-                    setDeviceData({ ...deviceData, location: e.target.value })
-                  }
-                />
-              </div>
-            </div>
-            <div>
-              {/* <label
-                    htmlFor="email"
-                    className="block text-sm font-medium leading-6 text-gray-900"
-                  >
-                    Email address
-                  </label> */}
-              <div className="mt-2">
-                <input
-                  placeholder="name"
-                  id="name"
-                  name="name"
-                  type="text"
-                  autoComplete="name"
-                  required
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  value={deviceData.name}
-                  onChange={(e) =>
-                    setDeviceData({ ...deviceData, name: e.target.value })
-                  }
-                />
-              </div>
-            </div>
-            <div>
-              {/* <label
-                    htmlFor="email"
-                    className="block text-sm font-medium leading-6 text-gray-900"
-                  >
-                    Email address
-                  </label> */}
-              <div className="mt-2">
-                <input
-                  placeholder="description"
-                  id="description"
-                  name="description"
-                  type="text"
-                  autoComplete="description"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  value={deviceData.description}
-                  onChange={(e) =>
-                    setDeviceData({
-                      ...deviceData,
-                      description: e.target.value,
-                    })
-                  }
-                />
-              </div>
-            </div>
-            <div>
-              {/* <label
-                    htmlFor="email"
-                    className="block text-sm font-medium leading-6 text-gray-900"
-                  >
-                    Email address
-                  </label> */}
-              <div className="mt-2">
-                <input
-                  placeholder="type"
-                  id="type"
-                  name="type"
-                  type="text"
-                  autoComplete="type"
-                  required
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  value={deviceData.type}
-                  onChange={(e) =>
-                    setDeviceData({ ...deviceData, type: e.target.value })
-                  }
-                />
-              </div>
-            </div>
-            <div>
-              {/* <label
-                    htmlFor="email"
-                    className="block text-sm font-medium leading-6 text-gray-900"
-                  >
-                    Email address
-                  </label> */}
-              <div className="mt-2">
-                <input
-                  placeholder="deviceID"
-                  id="deviceID"
-                  name="deviceID"
-                  type="text"
-                  autoComplete="deviceID"
-                  required
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  value={deviceData.deviceId}
-                  onChange={(e) =>
-                    setDeviceData({ ...deviceData, deviceId: e.target.value })
-                  }
-                />
-              </div>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                className="flex w-full justify-center rounded-md bg-black px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              >
-                add
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </>
-  );
+const empty = {
+  deviceId: '',
+  location: '',
+  name: '',
+  type: '',
+  description: '',
 };
-export default AddDevice;
+
+export default function AddDevice({ onSaved }) {
+  const { user } = useContext(UserContext);
+  const [form, setForm] = useState(empty);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const request = useRef(null);
+  useEffect(() => () => request.current?.abort(), []);
+
+  const change = (event) =>
+    setForm({ ...form, [event.target.name]: event.target.value });
+
+  async function submit(event) {
+    event.preventDefault();
+    if (request.current) return;
+    setError('');
+    setSuccess('');
+    let body;
+    try {
+      body = devicePayload(form, []);
+    } catch (failure) {
+      setError(getApiErrorMessage(failure));
+      return;
+    }
+    const controller = new AbortController();
+    request.current = controller;
+    setPending(true);
+    try {
+      const existing = await apiRequest('/device/' + body.deviceId, {
+        token: user.token,
+        signal: controller.signal,
+      });
+      body = devicePayload(form, existing);
+      const saved = await apiRequest('/device/update', {
+        method: 'POST',
+        token: user.token,
+        body,
+        signal: controller.signal,
+      });
+      if (controller.signal.aborted) return;
+      setForm(empty);
+      setSuccess('Urządzenie zostało dodane.');
+      onSaved?.(saved);
+    } catch (failure) {
+      if (failure.name !== 'AbortError') setError(getApiErrorMessage(failure));
+    } finally {
+      request.current = null;
+      if (!controller.signal.aborted) setPending(false);
+    }
+  }
+
+  return (
+    <section className="form-panel" aria-labelledby="device-form-title">
+      <p className="eyebrow">Konfiguracja miasta</p>
+      <h1 id="device-form-title">Dodaj urządzenie</h1>
+      <p>Wybierz wolny identyfikator i przypisz urządzenie do lokalizacji.</p>
+      <form onSubmit={submit} className="form-grid" aria-busy={pending}>
+        <div className="field">
+          <label htmlFor="deviceId">Identyfikator urządzenia (0–95)</label>
+          <input
+            className="input"
+            id="deviceId"
+            name="deviceId"
+            type="number"
+            min="0"
+            max="95"
+            step="1"
+            required
+            disabled={pending}
+            value={form.deviceId}
+            onChange={change}
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="device-name">Nazwa urządzenia</label>
+          <input
+            className="input"
+            id="device-name"
+            name="name"
+            required
+            disabled={pending}
+            value={form.name}
+            onChange={change}
+            placeholder="np. Oświetlenie rynku"
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="device-location">Lokalizacja</label>
+          <input
+            className="input"
+            id="device-location"
+            name="location"
+            required
+            disabled={pending}
+            value={form.location}
+            onChange={change}
+            placeholder="np. house1"
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="device-type">Typ urządzenia</label>
+          <input
+            className="input"
+            id="device-type"
+            name="type"
+            required
+            disabled={pending}
+            value={form.type}
+            onChange={change}
+            placeholder="np. light"
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="device-description">Opis (opcjonalnie)</label>
+          <textarea
+            className="input"
+            id="device-description"
+            name="description"
+            rows="3"
+            disabled={pending}
+            value={form.description}
+            onChange={change}
+          />
+        </div>
+        {error && (
+          <p className="error-message" role="alert">
+            {error}
+          </p>
+        )}
+        {success && (
+          <p className="success-message" role="status">
+            {success}
+          </p>
+        )}
+        <button className="button" type="submit" disabled={pending}>
+          {pending ? 'Zapisywanie…' : 'Dodaj urządzenie'}
+        </button>
+      </form>
+    </section>
+  );
+}
+
+AddDevice.propTypes = { onSaved: PropTypes.func };

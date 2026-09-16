@@ -7,7 +7,7 @@ Skrócona dokumentacja systemu (wersja polska; wersja angielska: [DOCUMENTATION.
 System składa się z czterech komponentów:
 
 1. **API** (`source/server/api`) — centralny serwer REST w Node.js/Express/TypeScript. Przechowuje użytkowników, urządzenia, odczyty sensorów i historię stanów w MongoDB. Port domyślny: **4200**.
-2. **Panel webowy** (`source/web/react`) — SPA w React; osobne widoki dla administratora (zarządzanie użytkownikami i urządzeniami) i użytkownika (sterowanie przypisanymi urządzeniami).
+2. **Panel webowy** (`source/web/react`) — zależne od roli SPA w React do obsługi urządzeń, dostępnych lokalizacji, wykresów środowiskowych, historii stanów i zarządzania przez administratora.
 3. **Firmware ESP32** (`source/embedded/esp32_arduino`) — odpytuje API o aktualne stany urządzeń i ustawia 96 wyjść cyfrowych przez ekspandery MCP23017.
 4. **Aplikacja mobilna** (`source/mobile/react-native`) — React Native; miała być klientem wspólnego API Node.js, ale integracja nie została ukończona. Zachowany prototyp korzysta z Firebase (Auth + Firestore) jako niezależnego backendu.
 
@@ -76,6 +76,7 @@ Prefiks wszystkich tras: `/api`. Oznaczenia: 🔓 publiczny, 👤 wymaga JWT, �
 |---|---|---|---|
 | GET | `/iot/all` | 👤 | Aktualne stany wszystkich urządzeń — używane przez ESP32 |
 | GET | `/user/latest` | 👤 | Najnowsze stany urządzeń użytkownika |
+| GET | `/history/:id` | 👤 | Historia stanów uprawnionego urządzenia w zadanym czasie |
 | GET | `/latest` | 🛡️ | Najnowsze stany (wszystkie) |
 | GET | `/all` | 🛡️ | Pełna historia stanów |
 | GET | `/:id` | 🛡️ | Stan konkretnego urządzenia |
@@ -88,6 +89,7 @@ Prefiks wszystkich tras: `/api`. Oznaczenia: 🔓 publiczny, 👤 wymaga JWT, �
 | Metoda | Ścieżka | Dostęp | Opis |
 |---|---|---|---|
 | GET | `/all/latest` | 🔓 | Najnowsze odczyty wszystkich sensorów |
+| GET | `/history/:id` | 👤 | Historia temperatury, wilgotności i ciśnienia w zadanym czasie |
 | GET | `/all` | 🔓 | Najnowsze 20 odczytów każdego skonfigurowanego sensora |
 | GET | `/all/:num` | 🛡️ | Ostatnie dodatnie *num* odczytów każdego skonfigurowanego sensora |
 | GET | `/:id` | 🛡️ | Odczyty sensora |
@@ -95,12 +97,19 @@ Prefiks wszystkich tras: `/api`. Oznaczenia: 🔓 publiczny, 👤 wymaga JWT, �
 | POST | `/update/:id` | 🛡️ | Aktualizacja odczytu |
 | DELETE | `/all`, `/:id` | 🛡️ | Usunięcie odczytów |
 
+Obie trasy historii wymagają zweryfikowanego JWT, który nadal znajduje się w magazynie tokenów. Parametry query `from` i `to` są znacznikami czasu ISO ze strefą czasową; zakres musi być dodatni i nie może przekraczać 31 dni. Ich pominięcie wybiera poprzednie 24 godziny. `limit` przyjmuje 1–2000, domyślnie 1000. Wyniki są chronologiczne i zawierają `truncated`, gdy istnieją dalsze pasujące obserwacje.
+
+Historia stanów dodatkowo autoryzuje urządzenie według lokalizacji: rola zwykłego użytkownika musi odpowiadać `Device.location`, a administrator może odczytać każde urządzenie. Dostęp administratora uznaje zarówno `role: admin`, jak i obsługiwany claim `isAdmin`. Pole `initialState` zawiera ostatni zapisany stan sprzed `from` albo `null`, gdy stan jest nieznany. Przy skróconym wyniku klient nie może łączyć pominiętego okresu z tym stanem bazowym.
+
 ## 5. Panel webowy — przepływ
 
-1. `Login.jsx` → `POST /api/user/auth` → token JWT zapisywany dla bieżącej karty w `sessionStorage`.
-2. Router (`App.jsx`) kieruje na podstawie roli: `Dashboard` (user) lub `AdminDashboard` (admin); trasy chronione przez `PrivateRoutes`.
-3. Użytkownik: `UsersTable` pobiera urządzenia z `GET /api/device/user/get` i przełącza stany przez `POST /api/state/user/update`.
-4. Administrator: zakładki *addNewUser* (`POST /api/user/create`), *addNewDevice* (`POST /api/device/update`) oraz *controlPanel* (`AdminsTable` — sterowanie wszystkimi urządzeniami).
+1. `Login.jsx` → `POST /api/user/auth` → token JWT jest zapisywany dla bieżącej karty w `sessionStorage`; trasy chronione odrzucają wygasłe sesje.
+2. `PanelLayout` co 30 sekund pobiera urządzenia, najnowsze stany, definicje czujników i najnowsze odczyty. Zwykłe konto widzi urządzenia i czujniki swojej roli/lokalizacji, a administrator wszystkie.
+3. `Devices` zastępuje dawny widok `Home Lights`. Filtruje urządzenia, aktualizuje przypisane stany przez `POST /api/state/user/update` i otwiera historię urządzenia z `GET /api/state/history/:id`.
+4. `Locations` powstaje z lokalizacji urządzeń i czujników dostępnych dla konta, bez osobnego magazynu lokalizacji.
+5. Wykresy czujników pobierają `GET /api/sensor/history/:id` dla temperatury, wilgotności i ciśnienia z 1 godziny, 24 godzin, 7 dni lub 30 dni. Domyślnie pokazują dane rzeczywiste. Opcjonalny tryb DEMO jest początkowo wyłączony i tworzy próbki wyłącznie w pamięci przeglądarki; nie wywołuje trasy zapisu.
+
+Wykresy zachowują brakujące wartości zamiast wymyślać pomiary. Stan urządzenia sprzed pierwszej zapisanej obserwacji pozostaje nieznany, a skrócona historia pozostawia pusty pominięty okres początkowy. Rejestracja czujnika tworzy tylko metadane: bez podłączonego ESP nie pojawią się prawdziwe odczyty.
 
 ## 6. Firmware ESP32
 
@@ -131,7 +140,7 @@ Poniższe oficjalne materiały NXP zebrano podczas prac badawczych nad projektem
 | Seed API | `INITIAL_ADMIN_EMAIL` | E-mail używany wyłącznie przez `npm run seed:admin` |
 | Seed API | `INITIAL_ADMIN_NAME` | Nazwa logowania używana wyłącznie przez `npm run seed:admin` |
 | Seed API | `INITIAL_ADMIN_PASSWORD` | Hasło początkowe (minimum 12 znaków); usuń je po seedowaniu |
-| Web | `VITE_API_URL` | Adres API, np. `http://localhost:4200/api` |
+| Web | `VITE_API_URL` | Bazowy adres API z końcowym `/api` lub bez; oba warianty są normalizowane |
 | Mobile | `firebaseConfig.local.ts` | Lokalna konfiguracja Firebase skopiowana z wersjonowanego szablonu |
 | Firmware | `secrets.h` | Lokalne SSID Wi-Fi, adres API i token skopiowane z `secrets.example.h` |
 
@@ -184,7 +193,7 @@ Polecenia CLI Vercela uruchamiaj z katalogu głównego repozytorium: CLI sam uwz
 ## 9. Znane ograniczenia / uwagi
 
 - Sprzęt obsługuje identyfikatory 0–95 (6 ekspanderów × 16 wyjść). API wymusza ten zakres i unikalność identyfikatorów oraz zwraca deterministyczną, 96-elementową odpowiedź dla ESP32.
-- Testy regresji API obejmują trasy sensorów, kontrakt formularza webowego z API, walidację identyfikatorów, odpowiedź dla ESP32, współdzielenie i ponawianie połączenia z bazą oraz zachowanie handlera serverless. Projekt mobilny zachowuje jeden test dymny renderowania React Native; panel webowy nie ma zestawu testów automatycznych. Brak konfiguracji Docker/CI.
+- Testy regresji API obejmują trasy, autoryzację, walidację historii, odpowiedź dla ESP32, współdzielenie i ponawianie połączenia z bazą oraz zachowanie serverless. W `source/web/react` polecenie `npm test` sprawdza pomocniczą obsługę URL-i, sesji i danych wykresów, a `npm run test:e2e` testuje panel w Playwright z mockowanym API; te testy przeglądarkowe nie zapisują danych w prawdziwym backendzie. Projekt mobilny zachowuje jeden test dymny renderowania React Native. Brak konfiguracji Docker/CI.
 - Projekty webowy i mobilny przechodzą zadania ESLint; przechodzi również sprawdzenie TypeScript aplikacji mobilnej.
 - Dane konfiguracyjne firmware są dostarczane przez ignorowany plik `secrets.h`; ich zmiana nadal wymaga rekompilacji.
 - Planowana integracja aplikacji mobilnej z API Node.js nie została ukończona. Zachowany prototyp używa Firebase, a oba backendy nie są zsynchronizowane.

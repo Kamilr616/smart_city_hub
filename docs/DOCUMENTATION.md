@@ -7,7 +7,7 @@ Short technical documentation of the system. Setup instructions are in the [READ
 The system consists of four components:
 
 1. **API** (`source/server/api`) — the central REST server built with Node.js/Express/TypeScript. Stores users, devices, sensor readings, and state history in MongoDB. Default port: **4200**.
-2. **Web dashboard** (`source/web/react`) — a React SPA with separate views for the administrator (user and device management) and the regular user (controlling assigned devices).
+2. **Web dashboard** (`source/web/react`) — a role-aware React SPA for devices, available locations, environmental charts, state history, and administrator management.
 3. **ESP32 firmware** (`source/embedded/esp32_arduino`) — polls the API for current device states and drives 96 digital outputs through MCP23017 expanders.
 4. **Mobile app** (`source/mobile/react-native`) — React Native; planned as a client of the shared Node.js API, but the integration was not completed. The retained prototype uses Firebase (Auth + Firestore) as an independent backend.
 
@@ -76,6 +76,7 @@ All routes are prefixed with `/api`. Legend: 🔓 public, 👤 requires JWT, �
 |---|---|---|---|
 | GET | `/iot/all` | 👤 | Current states of all devices — used by the ESP32 |
 | GET | `/user/latest` | 👤 | Latest states of the user's devices |
+| GET | `/history/:id` | 👤 | Time-bounded state history for an authorized device |
 | GET | `/latest` | 🛡️ | Latest states (all devices) |
 | GET | `/all` | 🛡️ | Full state history |
 | GET | `/:id` | 🛡️ | State of a specific device |
@@ -88,6 +89,7 @@ All routes are prefixed with `/api`. Legend: 🔓 public, 👤 requires JWT, �
 | Method | Path | Access | Description |
 |---|---|---|---|
 | GET | `/all/latest` | 🔓 | Latest readings from all sensors |
+| GET | `/history/:id` | 👤 | Time-bounded temperature, humidity, and pressure history |
 | GET | `/all` | 🔓 | Latest 20 readings for each configured sensor |
 | GET | `/all/:num` | 🛡️ | Return the last positive *num* readings for each configured sensor |
 | GET | `/:id` | 🛡️ | Readings from a sensor |
@@ -95,12 +97,19 @@ All routes are prefixed with `/api`. Legend: 🔓 public, 👤 requires JWT, �
 | POST | `/update/:id` | 🛡️ | Update a reading |
 | DELETE | `/all`, `/:id` | 🛡️ | Delete readings |
 
+Both history routes require a verified JWT that remains present in the token store. Query parameters `from` and `to` are ISO timestamps with a timezone; the range must be positive and no longer than 31 days. Omitting them selects the previous 24 hours. `limit` accepts 1–2000 and defaults to 1000. Results are chronological and report `truncated` when more matching observations exist.
+
+State history also authorizes the device by location: a regular user's role must match `Device.location`; an administrator can read every device. Administrator access accepts either `role: admin` or the supported `isAdmin` claim. Its `initialState` is the last stored state before `from`, or `null` when unknown. If the result is truncated, clients must not bridge the omitted interval from that baseline.
+
 ## 5. Web dashboard — flow
 
-1. `Login.jsx` → `POST /api/user/auth` → the JWT is stored for the current browser tab in `sessionStorage`.
-2. The router (`App.jsx`) redirects based on role: `Dashboard` (user) or `AdminDashboard` (admin); routes are protected by `PrivateRoutes`.
-3. User: `UsersTable` fetches devices from `GET /api/device/user/get` and toggles states via `POST /api/state/user/update`.
-4. Administrator: tabs *addNewUser* (`POST /api/user/create`), *addNewDevice* (`POST /api/device/update`), and *controlPanel* (`AdminsTable` — controls all devices).
+1. `Login.jsx` → `POST /api/user/auth` → the JWT is stored for the current browser tab in `sessionStorage`; protected routes reject expired sessions.
+2. `PanelLayout` loads devices, latest states, sensor definitions, and latest readings every 30 seconds. Ordinary accounts see devices and sensors for their role/location; administrators see all.
+3. `Devices` replaces the former `Home Lights` view. It filters devices, updates assigned states through `POST /api/state/user/update`, and opens per-device history from `GET /api/state/history/:id`.
+4. `Locations` is computed from the device and sensor locations available to the account rather than from a separate location store.
+5. Sensor charts load `GET /api/sensor/history/:id` for temperature, humidity, and pressure over 1 hour, 24 hours, 7 days, or 30 days. Live data is the default. The optional DEMO mode starts off and generates browser-memory samples only; it does not call a write endpoint.
+
+Charts preserve missing values instead of inventing measurements. A device state before the first stored observation remains unknown, and a truncated history leaves its omitted leading interval blank. Registering a sensor creates metadata only: without connected ESP hardware, no real readings appear.
 
 ## 6. ESP32 firmware
 
@@ -131,7 +140,7 @@ The following official NXP resources were collected during the project's researc
 | API seed | `INITIAL_ADMIN_EMAIL` | Email used only by `npm run seed:admin` |
 | API seed | `INITIAL_ADMIN_NAME` | Login name used only by `npm run seed:admin` |
 | API seed | `INITIAL_ADMIN_PASSWORD` | Initial password (minimum 12 characters); remove it after seeding |
-| Web | `VITE_API_URL` | API address, e.g. `http://localhost:4200/api` |
+| Web | `VITE_API_URL` | API base URL with or without a trailing `/api`; both forms are normalized |
 | Mobile | `firebaseConfig.local.ts` | Local Firebase web configuration copied from the checked-in template |
 | Firmware | `secrets.h` | Local Wi-Fi SSID, API URL and bearer token copied from `secrets.example.h` |
 
@@ -184,7 +193,7 @@ A Vercel platform 404 means the function was not detected or the rewrite did not
 ## 9. Known limitations / notes
 
 - The hardware supports IDs 0–95 (6 expanders × 16 outputs). The API enforces that range and unique device IDs, and returns a deterministic 96-element ESP32 payload.
-- API regression tests cover sensor routes, the web-to-API device contract, ID validation, the ESP32 payload, database connection reuse/retry, and serverless handler behavior. The mobile project retains one React Native render smoke test; the web dashboard has no automated test suite. There is no Docker/CI configuration.
+- API regression tests cover routes, authorization, history validation, the ESP32 payload, database connection reuse/retry, and serverless behavior. In `source/web/react`, `npm test` covers URL/session and chart-data helpers, while `npm run test:e2e` exercises the dashboard with Playwright and a mocked API; these browser tests do not write to a real backend. The mobile project retains one React Native render smoke test. There is no Docker/CI configuration.
 - The web and mobile projects pass their ESLint tasks; the mobile TypeScript check also passes.
 - Firmware credentials are supplied through the ignored `secrets.h`; changing them still requires recompilation.
 - Planned integration of the mobile app with the Node.js API was not completed. The retained prototype uses Firebase, and the two backends are not synchronized.

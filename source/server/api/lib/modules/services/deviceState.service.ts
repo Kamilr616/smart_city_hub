@@ -22,7 +22,46 @@ export const buildIotStatePayload = (
     return payload;
 };
 
+import {HistoryRange} from '../models/history.model';
+
 export default class DeviceStateService {
+    public async getDeviceHistory(deviceId: number, role: string, {from, to, limit}: HistoryRange) {
+        if (typeof role !== 'string' || !role.trim()) return null;
+        const authorizedDevice = await DeviceModel.exists(role === 'admin' ? {deviceId} : {deviceId, location: role});
+        if (!authorizedDevice) return null;
+
+        // Match the unique device index; sort and limit inside Mongo so the API
+        // never loads the complete embedded history into application memory.
+        const [history] = await DeviceStateModel.aggregate<{
+            baseline: Array<{state: boolean; timestamp: Date}>;
+            states: Array<{state: boolean; timestamp: Date}>;
+        }>([
+            {$match: {deviceId}},
+            {$unwind: {path: '$states', includeArrayIndex: 'observationIndex'}},
+            {$match: {'states.timestamp': {$type: 'date', $lte: to}, 'states.state': {$type: 'bool'}}},
+            {$facet: {
+                baseline: [
+                    {$match: {'states.timestamp': {$lt: from}}},
+                    {$sort: {'states.timestamp': -1, observationIndex: -1}},
+                    {$limit: 1},
+                    {$project: {_id: 0, state: '$states.state', timestamp: '$states.timestamp'}}
+                ],
+                states: [
+                    {$match: {'states.timestamp': {$gte: from}}},
+                    {$sort: {'states.timestamp': -1, observationIndex: -1}},
+                    {$limit: limit + 1},
+                    {$project: {_id: 0, state: '$states.state', timestamp: '$states.timestamp'}}
+                ]
+            }}
+        ]);
+        const states = history?.states ?? [];
+        return {
+            initialState: history?.baseline[0]?.state ?? null,
+            states: states.slice(0, limit).reverse(),
+            truncated: states.length > limit
+        };
+    }
+
 
     public async getAllUserDeviceStates(role: string) {
         try {
@@ -49,11 +88,11 @@ export default class DeviceStateService {
             // Spłaszczamy wyniki do jednej tablicy i mapujemy je do oczekiwanego formatu
             // Zwracamy wszystkie stany urządzeń
             return results.flat().map(deviceState => {
-                const lastIndex = deviceState.states.length - 1;
+                const last = deviceState.states?.[deviceState.states.length - 1];
                 return {
                     deviceId: deviceState.deviceId,
-                    state: deviceState.states[lastIndex].state,
-                    timestamp: deviceState.states[lastIndex].timestamp
+                    state: last?.state ?? null,
+                    timestamp: last?.timestamp ?? null
                 };
             });
         } catch (error) {

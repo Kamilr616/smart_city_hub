@@ -4,7 +4,17 @@ import {ISensor} from "../models/sensor.model";
 
 import {SensorDefinitionModel, SensorDefinition} from '../schemas/sensorDefinition.schema';
 
+import {HistoryRange} from '../models/history.model';
+
 export default class SensorService {
+    public async getSensorHistory(deviceId: number, {from, to, limit}: HistoryRange) {
+        const readings = await SensorModel.find(
+            {deviceId, readingDate: {$gte: from, $lte: to}},
+            {_id: 0, deviceId: 1, temperature: 1, humidity: 1, pressure: 1, readingDate: 1}
+        ).sort({readingDate: -1, _id: -1}).limit(limit + 1).lean();
+        return {readings: readings.slice(0, limit).reverse(), truncated: readings.length > limit};
+    }
+
     public async getSensorCatalog() {
         return SensorDefinitionModel.find({}, {_id: 0, __v: 0}).sort({deviceId: 1}).lean();
     }

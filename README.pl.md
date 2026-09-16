@@ -75,10 +75,10 @@ smart_city_hub/
 
 ## Funkcje
 
-- **Sterowanie urządzeniami** — do 96 wyjść cyfrowych (6 ekspanderów MCP23017 × 16 pinów) sterowanych zdalnie z panelu web; ESP32 cyklicznie odpytuje API o stany i ustawia wyjścia.
-- **Odczyty czujników** — temperatura, ciśnienie i wilgotność zapisywane w bazie z datą odczytu i ID urządzenia.
+- **Urządzenia i lokalizacje** — widok `Devices` zależny od roli zastępuje dawny ekran `Home Lights`; `Locations` powstaje z urządzeń i czujników dostępnych dla zalogowanego konta.
+- **Sterowanie i historia urządzeń** — do 96 wyjść cyfrowych (6 ekspanderów MCP23017 × 16 pinów) można sterować zdalnie, a wykres każdego urządzenia korzysta z zapisów `DeviceState.states`.
+- **Odczyty i wykresy czujników** — temperatura, wilgotność i ciśnienie są prezentowane dla 1 godziny, 24 godzin, 7 dni lub 30 dni.
 - **Role i uwierzytelnianie** — logowanie JWT z osobnymi rolami `admin` / `user`; admin zarządza użytkownikami i urządzeniami, użytkownik steruje przypisanymi urządzeniami.
-- **Historia stanów** — każde urządzenie prowadzi znacznikowaną czasowo historię włączeń/wyłączeń.
 
 ## Wymagania
 
@@ -163,15 +163,21 @@ Skopiuj `.env.example` do `.env` i zmień go, jeśli API działa pod innym adres
 VITE_API_URL=http://localhost:4200/api
 ```
 
+`VITE_API_URL` może zawierać końcowe `/api` albo je pomijać; klient normalizuje oba warianty do jednego prefiksu API.
+
 Uruchom:
 
 ```bash
 npm run dev      # serwer deweloperski Vite
 npm run build    # build produkcyjny do dist/
 npm run preview  # podgląd builda produkcyjnego
+npm test         # testy jednostkowe frontendu
+npm run test:e2e # testy panelu Playwright z mockowanym API
 ```
 
 Serwer deweloperski Vite jest domyślnie dostępny pod adresem `http://localhost:5173`.
+
+Panel odświeża dane na żywo co 30 sekund. Wykresy czujników domyślnie korzystają z prawdziwych odczytów API; opcjonalny przełącznik DEMO jest początkowo wyłączony i generuje próbki wyłącznie w przeglądarce, bez zapisów do API. Bez podłączonego ESP zarejestrowane czujniki nie mają prawdziwych pomiarów do pokazania. Historia urządzenia zachowuje stan nieznany przed pierwszą obserwacją i pozostawia pusty pominięty okres, gdy API oznaczy wynik jako skrócony. Zestaw Playwright mockuje odpowiedzi API i nie zapisuje danych w prawdziwym backendzie.
 
 ### 3. Firmware ESP32
 
@@ -201,7 +207,7 @@ npm run ios
 |---|---|
 | Backend | Node.js, Express 4, TypeScript, Mongoose 8, JWT, bcrypt, Joi |
 | Baza danych | MongoDB (Atlas) |
-| Web | React 18, Vite, React Router 6, axios, Tailwind CSS, react-toastify |
+| Web | React 18, Vite, React Router 6, Chart.js, axios, Tailwind CSS, Playwright |
 | Mobile | React Native 0.73, React Navigation, Firebase (Auth, Firestore) |
 | Embedded | ESP32 (Arduino), MCP23017, ArduinoJson, WiFi + HTTPClient |
 

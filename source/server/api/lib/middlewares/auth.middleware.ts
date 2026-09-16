@@ -28,7 +28,7 @@ export const auth = async (request: Request, response: Response, next: NextFunct
         if (!authentication) {
             return response.status(401).send('Access denied or session expired.');
         }
-        response.locals.userRole = authentication.user.role;
+        response.locals.userRole = authentication.user.isAdmin ? 'admin' : authentication.user.role;
         response.locals.userId = authentication.user.userId;
         response.locals.authToken = authentication.token;
         next();
