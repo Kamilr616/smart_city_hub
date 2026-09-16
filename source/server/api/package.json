@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "description": "server",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "npm run build && node --test tests/sensor-routes.test.js tests/device-integration.test.js tests/cors-config.test.js",
     "dev": "ts-node ./lib/index.ts",
     "build": "tsc",
+    "typecheck": "tsc -p tsconfig.vercel.json",
     "postbuild": "node scripts/copy-public.mjs",
     "watch": "nodemon",
     "seed:admin": "ts-node ./lib/scripts/seedAdmin.ts"

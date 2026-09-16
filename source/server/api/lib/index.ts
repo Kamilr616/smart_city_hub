@@ -1,18 +1,26 @@
-import App from './app';
-import IndexController from "./controllers/index.controller";
-import SensorController from "./controllers/sensor.controller";
-import UserController from "./controllers/user.controller";
-import DeviceController from "./controllers/device.controller";
-import DeviceStateController from "./controllers/deviceState.controller";
-const app: App = new App([
-    new UserController(),
-    new IndexController(),
-    new SensorController(),
-    new DeviceController(),
-    new DeviceStateController()
-]);
+import mongoose from 'mongoose';
+import {config} from './config';
+import {connectToDatabase, createApp} from './server';
 
-void app.listen().catch(error => {
+const app = createApp();
+
+const closeOnSignal = async (): Promise<void> => {
+    await mongoose.connection.close();
+    console.log('MongoDB connection closed due to app termination');
+    process.exit(0);
+};
+
+process.on('SIGINT', closeOnSignal);
+process.on('SIGTERM', closeOnSignal);
+
+const start = async (): Promise<void> => {
+    await connectToDatabase();
+    app.listen(config.port, () => {
+        console.log(`App listening on the port ${config.port}`);
+    });
+};
+
+void start().catch(error => {
     console.error(`API startup failed: ${error instanceof Error ? error.message : error}`);
     process.exitCode = 1;
 });
