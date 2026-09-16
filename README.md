@@ -217,3 +217,17 @@ Keep JWT, MongoDB, Firebase, and Wi-Fi values in the local files described above
 ## License
 
 Project-authored code and documentation are released under the [MIT](LICENSE) license. Bundled and referenced third-party materials remain under their respective terms; see [Third-party notices](docs/THIRD_PARTY_NOTICES.md).
+
+## LEGO sensor catalog
+
+Two planned environmental sensors are defined in
+[lego-sensors.json](source/server/api/scripts/lego-sensors.json): the street weather
+station (sensor ID 0) and the Corner Garage sensor (ID 1).
+The API exposes their names, descriptions, location and measurement units through
+`GET /api/sensor/catalog`. An administrator can register or update a definition with
+`POST /api/sensor/catalog` using `deviceId`, `name`, `description` and `location`.
+
+Definitions use a separate collection from readings and output devices. Registering
+a sensor does not create telemetry: without ESP measurements, the latest-reading
+endpoint continues to return empty sensor slots. The Digital Twin simulation stays
+in the browser. Sensor IDs 0 and 1 are accepted by the authenticated bulk ingest route.

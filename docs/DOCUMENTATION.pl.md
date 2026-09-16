@@ -195,3 +195,26 @@ Polecenia CLI Vercela uruchamiaj z katalogu głównego repozytorium: CLI sam uwz
 ## 10. Licencje
 
 Kod i dokumentacja autorstwa zespołu projektu są objęte repozytoryjną [licencją MIT](../LICENSE). Dołączone biblioteki, multimedia, instrukcje i zależności pakietów zachowują własne warunki; zobacz [informacje o licencjach podmiotów trzecich](THIRD_PARTY_NOTICES.md).
+
+## Katalog czujników LEGO
+
+Dwa planowane czujniki środowiskowe opisano w
+[lego-sensors.json](../source/server/api/scripts/lego-sensors.json): stacja pogodowa przy
+ulicy (ID czujnika 0) i czujnik przy Corner Garage (ID 1).
+API udostępnia nazwy, opisy, lokalizację i jednostki przez
+`GET /api/sensor/catalog`. Administrator rejestruje lub aktualizuje definicję przez
+`POST /api/sensor/catalog`, podając `deviceId`, `name`, `description` i `location`.
+
+Definicje mają osobną kolekcję, niezależną od odczytów i urządzeń wykonawczych.
+Rejestracja nie tworzy pomiarów: bez danych z ESP endpoint najnowszych odczytów nadal
+zwraca puste miejsca czujników. Symulacja Digital Twin działa w przeglądarce.
+Chroniona trasa zbiorczego zapisu pomiarów przyjmuje ID czujników 0 i 1.
+
+Odczyt katalogu jest publiczny, podobnie jak odczyt najnowszych pomiarów. Zapis wymaga
+dotychczasowej weryfikacji JWT, kontroli magazynu tokenów oraz uprawnień administratora.
+POST aktualizuje lub tworzy wpis według ID czujnika (0–1). Nazwa i lokalizacja są
+wymaganymi niepustymi ciągami do 120 znaków, opis może mieć do 1000 znaków.
+Pola pomiarowe i nieznane właściwości są odrzucane. Rejestracja nie zmienia stanów włącz/wyłącz.
+Odpowiedź zawiera `type: "environmental"` i `measurements`: temperature/°C, humidity/%
+oraz pressure/hPa. Niepoprawna definicja zwraca 400, a błąd zapisu 503.
+Ponowna rejestracja aktualizuje metadane zamiast tworzyć duplikaty.

@@ -220,3 +220,17 @@ Wartości JWT, MongoDB, Firebase i Wi-Fi przechowuj w opisanych wyżej plikach l
 ## Licencja
 
 Kod i dokumentacja autorstwa zespołu projektu są udostępnione na licencji [MIT](LICENSE). Dołączone i wskazane materiały podmiotów trzecich pozostają na właściwych im warunkach; zobacz [informacje o licencjach podmiotów trzecich](docs/THIRD_PARTY_NOTICES.md).
+
+## Katalog czujników LEGO
+
+Dwa planowane czujniki środowiskowe opisano w
+[lego-sensors.json](source/server/api/scripts/lego-sensors.json): stacja pogodowa przy
+ulicy (ID czujnika 0) i czujnik przy Corner Garage (ID 1).
+API udostępnia nazwy, opisy, lokalizację i jednostki przez
+`GET /api/sensor/catalog`. Administrator rejestruje lub aktualizuje definicję przez
+`POST /api/sensor/catalog`, podając `deviceId`, `name`, `description` i `location`.
+
+Definicje mają osobną kolekcję, niezależną od odczytów i urządzeń wykonawczych.
+Rejestracja nie tworzy pomiarów: bez danych z ESP endpoint najnowszych odczytów nadal
+zwraca puste miejsca czujników. Symulacja Digital Twin działa w przeglądarce.
+Chroniona trasa zbiorczego zapisu pomiarów przyjmuje ID czujników 0 i 1.

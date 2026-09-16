@@ -195,3 +195,26 @@ A Vercel platform 404 means the function was not detected or the rewrite did not
 ## 10. Licenses
 
 Project-authored code and documentation are covered by the repository's [MIT license](../LICENSE). Bundled libraries, media, manuals, and package dependencies retain their own terms; see [Third-party notices](THIRD_PARTY_NOTICES.md).
+
+## LEGO sensor catalog
+
+Two planned environmental sensors are defined in
+[lego-sensors.json](../source/server/api/scripts/lego-sensors.json): the street weather
+station (sensor ID 0) and the Corner Garage sensor (ID 1).
+The API exposes their names, descriptions, location and measurement units through
+`GET /api/sensor/catalog`. An administrator can register or update a definition with
+`POST /api/sensor/catalog` using `deviceId`, `name`, `description` and `location`.
+
+Definitions use a separate collection from readings and output devices. Registering
+a sensor does not create telemetry: without ESP measurements, the latest-reading
+endpoint continues to return empty sensor slots. The Digital Twin simulation stays
+in the browser. Sensor IDs 0 and 1 are accepted by the authenticated bulk ingest route.
+
+The catalog read is public, like the latest-reading endpoint; writes require the
+existing JWT verification, token-store check and administrator authorization.
+POST upserts by sensor ID (0–1); names and locations are required non-empty strings
+(up to 120 characters), descriptions up to 1000 characters. Measurement fields and
+unknown properties are rejected. Registration does not change any on/off state.
+The response includes `type: "environmental"` and `measurements` with temperature/°C,
+humidity/% and pressure/hPa. Invalid definitions return 400 and storage failures 503.
+Repeated registration updates metadata instead of creating duplicate sensors.
