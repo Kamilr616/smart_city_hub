@@ -1,3 +1,4 @@
+import {config} from '../config';
 import Controller from '../interfaces/controller.interface';
 import {Request, Response, NextFunction, Router} from 'express';
 import {checkSensorIdParam, checkSensorLimitParam} from '../middlewares/deviceIdParam.middleware';
@@ -18,6 +19,9 @@ class SensorController implements Controller {
     }
 
     private initializeRoutes() {
+        this.router.get(this.path + '/catalog', this.getSensorCatalog);
+        this.router.post(this.path + '/catalog', admin, this.updateSensorDefinition);
+
         //this.router.get(`${this.path}/user/all`, auth, this.getAllUserSensorData);
         //this.router.get(`${this.path}/user/all/latest`, auth, this.getAllUserLatestSensorData);
 
@@ -30,6 +34,34 @@ class SensorController implements Controller {
         this.router.delete(`${this.path}/all`, admin, this.cleanAllSensorData);
         this.router.delete(`${this.path}/:id`, admin, checkSensorIdParam, this.cleanSingleSensorData);
     }
+
+    private getSensorCatalog = async (_request: Request, response: Response) => {
+        try {
+            response.status(200).json(await this.sensorService.getSensorCatalog());
+        } catch {
+            response.status(503).json({error: 'Sensor catalog unavailable.'});
+        }
+    };
+
+    private updateSensorDefinition = async (request: Request, response: Response) => {
+        const schema = Joi.object({
+            deviceId: Joi.number().integer().min(0).max(config.supportedSensorsNum - 1).required(),
+            name: Joi.string().trim().max(120).required(),
+            description: Joi.string().max(1000).allow('').default(''),
+            location: Joi.string().trim().max(120).required()
+        }).required();
+        const result = schema.validate(request.body);
+        if (result.error) {
+            response.status(400).json({error: 'Invalid sensor definition.'});
+            return;
+        }
+        try {
+            const definition = await this.sensorService.upsertSensorDefinition(result.value);
+            response.status(200).json(definition);
+        } catch {
+            response.status(503).json({error: 'Sensor catalog unavailable.'});
+        }
+    };
 
     private getPeriodAllSensorData = async (request: Request, response: Response, next: NextFunction) => {
         response.status(200).json(await this.sensorService.getPeriodSensorDataLatest(20));
@@ -113,9 +145,9 @@ class SensorController implements Controller {
     private addMultipleSensorData = async (request: Request, response: Response, next: NextFunction) => {
         const {sensorData} = request.body; // Przyjmujemy tablicę obiektów z danymi pomiarowymi dla różnych urządzeń
         // Walidacja danych wejściowych za pomocą biblioteki Joi
-        const schema = Joi.array().items(
+        const schema = Joi.array().min(1).required().unique('deviceId').items(
             Joi.object({
-                deviceId: Joi.number().integer().positive().required(), // Sprawdzamy, czy istnieje identyfikator urządzenia
+                deviceId: Joi.number().integer().min(0).max(config.supportedSensorsNum - 1).required(), // Sprawdzamy, czy istnieje identyfikator urządzenia
                 air: Joi.object({ // Walidujemy dane pomiarowe
                     temperature: Joi.number().required(),
                     pressure: Joi.number().required(),
