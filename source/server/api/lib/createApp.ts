@@ -1,5 +1,6 @@
 import type {Application} from 'express';
 import App from './app';
+import EspTokenController from './controllers/espToken.controller';
 import UserController from './controllers/user.controller';
 import IndexController from './controllers/index.controller';
 import SensorController from './controllers/sensor.controller';
@@ -12,6 +13,7 @@ export function createApp(): Application {
         new IndexController(),
         new SensorController(),
         new DeviceController(),
-        new DeviceStateController()
+        new DeviceStateController(),
+        new EspTokenController()
     ]).app;
 }

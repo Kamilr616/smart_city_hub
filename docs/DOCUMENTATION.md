@@ -14,7 +14,7 @@ The system consists of four components:
 ```mermaid
 flowchart LR
     WEB["React web dashboard"] -->|"REST + JWT"| API["Express / TypeScript API"]
-    ESP["ESP32 + 6× MCP23017"] -->|"polls states with JWT"| API
+    ESP["ESP32 + 6× MCP23017"] -->|"polls states with ESP token"| API
     API <-->|"Mongoose"| DB[(MongoDB)]
     MOBILE["React Native prototype"] --> FB["Firebase Auth + Firestore"]
     Twin["Digital Twin (web)"] -->|"polls states with JWT"| API
@@ -22,7 +22,7 @@ flowchart LR
 
 The original plan was to integrate the mobile app with the Node.js/MongoDB system. That work was not completed, so the retained mobile/Firebase data path remains separate and its data is not synchronized with the main system.
 
-A third, read-only client — the [Digital Twin](https://github.com/Kamilr616/smart-city-digital-twin) web app — mirrors the physical LEGO model on screen. It polls `GET /api/state/iot/all` with a JWT exactly like the ESP32 firmware, and it lives in its own repository.
+A third, read-only client — the [Digital Twin](https://github.com/Kamilr616/smart-city-digital-twin) web app — mirrors the physical LEGO model on screen. It lives in its own repository and polls `GET /api/state/iot/all` with a JWT. ESP32 boards can use separate location-scoped credentials.
 
 ## 2. Authentication and roles
 
@@ -41,6 +41,7 @@ A third, read-only client — the [Digital Twin](https://github.com/Kamilr616/sm
 | **User** | `email` (unique), `name` (unique), `role` (default `user`), `active`, `isAdmin` | User accounts |
 | **Password** | `userId`, `password` (bcrypt hash) | Passwords, kept separate from users |
 | **Token** | `userId`, `value` | Session tokens |
+| **EspToken** | `name`, `location`, `tokenHash`, `createdAt`, `expiresAt`, `revokedAt` | Expiring, revocable location credentials; hash only |
 | **Device** | `deviceId` (Number), `location`, `name` (default `outlet`), `type`, `description`, `editDate` | Device metadata (max 96) |
 | **DeviceState** | `deviceId` (ref: Device), `states[]` — `{state: Boolean, timestamp: Date}` | On/off history |
 | **Sensor** | `deviceId`, `temperature`, `pressure`, `humidity`, `readingDate` | Sensor readings |
@@ -53,6 +54,8 @@ All routes are prefixed with `/api`. Legend: 🔓 public, 👤 requires JWT, �
 
 | Method | Path | Access | Description |
 |---|---|---|---|
+| GET | `/list` | 🛡️ | List user accounts |
+| PATCH | `/:id` | 🛡️ | Edit an account and revoke its sessions |
 | POST | `/create` | 🛡️ | Create a user |
 | POST | `/auth` | 🔓 | Log in, returns a JWT |
 | DELETE | `/logout` | 👤 | Log out and invalidate the current token |
@@ -67,6 +70,7 @@ All routes are prefixed with `/api`. Legend: 🔓 public, 👤 requires JWT, �
 | GET | `/all/:id` | 🛡️ | All entries for a device |
 | GET | `/:id` | 🛡️ | A single device |
 | POST | `/update` | 🛡️ | Add / update a device |
+| PATCH | `/:id` | 🛡️ | Edit metadata without changing the device ID or state history |
 | DELETE | `/all` | 🛡️ | Delete all devices |
 | DELETE | `/:id` | 🛡️ | Delete a device |
 
@@ -74,7 +78,7 @@ All routes are prefixed with `/api`. Legend: 🔓 public, 👤 requires JWT, �
 
 | Method | Path | Access | Description |
 |---|---|---|---|
-| GET | `/iot/all` | 👤 | Current states of all devices — used by the ESP32 |
+| GET | `/iot/all` | 👤 or ESP | 96 states, scoped by role/location; admin JWT can read all |
 | GET | `/user/latest` | 👤 | Latest states of the user's devices |
 | GET | `/history/:id` | 👤 | Time-bounded state history for an authorized device |
 | GET | `/latest` | 🛡️ | Latest states (all devices) |
@@ -93,13 +97,37 @@ All routes are prefixed with `/api`. Legend: 🔓 public, 👤 requires JWT, �
 | GET | `/all` | 🔓 | Latest 20 readings for each configured sensor |
 | GET | `/all/:num` | 🛡️ | Return the last positive *num* readings for each configured sensor |
 | GET | `/:id` | 🛡️ | Readings from a sensor |
-| POST | `/iot/update` | 🛡️ | Validate and store a batch of sensor readings |
+| POST | `/iot/update` | 🛡️ or ESP | Store a sensor batch; ESP is limited to registered sensors in its location |
 | POST | `/update/:id` | 🛡️ | Update a reading |
 | DELETE | `/all`, `/:id` | 🛡️ | Delete readings |
 
 Both history routes require a verified JWT that remains present in the token store. Query parameters `from` and `to` are ISO timestamps with a timezone; the range must be positive and no longer than 31 days. Omitting them selects the previous 24 hours. `limit` accepts 1–2000 and defaults to 1000. Results are chronological and report `truncated` when more matching observations exist.
 
 State history also authorizes the device by location: a regular user's role must match `Device.location`; an administrator can read every device. Administrator access accepts either `role: admin` or the supported `isAdmin` claim. Its `initialState` is the last stored state before `from`, or `null` when unknown. If the result is truncated, clients must not bridge the omitted interval from that baseline.
+
+### Administrator operations
+
+`GET /api/user/list` returns an array of `{_id, name, email, role, isAdmin, active}` without passwords or session tokens. `PATCH /api/user/:id` accepts one or more of `name`, `email`, `role`, `isAdmin`, `active`, and `password`; `:id` is the user’s MongoDB ID. Names and roles are non-empty strings up to 100 characters, email up to 254 characters, and flags are booleans. Unknown fields are rejected. Passwords require at least 12 characters and no more than 72 UTF-8 bytes; omit `password` to retain the existing hash.
+
+Every successful user edit revokes all sessions for that account. Password storage, account changes, and session revocation run in a MongoDB transaction, so account updates require MongoDB Atlas or a replica set rather than a standalone MongoDB server. Inactive accounts cannot log in or use existing sessions. Removing your own administrator access, deactivating your own account, or removing the last active administrator is rejected with 409. Duplicate names/emails also return 409; invalid input returns 400 and missing accounts return 404.
+
+`PATCH /api/device/:id` updates only `name`, `type`, `description`, and `location`; `:id` is the numeric device ID (0–95). `deviceId` is immutable. Editing metadata preserves state history and updates `editDate`; moving a device changes which location can access it.
+
+### ESP credentials — `/api/esp-tokens`
+
+| Method | Path | Access | Description |
+|---|---|---|---|
+| GET | `/` | 🛡️ | List credential metadata; no token values or hashes |
+| POST | `/` | 🛡️ | Create a location credential; returns the value once |
+| DELETE | `/:id` | 🛡️ | Revoke by credential MongoDB ID |
+
+Create with `{name, location, expiresInDays}`: name and location are non-empty strings up to 120 characters; expiry is an integer from 1 to 365 days. The location must already occur in device metadata or the sensor catalog; `admin` and `*` are not valid scopes. The 201 response is `{token, key}`, where `key` contains `{id, name, location, createdAt, expiresAt, revokedAt}`. Listing returns an array of these metadata objects, and revocation returns the updated object. An unused revocation timestamp is `null`.
+
+The opaque token consists of `sch_` followed by 64 random hexadecimal characters. Only its SHA-256 hash is stored in MongoDB. Copy the value when it is created: it cannot be retrieved later. Expired or revoked credentials return 401. Unknown token IDs return 404 on revocation; invalid input returns 400.
+
+ESP credentials are accepted only by `GET /api/state/iot/all` and `POST /api/sensor/iot/update`, using `Authorization: Bearer <token>` or the existing `x-access-token: Bearer <token>` header. They cannot authenticate dashboard or general administrator routes. The state route preserves the 96-element array indexed by `deviceId`, returning `false` for missing devices and every device outside the credential’s location. A regular user JWT is also limited to its role/location; an administrator JWT can read all locations.
+
+Sensor ingestion keeps the `{sensorData: [{deviceId, air: {temperature, pressure, humidity}}]}` body. Every sensor in an ESP batch must be registered in the token’s location; a cross-location or unregistered sensor rejects the whole batch with 403 before writes. Administrator JWT ingestion remains available. The retained output-control sketch only polls states; sensor uploads require sensor firmware.
 
 ## 5. Web dashboard — flow
 
@@ -109,13 +137,15 @@ State history also authorizes the device by location: a regular user's role must
 4. `Locations` is computed from the device and sensor locations available to the account rather than from a separate location store.
 5. Sensor charts load `GET /api/sensor/history/:id` for temperature, humidity, and pressure over 1 hour, 24 hours, 7 days, or 30 days. Live data is the default. The optional DEMO mode starts off and generates browser-memory samples only; it does not call a write endpoint.
 
+6. Administrators use `Użytkownicy` to list/edit accounts, `Devices` to edit device metadata, and `Tokeny ESP` to create, inspect expiry, or revoke location credentials. Token values are shown once after creation. The interface keeps the original white/gray palette, blue navigation, black buttons, KI logo, and concise headings.
+
 Charts preserve missing values instead of inventing measurements. A device state before the first stored observation remains unknown, and a truncated history leaves its omitted leading interval blank. Registering a sensor creates metadata only: without connected ESP hardware, no real readings appear.
 
 ## 6. ESP32 firmware
 
 - **Hardware:** ESP32 + 6× MCP23017 on the I2C bus (addresses `0x22`–`0x27`), 96 outputs in total; SDA=21, SCL=22; UART at 9600 baud.
-- **Operation:** after connecting to WiFi, the sketch periodically calls `GET /api/state/iot/all` (with a token in the `x-access-token` header), parses the exact 96-element JSON state array (`ArduinoJson`), and writes the required MCP23017 registers directly over I2C. Array position equals `deviceId`; missing devices are represented as `false`.
-- **Configuration:** copy `secrets.example.h` to the ignored `secrets.h` and set the WiFi SSID, API URL, and bearer token before flashing.
+- **Operation:** after connecting to WiFi, the sketch periodically calls `GET /api/state/iot/all` (with a token in the `x-access-token` header), parses the exact 96-element JSON state array (`ArduinoJson`), and writes the required MCP23017 registers directly over I2C. Array position equals `deviceId`; missing devices and devices outside the credential’s location are represented as `false`.
+- **Configuration:** copy `secrets.example.h` to the ignored `secrets.h` and set the WiFi SSID, API URL, and `API_TOKEN` before flashing. Create a credential in `Tokeny ESP` and use `"Bearer "` followed by the complete `sch_...` value. The existing sketch sends this string through `x-access-token`; expiry or revocation requires a new token and reflash.
 
 ### 6.1 Historical NXP/LPCXpresso references
 

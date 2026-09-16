@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { UserContext } from '../context/auth';
 import { useInventory } from '../hooks/useInventory';
 import Icon from './Icon';
+import kiLogo from '../assets/ki_LOGO_b.svg';
 const links = [
   ['/', 'Przegląd', 'overview'],
   ['/devices', 'Devices', 'devices'],
@@ -24,14 +25,9 @@ export default function PanelLayout() {
           className="brand"
           aria-label="Smart City Hub — przegląd"
         >
-          <span className="brand-symbol">
-            <Icon name="locations" />
-          </span>
-          <span>
-            smart city<span className="brand-sub">HUB / LEGO LAB</span>
-          </span>
+          <img src={kiLogo} alt="KI" className="brand-logo" />
+          <span>Smart City Hub</span>
         </NavLink>
-        <span className="nav-label">WORKSPACE</span>
         <nav aria-label="Nawigacja główna">
           {links.map(([to, label, icon]) => (
             <NavLink
@@ -49,15 +45,19 @@ export default function PanelLayout() {
         </nav>
         {isAdmin && (
           <>
-            <span className="nav-label admin-label">ZARZĄDZANIE</span>
+            <span className="nav-label admin-label">Administracja</span>
             <nav aria-label="Administracja">
               <NavLink to="/devices/new" className="nav-link">
                 <Icon name="add" />
                 Dodaj urządzenie
               </NavLink>
-              <NavLink to="/users/new" className="nav-link">
+              <NavLink to="/users" className="nav-link">
                 <Icon name="users" />
-                Dodaj użytkownika
+                Użytkownicy
+              </NavLink>
+              <NavLink to="/esp-tokens" className="nav-link">
+                <Icon name="devices" />
+                Tokeny ESP
               </NavLink>
             </nav>
           </>
@@ -94,18 +94,17 @@ export default function PanelLayout() {
                 ? 'Problem z połączeniem'
                 : inventory.loading
                   ? 'Odświeżanie'
-                  : 'Połączono z API'}
+                  : 'Dane aktualne'}
             </span>
-            <span className="role-pill">{isAdmin ? 'ADMIN' : user.role}</span>
+            <span className="role-pill">
+              {isAdmin ? 'Administrator' : user.role}
+            </span>
           </div>
         </header>
         <main className="page-content">
           <Outlet context={{ ...inventory, isAdmin, user }} />
         </main>
         <footer className="page-footer">
-          <span>
-            SMART CITY HUB <span className="muted">/ Model miasta LEGO</span>
-          </span>
           <span>
             Ostatnia próba odświeżenia:{' '}
             {inventory.updated?.toLocaleTimeString('pl-PL') || '—'}

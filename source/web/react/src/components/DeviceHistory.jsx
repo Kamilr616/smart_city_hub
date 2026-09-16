@@ -28,7 +28,6 @@ export default function DeviceHistory({ device, refreshKey = 0 }) {
     <section className="panel" aria-label={`Historia stanów: ${device.name}`}>
       <div className="panel-heading">
         <div>
-          <p className="eyebrow">ZAPISANE STANY URZĄDZENIA</p>
           <h2>Historia stanów · {device.name}</h2>
         </div>
         <div className="toolbar">

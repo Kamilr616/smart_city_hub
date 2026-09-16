@@ -90,11 +90,7 @@ export default function Devices() {
     <>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">URZĄDZENIA WYKONAWCZE</p>
           <h1>Devices</h1>
-          <p>
-            Sprawdź aktualny stan, steruj urządzeniami i przeglądaj historię.
-          </p>
         </div>
         <div className="actions">
           <button
@@ -200,6 +196,15 @@ export default function Devices() {
                       : 'Brak stanu'}
                 </span>
                 <div className="device-actions">
+                  {isAdmin && (
+                    <Link
+                      className="button button-secondary"
+                      to={`/devices/${device.deviceId}/edit`}
+                      aria-label={'Edytuj: ' + device.name}
+                    >
+                      Edytuj
+                    </Link>
+                  )}
                   <button
                     className="button button-secondary"
                     onClick={() =>

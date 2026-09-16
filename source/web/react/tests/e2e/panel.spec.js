@@ -244,9 +244,7 @@ test('failed fetch shows recovery instead of an endless spinner', async ({
 test('desktop and mobile layout remain usable', async ({ page }, testInfo) => {
   await setup(page);
   await page.goto('/');
-  await expect(
-    page.getByRole('heading', { name: 'Miasto pod kontrolą' }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Przegląd' })).toBeVisible();
   await page.screenshot({
     path: testInfo.outputPath('overview-desktop.png'),
     fullPage: true,
@@ -334,9 +332,7 @@ test('login accepts a username and unauthorized requests end the session', async
   await page.getByLabel('Nazwa użytkownika lub e-mail').fill('operator');
   await page.getByLabel('Hasło', { exact: true }).fill('fixture-password');
   await page.getByRole('button', { name: 'Zaloguj się', exact: true }).click();
-  await expect(
-    page.getByRole('heading', { name: 'Miasto pod kontrolą' }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Przegląd' })).toBeVisible();
   await page.route('**/api/device/user/get', (route) =>
     route.fulfill({ status: 401, json: { error: 'Expired' } }),
   );

@@ -131,7 +131,6 @@ export default function SensorPanel() {
       <section className="panel">
         <div className="panel-heading">
           <div>
-            <p className="eyebrow">ŚRODOWISKO MIASTA</p>
             <h2>Punkty pomiarowe</h2>
             <p>
               Temperatura, wilgotność i ciśnienie z zarejestrowanych czujników.
@@ -255,9 +254,6 @@ export default function SensorPanel() {
         >
           <div className="panel-heading">
             <div>
-              <p className="eyebrow">
-                {demo ? 'DEMO — DANE PRZYKŁADOWE' : 'DANE W CZASIE'}
-              </p>
               <h2>
                 {demo ? 'DEMO · Przykładowy wykres' : 'Historia pomiarów'}
               </h2>

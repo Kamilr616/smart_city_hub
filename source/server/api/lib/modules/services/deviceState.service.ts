@@ -171,10 +171,14 @@ export default class DeviceStateService {
         }
     }
 
-    public async getAllLatestDeviceStatesService() {
+    public async getAllLatestDeviceStatesService(location?: string) {
         try {
+            const devices = location === undefined ? null : await DeviceModel.find({location}).select('deviceId').lean();
+            const deviceId = devices === null
+                ? {$gte: 0, $lt: config.supportedDevicesNum}
+                : {$in: devices.map(device => device.deviceId)};
             const deviceStates = await DeviceStateModel.find(
-                {deviceId: {$gte: 0, $lt: config.supportedDevicesNum}},
+                {deviceId},
                 {__v: 0, _id: 0}
             ).lean();
             return buildIotStatePayload(deviceStates, config.supportedDevicesNum);

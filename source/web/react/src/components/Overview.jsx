@@ -17,13 +17,7 @@ export default function Overview() {
     <>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">TWOJA MAKIETA, W JEDNYM MIEJSCU</p>
-          <h1>
-            Miasto pod kontrolą<span className="accent">.</span>
-          </h1>
-          <p>
-            Urządzenia, środowisko i historia działania Twojego miasta LEGO.
-          </p>
+          <h1>Przegląd</h1>
         </div>
         <button
           className="button button-secondary"
@@ -40,12 +34,12 @@ export default function Overview() {
           ponownie.
         </p>
       )}
-      <section className="summary-grid" aria-label="Podsumowanie makiety">
+      <section className="summary-grid" aria-label="Podsumowanie">
         {[
           [
             'Urządzenia',
             errors.devices ? '—' : devices.length,
-            'Zarejestrowane w API',
+            'Zarejestrowane urządzenia',
             'devices',
           ],
           [
@@ -76,8 +70,7 @@ export default function Overview() {
         <section className="panel">
           <div className="panel-heading">
             <div>
-              <p className="eyebrow">PUNKTY POMIAROWE</p>
-              <h2>Środowisko miasta</h2>
+              <h2>Czujniki</h2>
             </div>
             <Link className="text-link" to="/sensors">
               Wykresy <Icon name="arrow" />
@@ -123,15 +116,10 @@ export default function Overview() {
               </p>
             )}
           </div>
-          <div className="info-note">
-            <span className="info-dot">i</span>Pomiary pochodzą z API. Jeśli ESP
-            nie jest podłączone, czujniki czekają na dane.
-          </div>
         </section>
         <section className="panel locations-preview">
           <div className="panel-heading">
             <div>
-              <p className="eyebrow">TWOJE OBSZARY</p>
               <h2>Locations</h2>
             </div>
             <Icon name="locations" />
@@ -144,7 +132,6 @@ export default function Overview() {
             >
               <span>
                 <strong>{city}</strong>
-                <small>Rola / lokalizacja</small>
               </span>
               <b>
                 {devices.filter((d) => d.location === city).length} urządzeń
@@ -163,8 +150,7 @@ export default function Overview() {
       <section className="panel">
         <div className="panel-heading">
           <div>
-            <p className="eyebrow">SZYBKI PODGLĄD</p>
-            <h2>Urządzenia makiety</h2>
+            <h2>Urządzenia</h2>
           </div>
           <Link className="text-link" to="/devices">
             Wszystkie urządzenia <Icon name="arrow" />

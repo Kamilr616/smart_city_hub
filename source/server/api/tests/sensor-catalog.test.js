@@ -17,6 +17,7 @@ function route(controller, path, method) {
 }
 function response() {
   return {
+    locals: {userRole: 'admin'},
     statusCode: null,
     body: null,
     status(code) {

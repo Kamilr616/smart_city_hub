@@ -65,7 +65,6 @@ export default function AddDevice({ onSaved }) {
 
   return (
     <section className="form-panel" aria-labelledby="device-form-title">
-      <p className="eyebrow">Konfiguracja miasta</p>
       <h1 id="device-form-title">Dodaj urządzenie</h1>
       <p>Wybierz wolny identyfikator i przypisz urządzenie do lokalizacji.</p>
       <form onSubmit={submit} className="form-grid" aria-busy={pending}>

@@ -22,6 +22,7 @@ class DeviceController implements Controller {
         this.router.get(`${this.path}/user/get`, auth, this.getAllUserDevices);
         this.router.get(`${this.path}/all/:id`, admin, this.getAllDeviceData);
         this.router.post(`${this.path}/update`, admin, this.updateDevice);
+        this.router.patch(`${this.path}/:id`, admin, this.updateMetadata);
         this.router.get(`${this.path}/:id`, admin, this.getDeviceData);
         this.router.delete(`${this.path}/all`, admin, this.cleanAllDeviceData);
         this.router.delete(`${this.path}/:id`, admin, this.removeDevice);
@@ -60,6 +61,27 @@ class DeviceController implements Controller {
     private getDeviceData = async (request: Request, response: Response, next: NextFunction) => {
         const {id} = request.params;
         response.status(200).json(await this.deviceService.query(id));
+    };
+
+    private updateMetadata = async (request: Request, response: Response) => {
+        const id = request.params.id;
+        if (!/^\d+$/.test(id) || Number(id) >= config.supportedDevicesNum) {
+            return response.status(400).json({error: 'Invalid device ID.'});
+        }
+        try {
+            const data = await Joi.object({
+                name: Joi.string().trim().min(1).max(100),
+                location: Joi.string().trim().min(1).max(100),
+                type: Joi.string().trim().min(1).max(100),
+                description: Joi.string().allow('').max(1000)
+            }).min(1).unknown(false).validateAsync(request.body);
+            const device = await this.deviceService.updateMetadata(Number(id), data);
+            if (!device) return response.status(404).json({error: 'Device not found.'});
+            return response.status(200).json(device);
+        } catch (error: any) {
+            const invalid = error?.isJoi || error?.name === 'ValidationError';
+            return response.status(invalid ? 400 : 500).json({error: invalid ? 'Invalid input data.' : 'Internal Server Error'});
+        }
     };
 
     private updateDevice = async (request: Request, response: Response, next: NextFunction) => {
