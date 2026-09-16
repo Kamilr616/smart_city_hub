@@ -166,13 +166,16 @@ Set `JWT_SECRET_KEY`, `MONGODB_URI`, and `CORS_ORIGIN` in Preview and Production
 
 ### Verification and diagnostics
 
-From `source/server/api`, run:
+From the repository root, run (select the API project when linking):
 
 ```bash
-npm test
+npm --prefix source/server/api test
+vercel link
 vercel pull --yes --environment=preview
 vercel build
 ```
+
+Run Vercel CLI commands from the repository root: the CLI applies the project's `source/server/api` Root Directory itself. Running `vercel build` inside the backend directory duplicates that path.
 
 `npm test` includes type checking, the build, route regressions, database connection reuse/retry coverage, passive serverless-handler import, CORS preflight, database-failure responses, and bcrypt login with JWT issuance and revocation. A deployable result also requires inspection of `.vercel/output/functions` and `.vercel/output/config.json`, followed by smoke tests against a real Preview URL. Verify at least `GET /` (200 static HTML even without the database) and `GET /api/state/iot/all` without a token (application 401 when the database is available). Do not commit `.vercel` or downloaded environment files.
 
