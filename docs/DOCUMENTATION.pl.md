@@ -139,10 +139,49 @@ Przed uruchomieniem komponentu skopiuj właściwy wersjonowany plik `.env.exampl
 
 Pliki `.env` nie są wersjonowane (`.gitignore`). Nigdy nie commituj początkowego hasła administratora.
 
-## 8. Znane ograniczenia / uwagi
+## 8. Uruchamianie API i wdrożenie na Vercelu
+
+API ma dwa punkty wejścia o różnych zadaniach:
+
+- `source/server/api/lib/index.ts` jest lokalnym punktem wejścia procesu. Łączy się z MongoDB, uruchamia `app.listen()` na porcie `PORT` i obsługuje sygnały procesu.
+- `source/server/api/api/index.ts` jest punktem wejścia Vercela. Eksportuje jako domyślny handler współdzieloną aplikację Express utworzoną przez `lib/createApp.ts`; sam import nie otwiera portu, nie łączy z MongoDB ani nie rejestruje obsługi sygnałów procesu.
+
+Dla żądań serverless plik `lib/database.ts` nawiązuje połączenie leniwie i przechowuje trwającą próbę połączenia w cache jednej ciepłej instancji funkcji. Gotowe połączenie Mongoose jest używane ponownie, a po nieudanej próbie lub rozłączeniu możliwe jest ponowienie. `serverSelectionTimeoutMS` wynosi 5 sekund; ogranicza wybór serwera, a nie czas każdego zapytania do bazy.
+
+Kolejność obsługi żądania to middleware CORS, middleware bazy, a następnie kontrolery. Dzięki temu preflight CORS kończy się przed próbą połączenia z bazą. Gdy MongoDB jest niedostępne, trasy API zwracają ogólną odpowiedź JSON 503 z błędem `Database unavailable`, bez ujawniania URI ani surowego błędu sterownika.
+
+### Konfiguracja Vercela
+
+| Ustawienie | Wartość |
+|---|---|
+| Root Directory | `source/server/api` |
+| Framework Preset | Other |
+| Install Command | `npm ci` |
+| Build Command | `npm run typecheck && npm run build` |
+| Output Directory | `dist/public` |
+
+Katalog outputu zawiera wyłącznie stronę statyczną. Funkcja serverless powstaje z `api/index.ts`, a `vercel.json` przepisuje `/api/:path*` na `/api`, zachowując dla Express ścieżkę, metodę, query i body. Statyczna strona startowa `/` pozostaje niezależna od dostępności bazy.
+
+Ustaw `JWT_SECRET_KEY`, `MONGODB_URI` i `CORS_ORIGIN` w środowiskach Preview i Production. `PORT` służy tylko lokalnie. Skonfiguruj dostęp sieciowy MongoDB Atlas dla faktycznego egressu wdrożenia Vercel; nie zakładaj, że nieograniczony dostęp `0.0.0.0/0` jest wymagany.
+
+### Weryfikacja i diagnostyka
+
+W katalogu `source/server/api` uruchom:
+
+```bash
+npm test
+vercel pull --yes --environment=preview
+vercel build
+```
+
+`npm test` obejmuje typecheck, build, regresje tras, testy współdzielenia i ponawiania połączenia z bazą, pasywny import handlera serverless, preflight CORS, odpowiedzi przy awarii bazy oraz logowanie bcrypt z wydaniem i unieważnieniem JWT. Wynik gotowy do wdrożenia wymaga też sprawdzenia `.vercel/output/functions` i `.vercel/output/config.json`, a następnie testów dymnych pod rzeczywistym URL-em Preview. Sprawdź co najmniej `GET /` (200 ze statycznym HTML-em nawet bez bazy) i `GET /api/state/iot/all` bez tokenu (aplikacyjne 401, gdy baza jest dostępna). Nie commituj `.vercel` ani pobranych plików środowiskowych.
+
+404 platformy Vercel oznacza, że funkcja nie została wykryta albo rewrite do niej nie dotarł. Expressowe 404 dla nieznanej trasy API dowodzi wykonania funkcji, podobnie jak oczekiwane 401 z chronionego endpointu bez tokenu przy dostępnej bazie. Ogólna odpowiedź JSON 503 z błędem `Database unavailable` dowodzi wykonania funkcji i nieudanego połączenia z bazą. Lokalne testy handlera nie sprawdzają routingu Vercela, dlatego wymagane są artefakty builda i testy dymne Preview.
+
+## 9. Znane ograniczenia / uwagi
 
 - Sprzęt obsługuje identyfikatory 0–95 (6 ekspanderów × 16 wyjść). API wymusza ten zakres i unikalność identyfikatorów oraz zwraca deterministyczną, 96-elementową odpowiedź dla ESP32.
-- Testy regresji API obejmują trasy sensorów, kontrakt formularza webowego z API, walidację identyfikatorów i odpowiedź dla ESP32. Projekt mobilny zachowuje jeden test dymny renderowania React Native; panel webowy nie ma zestawu testów automatycznych. Brak konfiguracji Docker/CI.
+- Testy regresji API obejmują trasy sensorów, kontrakt formularza webowego z API, walidację identyfikatorów, odpowiedź dla ESP32, współdzielenie i ponawianie połączenia z bazą oraz zachowanie handlera serverless. Projekt mobilny zachowuje jeden test dymny renderowania React Native; panel webowy nie ma zestawu testów automatycznych. Brak konfiguracji Docker/CI.
 - Projekty webowy i mobilny przechodzą zadania ESLint; przechodzi również sprawdzenie TypeScript aplikacji mobilnej.
 - Dane konfiguracyjne firmware są dostarczane przez ignorowany plik `secrets.h`; ich zmiana nadal wymaga rekompilacji.
 - Planowana integracja aplikacji mobilnej z API Node.js nie została ukończona. Zachowany prototyp używa Firebase, a oba backendy nie są zsynchronizowane.
@@ -150,6 +189,6 @@ Pliki `.env` nie są wersjonowane (`.gitignore`). Nigdy nie commituj początkowe
 - `npm audit` nadal zgłasza ostrzeżenie poziomu moderate w drzewie zależności starszego CLI React Native 0.73. Automatyczna poprawka proponowana przez npm wymaga niekompatybilnej aktualizacji React Native i powinna być osobną migracją.
 - Zainstalowano pakiety klienta/core GraphQL, ale nie ma aktywnego schematu ani endpointu GraphQL; zaimplementowanym interfejsem jest REST.
 
-## 9. Licencje
+## 10. Licencje
 
 Kod i dokumentacja autorstwa zespołu projektu są objęte repozytoryjną [licencją MIT](../LICENSE). Dołączone biblioteki, multimedia, instrukcje i zależności pakietów zachowują własne warunki; zobacz [informacje o licencjach podmiotów trzecich](THIRD_PARTY_NOTICES.md).

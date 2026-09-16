@@ -122,10 +122,33 @@ Uruchom API:
 npm run dev     # tryb deweloperski (ts-node)
 npm run watch   # tryb deweloperski z auto-restartem (nodemon)
 npm run build   # kompilacja TypeScript do dist/
-npm test        # build i testy regresji tras API
+npm test        # build i testy regresji API, serverless oraz uwierzytelniania
 ```
 
 API domyślnie nasłuchuje na `http://localhost:4200`.
+
+#### Wdrożenie API na Vercelu
+
+Utwórz projekt Vercel z następującymi ustawieniami backendu:
+
+| Ustawienie | Wartość |
+|---|---|
+| Root Directory | `source/server/api` |
+| Framework Preset | Other |
+| Install Command | `npm ci` |
+| Build Command | `npm run typecheck && npm run build` |
+| Output Directory | `dist/public` |
+
+Statyczny output obsługuje `/` niezależnie od MongoDB. Vercel buduje handler serverless z `api/index.ts`, a `vercel.json` przepisuje `/api/:path*` na `/api`; nie ustawiaj `dist` jako Root Directory.
+
+Ustaw `JWT_SECRET_KEY`, `MONGODB_URI` i `CORS_ORIGIN` dla Preview oraz Production. `PORT` służy wyłącznie lokalnie. W MongoDB Atlas zezwól na dostęp sieciowy dla faktycznego egressu wdrożenia Vercel; szeroka reguła `0.0.0.0/0` nie jest z założenia wymagana.
+
+Przed promocją uruchom `npm test`, a następnie `vercel pull --yes --environment=preview` i `vercel build` w `source/server/api`. Potwierdź, że `.vercel/output/functions` zawiera funkcję API, a `.vercel/output/config.json` trasuje `/api/*`, po czym wykonaj testy dymne Preview:
+
+- `GET /` zwraca statyczny HTML ze statusem 200, również gdy baza jest niedostępna.
+- `GET /api/state/iot/all` bez tokenu zwraca aplikacyjne 401, gdy baza jest dostępna.
+
+404 platformy oznacza problem z wykryciem funkcji lub routingiem. Aplikacyjne 404 dla nieznanej trasy API albo 401 z chronionej trasy potwierdza obsługę żądania przez Express. Ogólna odpowiedź JSON 503 z błędem `Database unavailable` oznacza, że funkcja została wykonana, ale nie połączyła się z MongoDB. Artefakty builda i testy dymne Preview są wymaganym sprawdzeniem wdrożenia.
 
 ### 2. Panel webowy
 
