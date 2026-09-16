@@ -139,10 +139,49 @@ Copy each checked-in `.env.example` to `.env` before running the relevant compon
 
 `.env` files are not versioned (`.gitignore`). Never commit the initial administrator password.
 
-## 8. Known limitations / notes
+## 8. API runtime and Vercel deployment
+
+The API has two entry points with separate responsibilities:
+
+- `source/server/api/lib/index.ts` is the local process entry point. It connects to MongoDB, starts `app.listen()` on `PORT`, and owns signal handling.
+- `source/server/api/api/index.ts` is the Vercel entry point. It exports the shared Express application created by `lib/createApp.ts` as the default handler; importing it does not listen on a port, connect to MongoDB, or register process signal handlers.
+
+For serverless requests, `lib/database.ts` connects lazily and caches an in-flight connection attempt within one warm function instance. A ready Mongoose connection is reused, while failed attempts and disconnected state can retry. `serverSelectionTimeoutMS` is 5 seconds; it limits server selection, not every database query.
+
+The request order is CORS middleware, database middleware, then controllers. A CORS preflight therefore completes before any database connection attempt. If MongoDB is unavailable, API routes return a generic JSON 503 with the `Database unavailable` error, without exposing a URI or raw driver error.
+
+### Vercel configuration
+
+| Setting | Value |
+|---|---|
+| Root Directory | `source/server/api` |
+| Framework Preset | Other |
+| Install Command | `npm ci` |
+| Build Command | `npm run typecheck && npm run build` |
+| Output Directory | `dist/public` |
+
+The output directory is only the static site. The serverless function comes from `api/index.ts`, and `vercel.json` rewrites `/api/:path*` to `/api`, preserving the path, method, query, and body for Express. The static `/` landing page remains independent of database availability.
+
+Set `JWT_SECRET_KEY`, `MONGODB_URI`, and `CORS_ORIGIN` in Preview and Production. `PORT` is local-only. Configure MongoDB Atlas network access for the deployment's actual Vercel egress; do not assume that unrestricted `0.0.0.0/0` access is required.
+
+### Verification and diagnostics
+
+From `source/server/api`, run:
+
+```bash
+npm test
+vercel pull --yes --environment=preview
+vercel build
+```
+
+`npm test` includes type checking, the build, route regressions, database connection reuse/retry coverage, passive serverless-handler import, CORS preflight, database-failure responses, and bcrypt login with JWT issuance and revocation. A deployable result also requires inspection of `.vercel/output/functions` and `.vercel/output/config.json`, followed by smoke tests against a real Preview URL. Verify at least `GET /` (200 static HTML even without the database) and `GET /api/state/iot/all` without a token (application 401 when the database is available). Do not commit `.vercel` or downloaded environment files.
+
+A Vercel platform 404 means the function was not detected or the rewrite did not reach it. An Express 404 for an unknown API route proves the function ran, as does the expected 401 from a protected endpoint without a token when MongoDB is reachable. A generic JSON 503 with the `Database unavailable` error proves the function ran but its database connection failed. Local handler tests do not verify Vercel routing, so build artifacts and Preview smoke tests are required.
+
+## 9. Known limitations / notes
 
 - The hardware supports IDs 0–95 (6 expanders × 16 outputs). The API enforces that range and unique device IDs, and returns a deterministic 96-element ESP32 payload.
-- API regression tests cover sensor routes, the web-to-API device contract, ID validation, and the ESP32 payload. The mobile project retains one React Native render smoke test; the web dashboard has no automated test suite. There is no Docker/CI configuration.
+- API regression tests cover sensor routes, the web-to-API device contract, ID validation, the ESP32 payload, database connection reuse/retry, and serverless handler behavior. The mobile project retains one React Native render smoke test; the web dashboard has no automated test suite. There is no Docker/CI configuration.
 - The web and mobile projects pass their ESLint tasks; the mobile TypeScript check also passes.
 - Firmware credentials are supplied through the ignored `secrets.h`; changing them still requires recompilation.
 - Planned integration of the mobile app with the Node.js API was not completed. The retained prototype uses Firebase, and the two backends are not synchronized.
@@ -150,6 +189,6 @@ Copy each checked-in `.env.example` to `.env` before running the relevant compon
 - `npm audit` still reports a moderate advisory in the legacy React Native 0.73 CLI dependency tree. npm's proposed automatic fix is a breaking React Native upgrade and should be handled as a separate migration.
 - GraphQL client/core packages are installed, but there is no active GraphQL schema or endpoint; REST is the implemented interface.
 
-## 9. Licenses
+## 10. Licenses
 
 Project-authored code and documentation are covered by the repository's [MIT license](../LICENSE). Bundled libraries, media, manuals, and package dependencies retain their own terms; see [Third-party notices](THIRD_PARTY_NOTICES.md).
