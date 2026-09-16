@@ -137,7 +137,7 @@ Sensor ingestion keeps the `{sensorData: [{deviceId, air: {temperature, pressure
 4. `Locations` is computed from the device and sensor locations available to the account rather than from a separate location store.
 5. Sensor charts load `GET /api/sensor/history/:id` for temperature, humidity, and pressure over 1 hour, 24 hours, 7 days, or 30 days. Live data is the default. The optional DEMO mode starts off and generates browser-memory samples only; it does not call a write endpoint.
 
-6. Administrators use `Użytkownicy` to list/edit accounts, `Devices` to edit device metadata, and `Tokeny ESP` to create, inspect expiry, or revoke location credentials. Token values are shown once after creation. The interface keeps the original white/gray palette, blue navigation, black buttons, KI logo, and concise headings.
+6. Administrators use `Users` to list/edit accounts, `Devices` to edit device metadata, and `ESP tokens` to create, inspect expiry, or revoke location credentials. Token values are shown once after creation. The interface keeps the original white/gray palette, blue navigation, black buttons, KI logo, and concise headings.
 
 Charts preserve missing values instead of inventing measurements. A device state before the first stored observation remains unknown, and a truncated history leaves its omitted leading interval blank. Registering a sensor creates metadata only: without connected ESP hardware, no real readings appear.
 
@@ -145,7 +145,7 @@ Charts preserve missing values instead of inventing measurements. A device state
 
 - **Hardware:** ESP32 + 6× MCP23017 on the I2C bus (addresses `0x22`–`0x27`), 96 outputs in total; SDA=21, SCL=22; UART at 9600 baud.
 - **Operation:** after connecting to WiFi, the sketch periodically calls `GET /api/state/iot/all` (with a token in the `x-access-token` header), parses the exact 96-element JSON state array (`ArduinoJson`), and writes the required MCP23017 registers directly over I2C. Array position equals `deviceId`; missing devices and devices outside the credential’s location are represented as `false`.
-- **Configuration:** copy `secrets.example.h` to the ignored `secrets.h` and set the WiFi SSID, API URL, and `API_TOKEN` before flashing. Create a credential in `Tokeny ESP` and use `"Bearer "` followed by the complete `sch_...` value. The existing sketch sends this string through `x-access-token`; expiry or revocation requires a new token and reflash.
+- **Configuration:** copy `secrets.example.h` to the ignored `secrets.h` and set the WiFi SSID, API URL, and `API_TOKEN` before flashing. Create a credential in `ESP tokens` and use `"Bearer "` followed by the complete `sch_...` value. The existing sketch sends this string through `x-access-token`; expiry or revocation requires a new token and reflash.
 
 ### 6.1 Historical NXP/LPCXpresso references
 

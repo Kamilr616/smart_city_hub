@@ -24,15 +24,15 @@ export default function HistoryChart({
       type: 'linear',
       min: Date.parse(from),
       max: Date.parse(to),
-      title: { display: true, text: 'Czas lokalny' },
+      title: { display: true, text: 'Local time' },
       ticks: {
         maxTicksLimit: 4,
         callback: (value) => [
-          new Date(value).toLocaleDateString('pl-PL', {
+          new Date(value).toLocaleDateString('en-GB', {
             day: '2-digit',
             month: '2-digit',
           }),
-          new Date(value).toLocaleTimeString('pl-PL', {
+          new Date(value).toLocaleTimeString('en-GB', {
             hour: '2-digit',
             minute: '2-digit',
           }),
@@ -47,7 +47,7 @@ export default function HistoryChart({
       position: index === 0 ? 'left' : 'right',
       title: {
         display: true,
-        text: binary ? 'Stan' : `${item.label} (${item.unit})`,
+        text: binary ? 'State' : `${item.label} (${item.unit})`,
         color: item.color,
       },
       grid: { drawOnChartArea: index === 0, color: '#eef2f6' },
@@ -55,7 +55,7 @@ export default function HistoryChart({
         ? {
             stepSize: 1,
             callback: (value) =>
-              value === 1 ? 'Włączone' : value === 0 ? 'Wyłączone' : '',
+              value === 1 ? 'On' : value === 0 ? 'Off' : '',
           }
         : { maxTicksLimit: 6 },
       ...(binary ? { min: 0, max: 1 } : {}),
@@ -77,6 +77,7 @@ export default function HistoryChart({
     })),
   };
   const options = {
+    locale: 'en-GB',
     responsive: true,
     maintainAspectRatio: false,
     animation: false,
@@ -95,8 +96,8 @@ export default function HistoryChart({
             items.length ? formatTimestamp(items[0].parsed.x) : '',
           label: (context) =>
             binary
-              ? `Stan: ${context.parsed.y === 1 ? 'włączone' : 'wyłączone'}`
-              : `${context.dataset.label}: ${context.parsed.y.toLocaleString('pl-PL')}`,
+              ? `State: ${context.parsed.y === 1 ? 'On' : 'Off'}`
+              : `${context.dataset.label}: ${context.parsed.y.toLocaleString('en-GB')}`,
         },
       },
     },
@@ -108,7 +109,7 @@ export default function HistoryChart({
       role={series.length > 1 ? 'region' : undefined}
       aria-label={
         series.length > 1
-          ? 'Wykres wielu parametrów — przewiń poziomo, aby zobaczyć całość'
+          ? 'Chart with multiple parameters — scroll horizontally to see all data'
           : undefined
       }
     >

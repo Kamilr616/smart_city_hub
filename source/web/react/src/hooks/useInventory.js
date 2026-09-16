@@ -33,7 +33,7 @@ export function useInventory() {
             signal: next.signal,
           });
           if (!Array.isArray(value))
-            throw new Error('Nieprawidłowa odpowiedź API.');
+            throw new Error('Invalid API response.');
           return { key, value };
         } catch (error) {
           return { key, error };

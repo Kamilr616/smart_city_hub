@@ -1,4 +1,4 @@
-﻿import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { UserContext } from './context/auth';
 import { apiRequest, getApiErrorMessage } from './api';
@@ -17,7 +17,7 @@ export default function Login() {
     event.preventDefault();
     if (request.current) return;
     if (!form.login.trim()) {
-      setError('Podaj nazwę użytkownika lub adres e-mail.');
+      setError('Enter your username or email address.');
       return;
     }
     const controller = new AbortController();
@@ -37,7 +37,7 @@ export default function Login() {
       if (failure.name !== 'AbortError')
         setError(
           failure.status === 401
-            ? 'Nieprawidłowa nazwa użytkownika, adres e-mail lub hasło.'
+            ? 'Incorrect username, email address, or password.'
             : getApiErrorMessage(failure),
         );
     } finally {
@@ -54,11 +54,11 @@ export default function Login() {
           <img src={kiLogo} alt="KI" />
           Smart City Hub
         </div>
-        <h1 id="login-title">Logowanie</h1>
-        <p>Podaj dane swojego konta.</p>
+        <h1 id="login-title">Sign in</h1>
+        <p>Enter your account details.</p>
         <form onSubmit={submit} className="form-grid" aria-busy={pending}>
           <div className="field">
-            <label htmlFor="login">Nazwa użytkownika lub e-mail</label>
+            <label htmlFor="login">Username or email</label>
             <input
               className="input"
               id="login"
@@ -74,7 +74,7 @@ export default function Login() {
             />
           </div>
           <div className="field">
-            <label htmlFor="password">Hasło</label>
+            <label htmlFor="password">Password</label>
             <input
               className="input"
               id="password"
@@ -95,7 +95,7 @@ export default function Login() {
             </p>
           )}
           <button className="button" type="submit" disabled={pending}>
-            {pending ? 'Logowanie…' : 'Zaloguj się'}
+            {pending ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
       </section>

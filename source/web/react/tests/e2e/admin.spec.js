@@ -114,21 +114,21 @@ test('device metadata edit preserves identifier and does not write state', async
 }) => {
   const f = await setup(page);
   await page.goto('/devices');
-  await page.getByRole('link', { name: 'Edytuj: Pet Shop' }).click();
-  await expect(page.getByLabel('ID urządzenia', { exact: true })).toHaveValue(
+  await page.getByRole('link', { name: 'Edit: Pet Shop' }).click();
+  await expect(page.getByLabel('Device ID', { exact: true })).toHaveValue(
     '0',
   );
   await expect(
-    page.getByLabel('ID urządzenia', { exact: true }),
+    page.getByLabel('Device ID', { exact: true }),
   ).not.toBeEditable();
   await page
-    .getByLabel('Nazwa urządzenia', { exact: true })
+    .getByLabel('Device name', { exact: true })
     .fill('Sklep zoologiczny');
-  await page.getByLabel('Opis', { exact: true }).fill('Nowy opis');
+  await page.getByLabel('Description', { exact: true }).fill('Nowy opis');
   await page
-    .getByRole('button', { name: 'Zapisz zmiany', exact: true })
+    .getByRole('button', { name: 'Save changes', exact: true })
     .click();
-  await expect(page.getByRole('status')).toContainText('zapisane');
+  await expect(page.getByRole('status')).toContainText('saved');
   expect(f.writes).toEqual([
     {
       path: '/api/device/0',
@@ -152,15 +152,15 @@ test('admin can edit a user and deactivate access without sending an empty passw
   const f = await setup(page);
   await page.goto('/users');
   await page
-    .getByRole('button', { name: 'Edytuj: operator', exact: true })
+    .getByRole('button', { name: 'Edit: operator', exact: true })
     .click();
-  await page.getByLabel('Nazwa użytkownika', { exact: true }).fill('operator2');
-  await page.getByLabel('Lokalizacja / rola', { exact: true }).fill('harbour');
-  await page.getByLabel('Konto aktywne', { exact: true }).uncheck();
+  await page.getByLabel('Username', { exact: true }).fill('operator2');
+  await page.getByLabel('Location / role', { exact: true }).fill('harbour');
+  await page.getByLabel('Active account', { exact: true }).uncheck();
   await page
-    .getByRole('button', { name: 'Zapisz zmiany', exact: true })
+    .getByRole('button', { name: 'Save changes', exact: true })
     .click();
-  await expect(page.getByRole('status')).toContainText('zapisane');
+  await expect(page.getByRole('status')).toContainText('saved');
   expect(f.writes).toHaveLength(1);
   expect(f.writes[0].body).toMatchObject({
     name: 'operator2',
@@ -179,15 +179,15 @@ test('ordinary users cannot open administration or device editing', async ({
   for (const path of ['/users', '/esp-tokens', '/devices/0/edit']) {
     await page.goto(path);
     await expect(
-      page.getByRole('heading', { name: 'Przegląd', exact: true }),
+      page.getByRole('heading', { name: 'Overview', exact: true }),
     ).toBeVisible();
   }
   await expect(
-    page.getByRole('link', { name: 'Użytkownicy', exact: true }),
+    page.getByRole('link', { name: 'Users', exact: true }),
   ).toHaveCount(0);
   await page.goto('/devices');
   await expect(
-    page.getByRole('link', { name: 'Edytuj: Pet Shop' }),
+    page.getByRole('link', { name: 'Edit: Pet Shop' }),
   ).toHaveCount(0);
 });
 test('ESP key is created for a location, shown once and can be revoked', async ({
@@ -195,13 +195,13 @@ test('ESP key is created for a location, shown once and can be revoked', async (
 }) => {
   const f = await setup(page);
   await page.goto('/esp-tokens');
-  await page.getByLabel('Nazwa tokenu', { exact: true }).fill('ESP rynek');
-  await page.getByLabel('Lokalizacja', { exact: true }).selectOption('city');
-  await page.getByLabel('Ważność (dni)', { exact: true }).fill('30');
+  await page.getByLabel('Token name', { exact: true }).fill('ESP rynek');
+  await page.getByLabel('Location', { exact: true }).selectOption('city');
+  await page.getByLabel('Validity (days)', { exact: true }).fill('30');
   await page
-    .getByRole('button', { name: 'Generuj token', exact: true })
+    .getByRole('button', { name: 'Generate token', exact: true })
     .click();
-  await expect(page.getByLabel('Nowy token ESP', { exact: true })).toHaveValue(
+  await expect(page.getByLabel('New ESP token', { exact: true })).toHaveValue(
     'sch_fixture-one-time-secret',
   );
   expect(f.writes[0].body).toEqual({
@@ -217,15 +217,15 @@ test('ESP key is created for a location, shown once and can be revoked', async (
   );
   expect(persisted).not.toContain('sch_fixture');
   await page.getByRole('link', { name: 'Devices', exact: true }).click();
-  await page.getByRole('link', { name: 'Tokeny ESP', exact: true }).click();
-  await expect(page.getByLabel('Nowy token ESP', { exact: true })).toHaveCount(
+  await page.getByRole('link', { name: 'ESP tokens', exact: true }).click();
+  await expect(page.getByLabel('New ESP token', { exact: true })).toHaveCount(
     0,
   );
   page.once('dialog', (dialog) => dialog.accept());
   await page
-    .getByRole('button', { name: 'Unieważnij: ESP rynek', exact: true })
+    .getByRole('button', { name: 'Revoke: ESP rynek', exact: true })
     .click();
-  await expect(page.getByText('Unieważniony', { exact: true })).toBeVisible();
+  await expect(page.getByText('Revoked', { exact: true })).toBeVisible();
 });
 
 test('administration layout works on desktop and mobile', async ({
@@ -234,10 +234,10 @@ test('administration layout works on desktop and mobile', async ({
   await setup(page);
   await page.goto('/users');
   await page
-    .getByRole('button', { name: 'Edytuj: operator', exact: true })
+    .getByRole('button', { name: 'Edit: operator', exact: true })
     .click();
   await expect(
-    page.getByLabel('Nazwa użytkownika', { exact: true }),
+    page.getByLabel('Username', { exact: true }),
   ).toBeVisible();
   await page.screenshot({
     path: info.outputPath('users-desktop.png'),
@@ -253,7 +253,7 @@ test('administration layout works on desktop and mobile', async ({
   });
   await page.goto('/esp-tokens');
   await expect(
-    page.getByRole('button', { name: 'Generuj token', exact: true }),
+    page.getByRole('button', { name: 'Generate token', exact: true }),
   ).toBeVisible();
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth),

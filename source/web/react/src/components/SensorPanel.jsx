@@ -131,9 +131,9 @@ export default function SensorPanel() {
       <section className="panel">
         <div className="panel-heading">
           <div>
-            <h2>Punkty pomiarowe</h2>
+            <h2>Measurement points</h2>
             <p>
-              Temperatura, wilgotność i ciśnienie z zarejestrowanych czujników.
+              Temperature, humidity and pressure from registered sensors.
             </p>
           </div>
           <button
@@ -141,25 +141,25 @@ export default function SensorPanel() {
             disabled={loading || history.loading || demo}
             onClick={() => setRefresh((value) => value + 1)}
           >
-            Odśwież pomiary
+            Refresh readings
           </button>
         </div>
-        {loading && <p role="status">Wczytywanie czujników…</p>}
+        {loading && <p role="status">Loading sensors…</p>}
         {catalogError && (
           <p className="error-message" role="alert">
-            Nie udało się pobrać katalogu czujników. {catalogError}
+            Could not load the sensor catalogue. {catalogError}
           </p>
         )}
         {!loading && !catalogError && !visibleCatalog.length && (
           <div className="empty-state">
-            Brak zarejestrowanych czujników w Twoich lokalizacjach.
+            No registered sensors in your locations.
           </div>
         )}
         {sensor && (
           <>
             <div className="toolbar">
               <div className="field">
-                <label htmlFor={sensorSelect}>Czujnik</label>
+                <label htmlFor={sensorSelect}>Sensor</label>
                 <select
                   id={sensorSelect}
                   className="select"
@@ -174,7 +174,7 @@ export default function SensorPanel() {
                 </select>
               </div>
               <div className="field">
-                <label htmlFor={rangeSelect}>Zakres czasu</label>
+                <label htmlFor={rangeSelect}>Time range</label>
                 <select
                   id={rangeSelect}
                   className="select"
@@ -194,14 +194,14 @@ export default function SensorPanel() {
                   checked={demo}
                   onChange={(event) => setDemo(event.target.checked)}
                 />{' '}
-                Tryb demonstracyjny (DEMO)
+                Demo mode (DEMO)
               </label>
             </div>
             <div className="panel-heading">
               <div>
                 <h3>{sensor.name}</h3>
                 <p>
-                  {sensor.description || 'Zarejestrowany czujnik środowiskowy.'}
+                  {sensor.description || 'Registered environmental sensor.'}
                 </p>
               </div>
               <span className="badge">
@@ -210,13 +210,13 @@ export default function SensorPanel() {
             </div>
             {demo && (
               <p className="badge" role="status">
-                <strong>DEMO — przykładowe dane.</strong> Wartości wygenerowane
-                w przeglądarce, niezapisane na serwerze.
+                <strong>DEMO — sample data.</strong> Values generated in your
+                browser and not saved on the server.
               </p>
             )}
             {!demo && latestError && (
               <p role="alert" className="error-message">
-                Najnowszy pomiar jest niedostępny. {latestError}
+                The latest reading is unavailable. {latestError}
               </p>
             )}
             <div className="metrics-grid">
@@ -231,17 +231,17 @@ export default function SensorPanel() {
               ))}
             </div>
             <p>
-              {demo ? 'Czas przykładowej wartości' : 'Ostatni pomiar'}:{' '}
+              {demo ? 'Sample reading time' : 'Last reading'}:{' '}
               {formatTimestamp(reading?.readingDate)}
             </p>
             {!demo && isStaleReading(reading) && (
               <p className="badge" role="status">
-                Nieaktualny pomiar — dane są starsze niż 15 minut.
+                Outdated reading — data is more than 15 minutes old.
               </p>
             )}
             {!demo && (
               <p>
-                Automatyczne odświeżanie co 30 sekund, gdy karta jest widoczna.
+                Refreshes automatically every 30 seconds while the tab is visible.
               </p>
             )}
           </>
@@ -250,25 +250,25 @@ export default function SensorPanel() {
       {sensor && (
         <section
           className="panel"
-          aria-label={`${demo ? 'DEMO · ' : ''}Historia pomiarów: ${sensor.name}`}
+          aria-label={`${demo ? 'DEMO · ' : ''}Reading history: ${sensor.name}`}
         >
           <div className="panel-heading">
             <div>
               <h2>
-                {demo ? 'DEMO · Przykładowy wykres' : 'Historia pomiarów'}
+                {demo ? 'DEMO · Sample chart' : 'Reading history'}
               </h2>
             </div>
             <span className="badge">{sensor.name}</span>
           </div>
           <div className="field chart-metric-selector">
-            <label htmlFor={metricSelect}>Parametr wykresu</label>
+            <label htmlFor={metricSelect}>Chart parameter</label>
             <select
               id={metricSelect}
               className="select"
               value={chartMetric}
               onChange={(event) => setChartMetric(event.target.value)}
             >
-              <option value="all">Wszystkie</option>
+              <option value="all">All</option>
               {metrics.map((metric) => (
                 <option key={metric.key} value={metric.key}>
                   {metric.label}
@@ -277,25 +277,25 @@ export default function SensorPanel() {
             </select>
           </div>
           {history.loading && (
-            <p role="status">Wczytywanie historii pomiarów…</p>
+            <p role="status">Loading reading history…</p>
           )}
           {history.error && (
             <p className="error-message" role="alert">
-              Nie udało się pobrać historii pomiarów. {history.error}
+              Could not load reading history. {history.error}
             </p>
           )}
           {history.data && !history.loading && (
             <>
               {history.data.truncated && (
                 <p className="badge" role="status">
-                  Limit historii: pokazano najnowsze 1000 pomiarów. Wybierz
-                  krótszy zakres, aby zobaczyć więcej szczegółów.
+                  History limit: showing the latest 1000 readings. Select
+                  a shorter time range to see more detail.
                 </p>
               )}
               {!hasMeasurements ? (
                 <div className="empty-state">
-                  Brak pomiarów w wybranym okresie. Czujnik jest zarejestrowany,
-                  ale nie ma danych do wyświetlenia.
+                  No readings in the selected period. The sensor is registered,
+                  but there is no data to display.
                 </div>
               ) : (
                 <>
@@ -311,19 +311,19 @@ export default function SensorPanel() {
                       }))}
                     from={history.data.from}
                     to={history.data.to}
-                    label={`${demo ? 'DEMO · ' : ''}Wykres pomiarów czujnika ${sensor.name}. Dane dostępne także w tabeli poniżej.`}
+                    label={`${demo ? 'DEMO · ' : ''}Reading chart for sensor ${sensor.name}. Data is also available in the table below.`}
                   />
                   <details>
-                    <summary>Pokaż pomiary w tabeli</summary>
+                    <summary>Show readings as a table</summary>
                     <div className="table-scroll">
                       <table>
                         <caption>
-                          {demo ? 'DEMO · Dane przykładowe' : 'Pomiary'} ·{' '}
+                          {demo ? 'DEMO · Sample data' : 'Readings'} ·{' '}
                           {sensor.name}
                         </caption>
                         <thead>
                           <tr>
-                            <th scope="col">Czas pomiaru</th>
+                            <th scope="col">Reading time</th>
                             {metrics.map((metric) => (
                               <th key={metric.key} scope="col">
                                 {metric.label} ({metric.unit})
