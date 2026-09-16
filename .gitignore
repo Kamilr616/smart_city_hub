@@ -35,3 +35,6 @@ dist-ssr
 # environment secrets
 .env
 source/embedded/esp32_arduino/smart_city_iot/secrets.h
+
+# Vercel project links, downloaded environment files and build output
+.vercel
