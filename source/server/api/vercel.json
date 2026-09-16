@@ -1,5 +1,17 @@
 {
+  "framework": null,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/public",
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": "lib/public/**"
+    }
+  },
   "rewrites": [
+    {
+      "source": "/",
+      "destination": "/api"
+    },
     {
       "source": "/api/(.*)",
       "destination": "/api"

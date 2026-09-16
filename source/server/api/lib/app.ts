@@ -4,7 +4,6 @@ import Controller from "./interfaces/controller.interface";
 import bodyParser from 'body-parser';
 import morgan from 'morgan';
 import cors from 'cors';
-import {connectToDatabase} from './server';
 
 
 class App {
@@ -30,13 +29,6 @@ class App {
     private initializeControllers(controllers: Controller[]): void {
         controllers.forEach((controller) => {
             this.app.use('/', controller.router);
-        });
-    }
-
-    public async listen(): Promise<void> {
-        await connectToDatabase();
-        this.app.listen(config.port, () => {
-            console.log(`App listening on the port ${config.port}`);
         });
     }
 }
