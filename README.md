@@ -179,10 +179,14 @@ Project settings:
 | Setting | Value |
 |---|---|
 | Root Directory | `source/server/api` |
+| Framework Preset | None (`"framework": null` in `vercel.json`) |
+| Build Command | `npm run build` |
+| Output Directory | `dist/public` |
 | Function entry | `api/index.ts` |
-| Rewrite | `vercel.json` sends `/api/(.*)` to the function; everything else stays static |
 
-The function builds the Express application once per cold start and reuses a single cached Mongoose connection across invocations. If the database cannot be reached, it answers `503 {"error": "Database unavailable"}` instead of hanging.
+`vercel.json` routes exactly two things to the function: `/` and `/api/(.*)`. The landing page is answered from the Output Directory when it is present there and by the function otherwise — `lib/public/**` is traced into the function bundle through `includeFiles`, because Vercel cannot see the path that `res.sendFile()` opens at runtime. Nothing else is routed, so the compiled server code in `dist/` is never served.
+
+The function builds the Express application once per cold start and reuses a single cached Mongoose connection. `OPTIONS` preflight requests are answered without touching the database, and if the database cannot be reached the function returns `503 {"error": "Database unavailable"}` — with the CORS headers still set — instead of hanging.
 
 Environment variables to set in the Vercel project:
 
@@ -192,6 +196,8 @@ Environment variables to set in the Vercel project:
 | `JWT_SECRET_KEY` | JWT signing secret |
 | `CORS_ORIGIN` | Comma-separated origins, including `https://kamilr616.github.io` and the deployed dashboard origin |
 | `PORT` | Not used by the serverless runtime; it only affects a local run |
+
+`MONGODB_URI` and `JWT_SECRET_KEY` are read while the module loads, so a missing value makes the function fail immediately with `FUNCTION_INVOCATION_FAILED`; set both before the first deploy.
 
 MongoDB Atlas **Network Access** must allow `0.0.0.0/0`, or use the Atlas–Vercel integration, because the egress IP addresses of serverless functions are dynamic.
 

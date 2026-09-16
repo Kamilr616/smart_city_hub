@@ -182,10 +182,14 @@ Ustawienia projektu:
 | Ustawienie | Wartość |
 |---|---|
 | Root Directory | `source/server/api` |
+| Framework Preset | Brak (`"framework": null` w `vercel.json`) |
+| Build Command | `npm run build` |
+| Output Directory | `dist/public` |
 | Punkt wejścia funkcji | `api/index.ts` |
-| Rewrite | `vercel.json` kieruje `/api/(.*)` do funkcji; pozostałe ścieżki pozostają statyczne |
 
-Funkcja buduje aplikację Express raz na zimny start i współdzieli jedno buforowane połączenie Mongoose między wywołaniami. Jeśli baza jest nieosiągalna, zwraca `503 {"error": "Database unavailable"}` zamiast zawieszać żądanie.
+`vercel.json` kieruje do funkcji dokładnie dwie ścieżki: `/` oraz `/api/(.*)`. Stronę startową zwraca Output Directory, jeśli plik tam jest, a w przeciwnym razie funkcja — katalog `lib/public/**` jest dołączany do bundle'a funkcji przez `includeFiles`, ponieważ Vercel nie widzi ścieżki otwieranej w czasie działania przez `res.sendFile()`. Żadna inna ścieżka nie jest routowana, więc skompilowany kod serwera z `dist/` nigdy nie jest serwowany.
+
+Funkcja buduje aplikację Express raz na zimny start i współdzieli jedno buforowane połączenie Mongoose. Żądania preflight (`OPTIONS`) są obsługiwane bez kontaktu z bazą, a gdy baza jest nieosiągalna, funkcja zwraca `503 {"error": "Database unavailable"}` — wraz z nagłówkami CORS — zamiast zawieszać żądanie.
 
 Zmienne środowiskowe do ustawienia w projekcie Vercel:
 
@@ -195,6 +199,8 @@ Zmienne środowiskowe do ustawienia w projekcie Vercel:
 | `JWT_SECRET_KEY` | Sekret do podpisywania JWT |
 | `CORS_ORIGIN` | Źródła rozdzielone przecinkami, w tym `https://kamilr616.github.io` oraz źródło wdrożonego panelu |
 | `PORT` | Nieużywane przez środowisko serverless; ma znaczenie tylko lokalnie |
+
+`MONGODB_URI` i `JWT_SECRET_KEY` są odczytywane podczas ładowania modułu, więc brak wartości powoduje natychmiastowy błąd funkcji `FUNCTION_INVOCATION_FAILED`; ustaw obie przed pierwszym wdrożeniem.
 
 W MongoDB Atlas sekcja **Network Access** musi dopuszczać `0.0.0.0/0` albo należy użyć integracji Atlas–Vercel, ponieważ adresy IP wyjściowe funkcji serverless są dynamiczne.
 

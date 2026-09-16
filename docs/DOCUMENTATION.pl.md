@@ -146,12 +146,16 @@ API może być hostowane na Vercel jako funkcja serverless; lokalne `npm run dev
 | Ustawienie | Wartość |
 |---|---|
 | Root Directory | `source/server/api` |
+| Framework Preset | Brak (`"framework": null`) |
+| Build Command | `npm run build` |
+| Output Directory | `dist/public` |
 | Punkt wejścia funkcji | `api/index.ts` (domyślny eksport `(req, res)`) |
-| Rewrite | `vercel.json`: `/api/(.*)` → `/api`, dzięki czemu funkcję wywołują tylko ścieżki API, a `public/` pozostaje statyczne |
 
-`api/index.ts` wywołuje `createApp()` z `lib/server.ts` raz na zimny start i przy każdym wywołaniu czeka na `connectToDatabase()`. Ten helper buforuje oczekujące połączenie Mongoose w zmiennej modułu oraz w `globalThis`, więc ciepła instancja używa jednego połączenia, a nieudana próba jest usuwana z bufora i ponawiana przy kolejnym żądaniu. Gdy połączenia nie da się nawiązać, funkcja zwraca `503 {"error": "Database unavailable"}`.
+`vercel.json` kieruje do funkcji `/` oraz `/api/(.*)` i nic poza tym, więc skompilowany kod serwera z `dist/` nigdy nie jest serwowany. Stronę startową zwraca Output Directory, jeśli Vercel znajdzie ją tam, a w przeciwnym razie funkcja; wpis `"functions": {"api/index.ts": {"includeFiles": "lib/public/**"}}` dołącza `lib/public/index.html` do bundle'a, ponieważ tracer plików nie potrafi prześledzić ścieżki otwieranej dopiero w czasie działania przez `res.sendFile()`.
 
-Wymagane zmienne środowiskowe w projekcie Vercel: `MONGODB_URI` (forma `mongodb+srv://` działa na Vercel), `JWT_SECRET_KEY` oraz `CORS_ORIGIN` jako lista rozdzielona przecinkami zawierająca `https://kamilr616.github.io` i źródło wdrożonego panelu. `PORT` nie jest używany przez środowisko serverless.
+`api/index.ts` wywołuje `createApp()` z `lib/server.ts` raz na zimny start. Żądanie preflight (`OPTIONS`) trafia od razu do middleware CORS Express, bez odpytywania bazy; każde inne żądanie czeka na `connectToDatabase()`. Ten helper buforuje oczekujące połączenie Mongoose w zmiennej modułu oraz w `globalThis`, więc ciepła instancja używa jednego połączenia, a nieudana próba — lub połączenie, którego `readyState` zmienił się na `disconnected` / `disconnecting` — jest usuwana z bufora i ponawiana przy kolejnym żądaniu. Gdy połączenia nie da się nawiązać, funkcja zwraca `503 {"error": "Database unavailable"}`, ustawiając `Access-Control-Allow-Origin` dla skonfigurowanego źródła oraz `Vary: Origin`, aby przeglądarka zobaczyła awarię, a nie nieprzejrzysty błąd CORS. Connection stringi są usuwane ze wszystkiego, co trafia do logów.
+
+Wymagane zmienne środowiskowe w projekcie Vercel: `MONGODB_URI` (forma `mongodb+srv://` działa na Vercel), `JWT_SECRET_KEY` oraz `CORS_ORIGIN` jako lista rozdzielona przecinkami zawierająca `https://kamilr616.github.io` i źródło wdrożonego panelu. `PORT` nie jest używany przez środowisko serverless. `MONGODB_URI` i `JWT_SECRET_KEY` są sprawdzane podczas ładowania modułu, więc brak wartości powoduje błąd funkcji `FUNCTION_INVOCATION_FAILED` przy pierwszym żądaniu — ustaw je przed pierwszym wdrożeniem.
 
 W MongoDB Atlas sekcja **Network Access** musi dopuszczać `0.0.0.0/0` albo być podłączona przez integrację Atlas–Vercel, ponieważ adresy IP wyjściowe funkcji serverless są dynamiczne.
 

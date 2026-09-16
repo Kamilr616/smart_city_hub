@@ -146,12 +146,16 @@ The API can be hosted on Vercel as a serverless function; a local `npm run dev` 
 | Setting | Value |
 |---|---|
 | Root Directory | `source/server/api` |
+| Framework Preset | None (`"framework": null`) |
+| Build Command | `npm run build` |
+| Output Directory | `dist/public` |
 | Function entry | `api/index.ts` (default export `(req, res)`) |
-| Rewrite | `vercel.json`: `/api/(.*)` → `/api`, so only API paths invoke the function and `public/` stays static |
 
-`api/index.ts` calls `createApp()` from `lib/server.ts` once per cold start and awaits `connectToDatabase()` on every invocation. That helper caches the pending Mongoose connection in a module variable and on `globalThis`, so a warm instance reuses one connection and a failed attempt is dropped from the cache and retried on the next request. When the connection cannot be established, the function answers `503 {"error": "Database unavailable"}`.
+`vercel.json` rewrites `/` and `/api/(.*)` to the function and nothing else, so the compiled server code under `dist/` is never served. The landing page comes from the Output Directory when Vercel finds it there and from the function otherwise; `"functions": {"api/index.ts": {"includeFiles": "lib/public/**"}}` traces `lib/public/index.html` into the bundle, because the file-tracer cannot follow a path that is only opened at runtime by `res.sendFile()`.
 
-Required environment variables in the Vercel project: `MONGODB_URI` (the `mongodb+srv://` form works on Vercel), `JWT_SECRET_KEY`, and `CORS_ORIGIN` as a comma-separated list containing `https://kamilr616.github.io` and the deployed dashboard origin. `PORT` is unused by the serverless runtime.
+`api/index.ts` calls `createApp()` from `lib/server.ts` once per cold start. An `OPTIONS` preflight is handed straight to the Express CORS middleware without a database round trip; every other request awaits `connectToDatabase()`. That helper caches the pending Mongoose connection in a module variable and on `globalThis`, so a warm instance reuses one connection, while a failed attempt — or a connection whose `readyState` has since become `disconnected` / `disconnecting` — is dropped from the cache and retried on the next request. When the connection cannot be established the function answers `503 {"error": "Database unavailable"}`, echoing `Access-Control-Allow-Origin` for a configured origin plus `Vary: Origin` so the browser sees the outage rather than an opaque CORS error. Connection strings are stripped from anything written to the log.
+
+Required environment variables in the Vercel project: `MONGODB_URI` (the `mongodb+srv://` form works on Vercel), `JWT_SECRET_KEY`, and `CORS_ORIGIN` as a comma-separated list containing `https://kamilr616.github.io` and the deployed dashboard origin. `PORT` is unused by the serverless runtime. Both `MONGODB_URI` and `JWT_SECRET_KEY` are validated while the module loads, so a missing value makes the function fail with `FUNCTION_INVOCATION_FAILED` on the first request — set them before the first deploy.
 
 MongoDB Atlas **Network Access** must allow `0.0.0.0/0` or be wired through the Atlas–Vercel integration, because serverless function egress IP addresses are dynamic.
 
