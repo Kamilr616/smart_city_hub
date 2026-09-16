@@ -1,103 +1,101 @@
-import axios from "axios";
-import { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { UserContext } from "./context/auth";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+﻿import { useContext, useEffect, useRef, useState } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { UserContext } from './context/auth';
+import { apiRequest, getApiErrorMessage } from './api';
 
 export default function Login() {
-  const { setUser } = useContext(UserContext);
-
-  const [formData, setFormDate] = useState({
-    login: "",
-    password: "",
-  });
-
+  const { user, setUser } = useContext(UserContext);
+  const [form, setForm] = useState({ login: '', password: '' });
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState('');
+  const request = useRef(null);
   const navigate = useNavigate();
+  useEffect(() => () => request.current?.abort(), []);
 
-  const loginUser = async (e) => {
-    e.preventDefault();
-
-    //login
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/user/auth`,
-        formData
-      );
-      if (response.data.token) {
-        setUser(response.data);
-        toast("Successfully Logged In");
-        navigate("/");
-      }
-    } catch (error) {
-      toast("Something went wrong.");
-      console.log(error);
+  async function submit(event) {
+    event.preventDefault();
+    if (request.current) return;
+    if (!form.login.trim()) {
+      setError('Podaj nazwę użytkownika lub adres e-mail.');
+      return;
     }
-  };
+    const controller = new AbortController();
+    request.current = controller;
+    setPending(true);
+    setError('');
+    try {
+      const session = await apiRequest('/user/auth', {
+        method: 'POST',
+        body: { login: form.login.trim(), password: form.password },
+        signal: controller.signal,
+      });
+      if (controller.signal.aborted) return;
+      setUser(session);
+      navigate('/', { replace: true });
+    } catch (failure) {
+      if (failure.name !== 'AbortError')
+        setError(
+          failure.status === 401
+            ? 'Nieprawidłowa nazwa użytkownika, adres e-mail lub hasło.'
+            : getApiErrorMessage(failure),
+        );
+    } finally {
+      request.current = null;
+      if (!controller.signal.aborted) setPending(false);
+    }
+  }
+
+  if (user) return <Navigate to="/" replace />;
   return (
-    <>
-      <ToastContainer />
-      <div className=" flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-          <h2 className=" text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-            Login
-          </h2>
-        </div>
-
-        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form
-            onSubmit={loginUser}
-            className="space-y-6"
-            action="#"
-            method="POST"
-          >
-            <div>
-              <div className="mt-2">
-                <input
-                  placeholder="email@domain.com"
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-black-600 sm:text-sm sm:leading-6"
-                  value={formData.login}
-                  onChange={(e) =>
-                    setFormDate({ ...formData, login: e.target.value })
-                  }
-                />
-              </div>
-            </div>
-
-            <div>
-              <div className="mt-1">
-                <input
-                  id="password"
-                  placeholder="Password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-black-600 sm:text-sm sm:leading-6"
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormDate({ ...formData, password: e.target.value })
-                  }
-                />
-              </div>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                className="flex w-full justify-center rounded-md bg-black px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm  focus-visible:outline-2 focus-visible:outline-offset-2 "
-              >
-                login
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </>
+    <main className="auth-page">
+      <section className="auth-card" aria-labelledby="login-title">
+        <div className="auth-brand">Smart City Hub</div>
+        <p className="eyebrow">Twoje miasto, pod kontrolą</p>
+        <h1 id="login-title">Witaj ponownie</h1>
+        <p>Zaloguj się, aby zobaczyć urządzenia i pomiary w swoim mieście.</p>
+        <form onSubmit={submit} className="form-grid" aria-busy={pending}>
+          <div className="field">
+            <label htmlFor="login">Nazwa użytkownika lub e-mail</label>
+            <input
+              className="input"
+              id="login"
+              name="login"
+              type="text"
+              autoComplete="username"
+              required
+              disabled={pending}
+              value={form.login}
+              onChange={(event) =>
+                setForm({ ...form, login: event.target.value })
+              }
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="password">Hasło</label>
+            <input
+              className="input"
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              required
+              disabled={pending}
+              value={form.password}
+              onChange={(event) =>
+                setForm({ ...form, password: event.target.value })
+              }
+            />
+          </div>
+          {error && (
+            <p className="error-message" role="alert">
+              {error}
+            </p>
+          )}
+          <button className="button" type="submit" disabled={pending}>
+            {pending ? 'Logowanie…' : 'Zaloguj się'}
+          </button>
+        </form>
+      </section>
+    </main>
   );
 }
