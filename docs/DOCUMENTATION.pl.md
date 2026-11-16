@@ -228,7 +228,7 @@ Polecenia CLI Vercela uruchamiaj z katalogu głównego repozytorium: CLI sam uwz
 - Dane konfiguracyjne firmware są dostarczane przez ignorowany plik `secrets.h`; ich zmiana nadal wymaga rekompilacji.
 - Planowana integracja aplikacji mobilnej z API Node.js nie została ukończona. Zachowany prototyp używa Firebase, a oba backendy nie są zsynchronizowane.
 - Dla prototypu mobilnego zachowano tylko natywny projekt iOS; jego zbudowanie wymaga macOS z Xcode. Repozytorium nie zawiera natywnego projektu Android.
-- `npm audit` nadal zgłasza ostrzeżenie poziomu moderate w drzewie zależności starszego CLI React Native 0.73. Automatyczna poprawka proponowana przez npm wymaga niekompatybilnej aktualizacji React Native i powinna być osobną migracją.
+- Drzewo mobile stosuje ograniczone zamienniki deepmerge, grpc-js i minimatch; przy aktualizacjach sprawdzaj ich zgodność i poprawki upstream. Audyt Ruby jest niezależny od npm. Przykładowy URL firmware używa HTTP, a obecna ścieżka HTTPS nie weryfikuje certyfikatu; przed użyciem w niezaufanej sieci należy skonfigurować klienta TLS weryfikującego certyfikat.
 - Zaimplementowanym interfejsem jest REST; nie ma aktywnego schematu ani endpointu GraphQL.
 
 ## 10. Licencje

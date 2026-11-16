@@ -88,7 +88,7 @@ smart_city_hub/
 
 ## Wymagania
 
-- Node.js 26.13.1 i npm 11.20.0 (zob. `.nvmrc`)
+- Node.js 26.13.1 i npm 11.20.0
 - Konto MongoDB Atlas (lub lokalny replica set MongoDB; aktualizacje kont używają transakcji)
 - Do firmware: Arduino IDE ze wsparciem płytek ESP32 oraz `ArduinoJson` 7.x; rejestry MCP23017 są obsługiwane bezpośrednio przez I2C
 - Do zachowanej aplikacji mobilnej: macOS z Xcode, środowisko React Native i projekt Firebase
@@ -218,7 +218,7 @@ npm run ios
 | Backend | Node.js, Express 4, TypeScript, Mongoose 8, JWT, bcrypt, Joi |
 | Baza danych | MongoDB (Atlas) |
 | Web | React 18, Vite, React Router 7, Chart.js, Tailwind CSS, Playwright |
-| Mobile | React Native 0.73, React Navigation, Firebase (Auth, Firestore) |
+| Mobile | React Native 0.88, React Navigation, Firebase (Auth, Firestore) |
 | Embedded | ESP32 (Arduino), MCP23017, ArduinoJson, WiFi + HTTPClient |
 
 ## 👥 Zespół
@@ -256,3 +256,5 @@ Chroniona trasa zbiorczego zapisu pomiarów przyjmuje ID czujników 0 i 1.
 GitHub Actions sprawdza API, klienta web, JavaScript mobile, symulator iOS i firmware dla PR oraz push do `develop` i `main`. Zadanie `ci` wymaga powodzenia wszystkich pięciu zadań. W każdym projekcie npm uruchom `npm ci`, `npm ls --all` i `npm audit --audit-level=low`; testy opisano w sekcjach komponentów. iOS wymaga macOS, Xcode oraz wersjonowanych lockfile Ruby i CocoaPods.
 
 Profil firmware CI celuje w ogólny ESP32 z Arduino core 3.3.12 i ArduinoJson 7.4.3. Kompiluje tymczasową kopię z przykładowymi danymi; nie jest to test sprzętu.
+
+Aktualizacje wersji Dependabot celują w `develop`. Aktualizacje bezpieczeństwa GitHub dotyczą gałęzi domyślnej; poprawki należy odtworzyć na `develop` przed PR wydania. Alerty i wymagane kontrole są ustawieniami repozytorium i wymagają osobnego włączenia.

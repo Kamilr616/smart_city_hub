@@ -28,8 +28,11 @@ jobs:
           cache-dependency-path: source/server/api/package-lock.json
       - run: npm ci
       - run: npm ls --all
+        if: ${{ !cancelled() }}
       - run: npm audit --audit-level=low
+        if: ${{ !cancelled() }}
       - run: npm test
+        if: ${{ !cancelled() }}
   web:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -45,12 +48,19 @@ jobs:
           cache-dependency-path: source/web/react/package-lock.json
       - run: npm ci
       - run: npm ls --all
+        if: ${{ !cancelled() }}
       - run: npm audit --audit-level=low
+        if: ${{ !cancelled() }}
       - run: npm test
+        if: ${{ !cancelled() }}
       - run: npm run lint
+        if: ${{ !cancelled() }}
       - run: npm run build
+        if: ${{ !cancelled() }}
       - run: npx playwright install --with-deps chromium
+        if: ${{ !cancelled() }}
       - run: npm run test:e2e
+        if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: failure()
         with:
@@ -72,10 +82,15 @@ jobs:
           cache-dependency-path: source/mobile/react-native/package-lock.json
       - run: npm ci
       - run: npm ls --all
+        if: ${{ !cancelled() }}
       - run: npm audit --audit-level=low
+        if: ${{ !cancelled() }}
       - run: npm run lint
+        if: ${{ !cancelled() }}
       - run: npm run typecheck
+        if: ${{ !cancelled() }}
       - run: npm test -- --runInBand
+        if: ${{ !cancelled() }}
   mobile-ios:
     env:
       BUNDLE_FROZEN: "true"
@@ -93,11 +108,10 @@ jobs:
           cache-dependency-path: source/mobile/react-native/package-lock.json
       - uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1.338.0
         with:
-          ruby-version: '3.3'
+          ruby-version: '3.3.13'
           bundler-cache: true
           working-directory: source/mobile/react-native
       - run: npm ci
-      - run: bundle exec bundle-audit check --update
       - run: bundle exec pod install --deployment
         working-directory: source/mobile/react-native/ios
       - run: xcodebuild -list -workspace ios/expennsesapp.xcworkspace
@@ -106,6 +120,9 @@ jobs:
         run: |
           DEVICE_ID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for k,v in d["devices"].items() if "iOS" in k for x in v if x["name"].startswith("iPhone")))')
           xcodebuild test -configuration Release -workspace ios/expennsesapp.xcworkspace -scheme expennsesapp -destination "platform=iOS Simulator,id=$DEVICE_ID" CODE_SIGNING_ALLOWED=NO
+      - name: Audit Ruby dependencies
+        if: ${{ !cancelled() }}
+        run: bundle exec bundle-audit check --update
   firmware:
     runs-on: ubuntu-latest
     timeout-minutes: 45
