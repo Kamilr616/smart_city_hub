@@ -88,7 +88,7 @@ smart_city_hub/
 
 ## Wymagania
 
-- Node.js 18+ i npm
+- Node.js 26.13.1 i npm 11.20.0
 - Konto MongoDB Atlas (lub lokalny replica set MongoDB; aktualizacje kont używają transakcji)
 - Do firmware: Arduino IDE ze wsparciem płytek ESP32 oraz `ArduinoJson` 7.x; rejestry MCP23017 są obsługiwane bezpośrednio przez I2C
 - Do zachowanej aplikacji mobilnej: macOS z Xcode, środowisko React Native i projekt Firebase
