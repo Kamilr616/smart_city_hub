@@ -3,6 +3,11 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=26.13.1 <27",
+    "npm": ">=11.20.0 <12"
+  },
+  "packageManager": "npm@11.20.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -15,10 +20,10 @@
     "chart.js": "^4.5.1",
     "jwt-decode": "^4.0.0",
     "prop-types": "^15.8.1",
-    "react": "^18.2.0",
+    "react": "^18.3.1",
     "react-chartjs-2": "^5.3.1",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.23.1"
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.18.5"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
@@ -32,6 +37,6 @@
     "eslint-plugin-react-refresh": "^0.4.6",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.4",
-    "vite": "^6.4.3"
+    "vite": "~6.4.6"
   }
 }
