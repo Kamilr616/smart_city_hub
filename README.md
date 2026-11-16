@@ -215,7 +215,7 @@ npm run ios
 | Backend | Node.js, Express 4, TypeScript, Mongoose 8, JWT, bcrypt, Joi |
 | Database | MongoDB (Atlas) |
 | Web | React 18, Vite, React Router 7, Chart.js, Tailwind CSS, Playwright |
-| Mobile | React Native 0.88, React Navigation, Firebase (Auth, Firestore) |
+| Mobile | React Native 0.73, React Navigation, Firebase (Auth, Firestore) |
 | Embedded | ESP32 (Arduino), MCP23017, ArduinoJson, WiFi + HTTPClient |
 
 ## 👥 Team
@@ -250,7 +250,7 @@ in the browser. Sensor IDs 0 and 1 are accepted by the authenticated bulk ingest
 
 ## Continuous integration
 
-GitHub Actions checks the API, web client, mobile JavaScript, iOS simulator and firmware on pull requests and pushes to `develop` and `main`. The `ci` job requires all jobs to succeed. Run `npm ci`, `npm ls --all` and `npm audit --audit-level=low` in each npm project; see the component sections for tests. iOS requires macOS, Xcode and the checked-in Ruby and CocoaPods locks.
+GitHub Actions checks the API, web client and firmware on pull requests and pushes to `develop` and `main`. The `ci` job requires all jobs to succeed. Run `npm ci`, `npm ls --all` and `npm audit --audit-level=low` in the API and web projects; see the component sections for tests. The mobile prototype is not included in CI.
 
 The firmware CI profile targets a generic ESP32 using Arduino core 3.3.12 and ArduinoJson 7.4.3. It compiles a temporary copy with placeholder credentials; this is not a hardware test.
 
