@@ -72,12 +72,14 @@ final class expennsesappUITests: XCTestCase {
     app.launch()
     let emailField = app.textFields["Email"]
     XCTAssertTrue(emailField.waitForExistence(timeout: 60))
+    // Drawer labels include the icon's accessibility text before the route name.
+    let statistics = app.buttons.matching(NSPredicate(format: "label ENDSWITH %@", "Statystyki")).element
 
     // Anonymous users cannot reveal drawer routes by swiping from the edge.
     let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.01, dy: 0.5))
     let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.5))
     start.press(forDuration: 0.1, thenDragTo: end)
-    XCTAssertFalse(app.buttons["Statystyki"].exists)
+    XCTAssertFalse(statistics.exists)
     XCTAssertTrue(emailField.exists)
 
     emailField.tap()
@@ -102,7 +104,6 @@ final class expennsesappUITests: XCTestCase {
 
     // Open the actual drawer with a gesture and select the statistics screen.
     start.press(forDuration: 0.1, thenDragTo: end)
-    let statistics = app.buttons["Statystyki"]
     XCTAssertTrue(statistics.waitForExistence(timeout: 10))
     statistics.tap()
     assertChartIsRendered(app.otherElements["temperature-chart"])
@@ -114,6 +115,6 @@ final class expennsesappUITests: XCTestCase {
     app.buttons["Wyloguj"].tap()
     XCTAssertTrue(emailField.waitForExistence(timeout: 10))
     start.press(forDuration: 0.1, thenDragTo: end)
-    XCTAssertFalse(app.buttons["Statystyki"].exists)
+    XCTAssertFalse(statistics.exists)
   }
 }
