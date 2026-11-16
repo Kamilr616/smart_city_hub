@@ -79,7 +79,8 @@ final class expennsesappUITests: XCTestCase {
     let passwordField = app.secureTextFields["Hasło"]
     passwordField.tap()
     passwordField.typeText(password)
-    app.staticTexts["Logowanie"].tap()
+    passwordField.typeText("\n")
+    XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 5), "Keyboard did not close")
     app.buttons["Zaloguj"].tap()
 
     let device = app.buttons["device-1"]
