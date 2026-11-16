@@ -101,6 +101,13 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
+          node-version: 24.22.3
+      - name: Install emulator CLI in isolated directory
+        run: |
+          echo "FIREBASE_NODE=$(command -v node)" >> "$GITHUB_ENV"
+          npm install --prefix "$RUNNER_TEMP/firebase-cli" firebase-tools@15.36.0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
           node-version: 26.13.1
       - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
@@ -108,7 +115,7 @@ jobs:
           java-version: '21'
       - run: npm ci
       - name: Exercise Auth and Firestore emulators
-        run: npx --yes firebase-tools@15.36.0 emulators:exec --config firebase.emulator.json --project demo-smart-city-hub --only auth,firestore "node scripts/firebase-emulator-smoke.js"
+        run: "$FIREBASE_NODE" "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" emulators:exec --config firebase.emulator.json --project demo-smart-city-hub --only auth,firestore "node scripts/firebase-emulator-smoke.js"
   mobile-ios:
     env:
       BUNDLE_FROZEN: "true"
