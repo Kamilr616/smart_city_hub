@@ -19,3 +19,13 @@ npm run ios
 ```
 
 Use `npm test -- --runInBand` for the Jest tests, `npm run typecheck` for TypeScript, and `npm run lint` for the React Native lint configuration.
+
+## Firebase emulator smoke test
+
+With Java 21 and the Firebase CLI available, run the local Auth and Firestore emulators from this directory:
+
+```bash
+firebase emulators:exec --config firebase.emulator.json --project demo-smart-city-hub --only auth,firestore "node scripts/firebase-emulator-smoke.js"
+```
+
+The script uses a demo project and localhost emulators. It exercises registration, profile writes and reads, sign-out and sign-in using the Node SDK and its gRPC transport. This does not validate the React Native WebChannel transport or a simulator build.
