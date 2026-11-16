@@ -44,7 +44,7 @@ const LoginScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.screenContainer}>
-      <StatusBar translucent backgroundColor="transparent" />
+      <StatusBar />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         style={styles.screenContainer}>

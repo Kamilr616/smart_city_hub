@@ -30,9 +30,7 @@ const Section: React.FC<SectionProps> = ({children, title}) => {
       <Text
         style={[
           styles.sectionTitle,
-          {
-            color: isDarkMode ? '#ffffff' : '#000000',
-          },
+            isDarkMode ? styles.darkTitle : styles.lightTitle,
         ]}>
         {title}
       </Text>
@@ -77,7 +75,7 @@ const RegistrationScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.screenContainer}>
-      <StatusBar translucent backgroundColor="transparent" />
+      <StatusBar />
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         style={styles.screenContainer}>
@@ -139,6 +137,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 45,
     fontWeight: 'bold',
+  },
+  darkTitle: {
+    color: '#ffffff',
+  },
+  lightTitle: {
+    color: '#000000',
   },
   titletext: {
     fontSize: 45,

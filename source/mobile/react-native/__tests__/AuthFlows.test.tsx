@@ -18,11 +18,11 @@ jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({navigate: mockNavigate}),
 }));
 jest.mock('@react-navigation/drawer', () => {
-  const React = require('react');
+  const ReactMock = require('react');
   const {View} = require('react-native');
   return {
     DrawerContentScrollView: ({children}: {children: React.ReactNode}) =>
-      React.createElement(View, null, children),
+      ReactMock.createElement(View, null, children),
     DrawerItemList: () => null,
   };
 });
