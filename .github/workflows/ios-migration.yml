@@ -47,12 +47,21 @@ jobs:
         timeout-minutes: 40
         run: |
           DEVICE_ID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for k,v in d["devices"].items() if "iOS" in k for x in v if x["name"].startswith("iPhone")))')
-          xcodebuild test -configuration Release -workspace ios/expennsesapp.xcworkspace -scheme expennsesapp -destination "platform=iOS Simulator,id=$DEVICE_ID" CODE_SIGNING_ALLOWED=NO
+          xcrun simctl bootstatus "$DEVICE_ID" -b
+          xcodebuild test -parallel-testing-enabled NO -configuration Release -workspace ios/expennsesapp.xcworkspace -scheme expennsesapp -destination "platform=iOS Simulator,id=$DEVICE_ID" CODE_SIGNING_ALLOWED=NO
       - name: Test authenticated simulator flows
         timeout-minutes: 40
         run: |
           DEVICE_ID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for k,v in d["devices"].items() if "iOS" in k for x in v if x["name"].startswith("iPhone")))')
-          SCH_E2E_FIREBASE=1 "$FIREBASE_NODE" "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" emulators:exec --config firebase.emulator.json --project demo-smart-city-hub --only auth "xcodebuild test -configuration Release -workspace ios/expennsesapp.xcworkspace -scheme expennsesappUITests -destination 'platform=iOS Simulator,id=$DEVICE_ID' -derivedDataPath '$RUNNER_TEMP/sch-ui-derived' CODE_SIGNING_ALLOWED=NO"
+          xcrun simctl bootstatus "$DEVICE_ID" -b
+          SCH_E2E_FIREBASE=1 "$FIREBASE_NODE" "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" emulators:exec --config firebase.emulator.json --project demo-smart-city-hub --only auth "xcodebuild test -parallel-testing-enabled NO -resultBundlePath '$RUNNER_TEMP/sch-ui.xcresult' -configuration Release -workspace ios/expennsesapp.xcworkspace -scheme expennsesappUITests -destination 'platform=iOS Simulator,id=$DEVICE_ID' -derivedDataPath '$RUNNER_TEMP/sch-ui-derived' CODE_SIGNING_ALLOWED=NO"
+      - name: Save iOS UI test results
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ios-ui-results
+          path: ${{ runner.temp }}/sch-ui.xcresult
+          if-no-files-found: ignore
       - name: Audit Ruby dependencies
         if: always()
         run: bundle exec bundle-audit check --update
