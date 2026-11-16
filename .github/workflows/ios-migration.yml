@@ -32,7 +32,6 @@ jobs:
             source/mobile/react-native/Gemfile.lock
             source/mobile/react-native/ios/Podfile.lock
           if-no-files-found: error
-      - run: bundle exec bundle-audit check --update
       - run: bundle exec pod install --deployment
         working-directory: source/mobile/react-native/ios
       - run: xcodebuild -list -workspace ios/expennsesapp.xcworkspace
@@ -41,3 +40,6 @@ jobs:
         run: |
           DEVICE_ID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for k,v in d["devices"].items() if "iOS" in k for x in v if x["name"].startswith("iPhone")))')
           xcodebuild test -configuration Release -workspace ios/expennsesapp.xcworkspace -scheme expennsesapp -destination "platform=iOS Simulator,id=$DEVICE_ID" CODE_SIGNING_ALLOWED=NO
+      - name: Audit Ruby dependencies
+        if: always()
+        run: bundle exec bundle-audit check --update
