@@ -10,7 +10,7 @@ The full system description is in the [repository README](../../../README.md).
 
 ## Run locally
 
-The retained native project targets iOS. Building it requires macOS with Xcode; an Android native project is not included in this repository.
+The retained native project targets iOS 15.1 and later. Building it requires macOS with Xcode and CocoaPods; an Android native project is not included in this repository. Use Node.js 26.13.1 or later in the 26.x line and npm 11.20.0 or later in the 11.x line.
 
 ```bash
 npm ci
@@ -18,4 +18,4 @@ npm start
 npm run ios
 ```
 
-Use `npm test` for the Jest test and `npm run lint` for the React Native lint configuration.
+Use `npm test -- --runInBand` for the Jest tests, `npm run typecheck` for TypeScript, and `npm run lint` for the React Native lint configuration.

@@ -13,7 +13,6 @@ import {
   Alert,
 } from 'react-native';
 
-import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {useNavigation} from '@react-navigation/native';
 import {DrawerNavigationProp} from '@react-navigation/drawer';
 import type {RootDrawerParamList} from '../App';
@@ -32,7 +31,7 @@ const Section: React.FC<SectionProps> = ({children, title}) => {
         style={[
           styles.sectionTitle,
           {
-            color: isDarkMode ? Colors.white : Colors.black,
+            color: isDarkMode ? '#ffffff' : '#000000',
           },
         ]}>
         {title}

@@ -1,4 +1,6 @@
 import React from 'react';
+import {StyleSheet} from 'react-native';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {
   createDrawerNavigator,
   DrawerContentComponentProps,
@@ -58,76 +60,79 @@ const AboutIcon = ({color, size}: DrawerIconProps) => (
 
 const App: React.FC = () => {
   return (
-    <NavigationContainer>
-      <Drawer.Navigator
-        initialRouteName="Login"
-        useLegacyImplementation={false}
-        drawerContent={renderDrawerContent}
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: '#29B1ED',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}>
-        <Drawer.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{
-            drawerItemStyle: {display: 'none'},
-            headerShown: false,
-            drawerIcon: LoginIcon,
-          }}
-        />
-        <Drawer.Screen
-          name="Registration"
-          component={RegistrationScreen}
-          options={{
-            drawerItemStyle: {display: 'none'},
-            headerShown: false,
-            drawerIcon: RegistrationIcon,
-          }}
-        />
-        <Drawer.Screen
-          name="Ekran domowy"
-          component={MainScreen}
-          options={{
-            drawerIcon: HomeIcon,
-          }}
-        />
-        <Drawer.Screen
-          name="Urządzenia"
-          component={DevicesScreen}
-          options={{
-            drawerIcon: DevicesIcon,
-          }}
-        />
-        <Drawer.Screen
-          name="Statystyki"
-          component={StatisticsScreen}
-          options={{
-            drawerIcon: StatisticsIcon,
-          }}
-        />
-        <Drawer.Screen
-          name="Ustawienia"
-          component={SettingsScreen}
-          options={{
-            drawerIcon: SettingsIcon,
-          }}
-        />
-        <Drawer.Screen
-          name="O nas"
-          component={AboutUsScreen}
-          options={{
-            drawerIcon: AboutIcon,
-          }}
-        />
-      </Drawer.Navigator>
-    </NavigationContainer>
+    <GestureHandlerRootView style={styles.root}>
+      <NavigationContainer>
+        <Drawer.Navigator
+          initialRouteName="Login"
+          drawerContent={renderDrawerContent}
+          screenOptions={{
+            headerStyle: {
+              backgroundColor: '#29B1ED',
+            },
+            headerTintColor: '#fff',
+            headerTitleStyle: {
+              fontWeight: 'bold',
+            },
+          }}>
+          <Drawer.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{
+              drawerItemStyle: {display: 'none'},
+              headerShown: false,
+              drawerIcon: LoginIcon,
+            }}
+          />
+          <Drawer.Screen
+            name="Registration"
+            component={RegistrationScreen}
+            options={{
+              drawerItemStyle: {display: 'none'},
+              headerShown: false,
+              drawerIcon: RegistrationIcon,
+            }}
+          />
+          <Drawer.Screen
+            name="Ekran domowy"
+            component={MainScreen}
+            options={{
+              drawerIcon: HomeIcon,
+            }}
+          />
+          <Drawer.Screen
+            name="Urządzenia"
+            component={DevicesScreen}
+            options={{
+              drawerIcon: DevicesIcon,
+            }}
+          />
+          <Drawer.Screen
+            name="Statystyki"
+            component={StatisticsScreen}
+            options={{
+              drawerIcon: StatisticsIcon,
+            }}
+          />
+          <Drawer.Screen
+            name="Ustawienia"
+            component={SettingsScreen}
+            options={{
+              drawerIcon: SettingsIcon,
+            }}
+          />
+          <Drawer.Screen
+            name="O nas"
+            component={AboutUsScreen}
+            options={{
+              drawerIcon: AboutIcon,
+            }}
+          />
+        </Drawer.Navigator>
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 };
+
+const styles = StyleSheet.create({root: {flex: 1}});
 
 export default App;

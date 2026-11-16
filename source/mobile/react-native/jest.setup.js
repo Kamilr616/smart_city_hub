@@ -2,14 +2,7 @@
 
 require('react-native-gesture-handler/jestSetup');
 
-jest.mock('react-native/Libraries/Utilities/BackHandler', () => ({
-  addEventListener: jest.fn(() => ({remove: jest.fn()})),
-  exitApp: jest.fn(),
-  removeEventListener: jest.fn(),
-}));
-jest.mock('react-native-reanimated', () =>
-  require('react-native-reanimated/mock'),
-);
+require('react-native-reanimated').setUpTests();
 jest.mock('./FirebaseConfig', () => ({FIREBASE_AUTH: {}, FIREBASE_DB: {}}));
 jest.mock('firebase/auth', () => ({
   createUserWithEmailAndPassword: jest.fn(),
