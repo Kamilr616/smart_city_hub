@@ -50,12 +50,14 @@ const token = (claims = {}) =>
     }),
   ).toString('base64url') +
   '.test';
-async function setup(page, claims = {}) {
+async function setup(page, claims = {}, signedIn = true) {
   const jwt = token(claims);
-  await page.addInitScript(
-    (value) => sessionStorage.setItem('user', JSON.stringify({ token: value })),
-    jwt,
-  );
+  if (signedIn) {
+    await page.addInitScript(
+      (value) => sessionStorage.setItem('user', JSON.stringify({ token: value })),
+      jwt,
+    );
+  }
   await page.route('**/api/**', async (route) => {
     const req = route.request();
     const url = new URL(req.url());
@@ -147,6 +149,49 @@ async function setup(page, claims = {}) {
     return route.fulfill({ status: 404, json: { error: 'Unhandled fixture' } });
   });
 }
+
+for (const [label, target] of [
+  ['external URL', 'https://outside.invalid/devices'],
+  ['protocol-relative URL', '//outside.invalid/devices'],
+  ['backslash URL', String.raw`\\outside.invalid/devices`],
+  ['mixed slash URL', String.raw`/\outside.invalid/devices`],
+]) {
+  test(`login keeps navigation inside the app for ${label}`, async ({
+    page,
+  }) => {
+    await setup(page, {}, false);
+    await page.addInitScript((redirect) => {
+      history.replaceState(
+        { usr: { from: { pathname: redirect }, redirect, returnTo: redirect } },
+        '',
+      );
+    }, target);
+    await page.route('https://outside.invalid/**', (route) => route.abort());
+    await page.route('**/api/user/auth', (route) =>
+      route.fulfill({
+        json: {
+          token: token({ redirect: target }),
+          redirect: target,
+          returnTo: target,
+        },
+      }),
+    );
+    const query = new URLSearchParams({
+      redirect: target,
+      returnTo: target,
+      next: target,
+    });
+    await page.goto(`/login?${query}`);
+    await page.getByLabel('Username or email').fill('admin');
+    await page.getByLabel('Password', { exact: true }).fill('test-password');
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+    await expect(page).toHaveURL('http://localhost:5182/');
+    await expect(
+      page.getByRole('heading', { name: 'Overview', exact: true }),
+    ).toBeVisible();
+  });
+}
+
 test('overview and locations show available roles without inert navigation', async ({
   page,
 }) => {
