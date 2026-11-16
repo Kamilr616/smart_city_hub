@@ -8,6 +8,8 @@ The full system description is in the [repository README](../../../README.md).
 
 `npm ci` copies `firebaseConfig.local.example.ts` to the git-ignored `firebaseConfig.local.ts` when the local file is missing. Replace the placeholder values in that local file with the configuration of your Firebase project; do not commit real credentials.
 
+The app opens its drawer after an explicit successful login and closes it when Firebase reports sign-out or a different user. Registration returns to the login screen. The auth-state listener does not by itself guarantee immediate detection of remotely revoked tokens; access to real backend data must also be protected by Firebase Security Rules and appropriate server-side revocation checks.
+
 ## Run locally
 
 The retained native project targets iOS 15.1 and later. Building it requires macOS with Xcode and CocoaPods; an Android native project is not included in this repository. Use Node.js 26.13.1 or later in the 26.x line and npm 11.20.0 or later in the 11.x line.

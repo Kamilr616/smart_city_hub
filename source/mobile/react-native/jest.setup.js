@@ -6,6 +6,7 @@ require('react-native-reanimated').setUpTests();
 jest.mock('./FirebaseConfig', () => ({FIREBASE_AUTH: {}, FIREBASE_DB: {}}));
 jest.mock('firebase/auth', () => ({
   createUserWithEmailAndPassword: jest.fn(),
+  onAuthStateChanged: jest.fn(() => () => {}),
   signInWithEmailAndPassword: jest.fn(),
   signOut: jest.fn(),
 }));

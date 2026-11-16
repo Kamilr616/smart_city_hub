@@ -18,7 +18,7 @@ import type {RootDrawerParamList} from '../App';
 import {signInWithEmailAndPassword} from 'firebase/auth';
 import {FIREBASE_AUTH} from '../FirebaseConfig';
 
-const LoginScreen: React.FC<{onAuthenticated: () => void}> = ({
+const LoginScreen: React.FC<{onAuthenticated: (uid: string) => void}> = ({
   onAuthenticated,
 }) => {
   const navigation =
@@ -28,9 +28,13 @@ const LoginScreen: React.FC<{onAuthenticated: () => void}> = ({
 
   const handleLogin = async () => {
     try {
-      await signInWithEmailAndPassword(FIREBASE_AUTH, email, password);
+      const credential = await signInWithEmailAndPassword(
+        FIREBASE_AUTH,
+        email,
+        password,
+      );
       console.log('Zalogowano pomyślnie');
-      onAuthenticated();
+      onAuthenticated(credential.user.uid);
     } catch (error) {
       console.error(error);
       Alert.alert(

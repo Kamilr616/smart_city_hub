@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {StyleSheet} from 'react-native';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {
@@ -15,6 +15,8 @@ import CustomDrawerContent from './screens/CustomDrawerContent';
 import LoginScreen from './screens/LoginScreen';
 import RegistrationScreen from './screens/RegistrationScreen';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import {onAuthStateChanged} from 'firebase/auth';
+import {FIREBASE_AUTH} from './FirebaseConfig';
 
 export type RootDrawerParamList = {
   Login: undefined;
@@ -56,9 +58,22 @@ const AboutIcon = ({color, size}: DrawerIconProps) => (
 );
 
 const App: React.FC = () => {
-  const [authenticated, setAuthenticated] = useState(false);
-  const onAuthenticated = useCallback(() => setAuthenticated(true), []);
-  const onSignedOut = useCallback(() => setAuthenticated(false), []);
+  const [observedUid, setObservedUid] = useState<string | null>(null);
+  const [approvedUid, setApprovedUid] = useState<string | null>(null);
+  useEffect(
+    () =>
+      onAuthStateChanged(FIREBASE_AUTH, user => {
+        const uid = user?.uid ?? null;
+        setObservedUid(uid);
+        setApprovedUid(previous => (previous === uid ? previous : null));
+      }),
+    [],
+  );
+  const authenticated = approvedUid !== null && approvedUid === observedUid;
+  const onAuthenticated = useCallback((uid: string) => {
+    setApprovedUid(FIREBASE_AUTH.currentUser?.uid === uid ? uid : null);
+  }, []);
+  const onSignedOut = useCallback(() => setApprovedUid(null), []);
   const renderDrawerContent = useCallback(
     (props: DrawerContentComponentProps) => (
       <CustomDrawerContent {...props} onSignedOut={onSignedOut} />

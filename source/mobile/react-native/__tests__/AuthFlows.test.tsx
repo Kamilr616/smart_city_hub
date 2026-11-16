@@ -33,7 +33,9 @@ beforeEach(() => {
 });
 
 it('logs in and opens the home screen', async () => {
-  jest.mocked(signInWithEmailAndPassword).mockResolvedValue({} as never);
+  jest
+    .mocked(signInWithEmailAndPassword)
+    .mockResolvedValue({user: {uid: 'user-1'}} as never);
   let screen!: renderer.ReactTestRenderer;
   await act(async () => {
     screen = renderer.create(
@@ -61,7 +63,9 @@ it('logs in and opens the home screen', async () => {
 });
 
 it('reports authentication only after Firebase accepts the credentials', async () => {
-  jest.mocked(signInWithEmailAndPassword).mockResolvedValue({} as never);
+  jest
+    .mocked(signInWithEmailAndPassword)
+    .mockResolvedValue({user: {uid: 'user-1'}} as never);
   let screen!: renderer.ReactTestRenderer;
   await act(async () => {
     screen = renderer.create(
