@@ -55,38 +55,53 @@ const StatisticsScreen: React.FC = () => {
 
         <View style={styles.chartContainer}>
           <Text style={styles.chartTitle}>Temperature (°C)</Text>
-          <LineChart
-            data={temperatureData}
-            width={screenWidth - 40}
-            height={220}
-            chartConfig={chartConfig}
-            bezier
-            style={styles.chart}
-          />
+          <View
+            testID="temperature-chart"
+            accessible
+            accessibilityLabel="Temperature chart">
+            <LineChart
+              data={temperatureData}
+              width={screenWidth - 40}
+              height={220}
+              chartConfig={chartConfig}
+              bezier
+              style={styles.chart}
+            />
+          </View>
         </View>
 
         <View style={styles.chartContainer}>
           <Text style={styles.chartTitle}>Wilgotność (%)</Text>
-          <LineChart
-            data={humidityData}
-            width={screenWidth - 40}
-            height={220}
-            chartConfig={chartConfig}
-            bezier
-            style={styles.chart}
-          />
+          <View
+            testID="humidity-chart"
+            accessible
+            accessibilityLabel="Humidity chart">
+            <LineChart
+              data={humidityData}
+              width={screenWidth - 40}
+              height={220}
+              chartConfig={chartConfig}
+              bezier
+              style={styles.chart}
+            />
+          </View>
         </View>
 
         <View style={styles.chartContainer}>
           <Text style={styles.chartTitle}>Ciśnienie (hPa)</Text>
-          <LineChart
-            data={pressureData}
-            width={screenWidth - 40}
-            height={220}
-            chartConfig={chartConfig}
-            bezier
-            style={styles.chart}
-          />
+          <View
+            testID="pressure-chart"
+            accessible
+            accessibilityLabel="Pressure chart">
+            <LineChart
+              data={pressureData}
+              width={screenWidth - 40}
+              height={220}
+              chartConfig={chartConfig}
+              bezier
+              style={styles.chart}
+            />
+          </View>
         </View>
       </ScrollView>
     </ImageBackground>

@@ -8,12 +8,14 @@ import {
 import {signOut} from 'firebase/auth';
 import {FIREBASE_AUTH} from '../FirebaseConfig';
 
-const CustomDrawerContent: React.FC<DrawerContentComponentProps> = props => {
+const CustomDrawerContent: React.FC<
+  DrawerContentComponentProps & {onSignedOut: () => void}
+> = props => {
   const handleLogout = async () => {
     try {
       await signOut(FIREBASE_AUTH);
       console.log('Wylogowano użytkownika');
-      props.navigation.navigate('Login');
+      props.onSignedOut();
     } catch (error) {
       console.error('Błąd podczas wylogowywania użytkownika:', error);
     }
@@ -24,7 +26,10 @@ const CustomDrawerContent: React.FC<DrawerContentComponentProps> = props => {
       <DrawerContentScrollView {...props}>
         <DrawerItemList {...props} />
       </DrawerContentScrollView>
-      <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+      <TouchableOpacity
+        accessibilityRole="button"
+        onPress={handleLogout}
+        style={styles.logoutButton}>
         <Text style={styles.logoutButtonText}>Wyloguj</Text>
       </TouchableOpacity>
     </View>

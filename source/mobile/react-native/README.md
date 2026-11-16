@@ -29,3 +29,14 @@ firebase emulators:exec --config firebase.emulator.json --project demo-smart-cit
 ```
 
 The script uses a demo project and localhost emulators. It exercises registration, profile writes and reads, sign-out and sign-in using the Node SDK and its gRPC transport. This does not validate the React Native WebChannel transport or a simulator build.
+
+## iOS simulator UI test
+
+The separate `expennsesappUITests` scheme uses a real simulator and the local Auth emulator. The test creates a disposable demo account and exercises the login form, drawer gestures, device control, chart rendering and logout. It uses the app's example device and chart data, not real devices. Run on macOS after installing Pods, with the simulator destination available:
+
+```bash
+firebase emulators:exec --config firebase.emulator.json --project demo-smart-city-hub --only auth \
+  'SCH_E2E_FIREBASE=1 xcodebuild test -configuration Release -workspace ios/expennsesapp.xcworkspace -scheme expennsesappUITests -destination "platform=iOS Simulator,name=iPhone 16" -derivedDataPath "$TMPDIR/sch-ui-test-derived" CODE_SIGNING_ALLOWED=NO'
+```
+
+Choose a simulator installed on the machine and a fresh derived-data directory. The environment variable replaces the Firebase configuration only when Metro creates this test bundle, directing it to localhost and the demo project. Do not distribute that bundle. The regular scheme and production bundle use the normal Firebase configuration.

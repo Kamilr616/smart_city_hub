@@ -18,7 +18,9 @@ import type {RootDrawerParamList} from '../App';
 import {signInWithEmailAndPassword} from 'firebase/auth';
 import {FIREBASE_AUTH} from '../FirebaseConfig';
 
-const LoginScreen: React.FC = () => {
+const LoginScreen: React.FC<{onAuthenticated: () => void}> = ({
+  onAuthenticated,
+}) => {
   const navigation =
     useNavigation<DrawerNavigationProp<RootDrawerParamList, 'Login'>>();
   const [email, setEmail] = useState('');
@@ -28,7 +30,7 @@ const LoginScreen: React.FC = () => {
     try {
       await signInWithEmailAndPassword(FIREBASE_AUTH, email, password);
       console.log('Zalogowano pomyślnie');
-      navigation.navigate('Ekran domowy', {refresh: true});
+      onAuthenticated();
     } catch (error) {
       console.error(error);
       Alert.alert(
@@ -67,7 +69,10 @@ const LoginScreen: React.FC = () => {
               onChangeText={setPassword}
               value={password}
             />
-            <TouchableOpacity onPress={handleLogin} style={styles.button}>
+            <TouchableOpacity
+              accessibilityRole="button"
+              onPress={handleLogin}
+              style={styles.button}>
               <Text style={styles.buttonText}>Zaloguj</Text>
             </TouchableOpacity>
             <TouchableOpacity

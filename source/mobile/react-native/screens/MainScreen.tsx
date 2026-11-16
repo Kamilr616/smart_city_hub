@@ -95,6 +95,8 @@ const MainScreen: React.FC = () => {
 
   const renderDevice: ListRenderItem<FavoriteDevice> = ({item}) => (
     <TouchableOpacity
+      accessibilityRole="button"
+      testID={`device-${item.id}`}
       style={styles.deviceContainer}
       onPress={() => openModal(item)}>
       <Text style={styles.deviceName}>{item.name}</Text>
@@ -126,14 +128,19 @@ const MainScreen: React.FC = () => {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Wykorzystanie urządzeń:</Text>
-          <LineChart
-            data={chartData}
-            width={screenWidth - 40}
-            height={220}
-            chartConfig={chartConfig}
-            bezier
-            style={styles.chart}
-          />
+          <View
+            testID="usage-chart"
+            accessible
+            accessibilityLabel="Device usage chart">
+            <LineChart
+              data={chartData}
+              width={screenWidth - 40}
+              height={220}
+              chartConfig={chartConfig}
+              bezier
+              style={styles.chart}
+            />
+          </View>
         </View>
       </ScrollView>
 
@@ -151,6 +158,7 @@ const MainScreen: React.FC = () => {
               Current State: {selectedDevice.state.toUpperCase()}
             </Text>
             <TouchableOpacity
+              accessibilityRole="button"
               style={styles.modalButton}
               onPress={toggleDeviceState}>
               <Text style={styles.modalButtonText}>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback, useState} from 'react';
 import {StyleSheet} from 'react-native';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {
@@ -33,9 +33,6 @@ type DrawerIconProps = {
   size: number;
 };
 
-const renderDrawerContent = (props: DrawerContentComponentProps) => (
-  <CustomDrawerContent {...props} />
-);
 const LoginIcon = ({color, size}: DrawerIconProps) => (
   <FontAwesomeIcon name="sign-in" size={size} color={color} />
 );
@@ -59,13 +56,23 @@ const AboutIcon = ({color, size}: DrawerIconProps) => (
 );
 
 const App: React.FC = () => {
+  const [authenticated, setAuthenticated] = useState(false);
+  const onAuthenticated = useCallback(() => setAuthenticated(true), []);
+  const onSignedOut = useCallback(() => setAuthenticated(false), []);
+  const renderDrawerContent = useCallback(
+    (props: DrawerContentComponentProps) => (
+      <CustomDrawerContent {...props} onSignedOut={onSignedOut} />
+    ),
+    [onSignedOut],
+  );
   return (
     <GestureHandlerRootView style={styles.root}>
       <NavigationContainer>
         <Drawer.Navigator
-          initialRouteName="Login"
+          key={authenticated ? 'authenticated' : 'anonymous'}
           drawerContent={renderDrawerContent}
           screenOptions={{
+            swipeEnabled: authenticated,
             headerStyle: {
               backgroundColor: '#29B1ED',
             },
@@ -74,59 +81,66 @@ const App: React.FC = () => {
               fontWeight: 'bold',
             },
           }}>
-          <Drawer.Screen
-            name="Login"
-            component={LoginScreen}
-            options={{
-              drawerItemStyle: {display: 'none'},
-              headerShown: false,
-              drawerIcon: LoginIcon,
-            }}
-          />
-          <Drawer.Screen
-            name="Registration"
-            component={RegistrationScreen}
-            options={{
-              drawerItemStyle: {display: 'none'},
-              headerShown: false,
-              drawerIcon: RegistrationIcon,
-            }}
-          />
-          <Drawer.Screen
-            name="Ekran domowy"
-            component={MainScreen}
-            options={{
-              drawerIcon: HomeIcon,
-            }}
-          />
-          <Drawer.Screen
-            name="Urządzenia"
-            component={DevicesScreen}
-            options={{
-              drawerIcon: DevicesIcon,
-            }}
-          />
-          <Drawer.Screen
-            name="Statystyki"
-            component={StatisticsScreen}
-            options={{
-              drawerIcon: StatisticsIcon,
-            }}
-          />
-          <Drawer.Screen
-            name="Ustawienia"
-            component={SettingsScreen}
-            options={{
-              drawerIcon: SettingsIcon,
-            }}
-          />
-          <Drawer.Screen
-            name="O nas"
-            component={AboutUsScreen}
-            options={{
-              drawerIcon: AboutIcon,
-            }}
-          />
+          {!authenticated ? (
+            <>
+              <Drawer.Screen
+                name="Login"
+                options={{
+                  drawerItemStyle: {display: 'none'},
+                  headerShown: false,
+                  drawerIcon: LoginIcon,
+                }}>
+                {() => <LoginScreen onAuthenticated={onAuthenticated} />}
+              </Drawer.Screen>
+              <Drawer.Screen
+                name="Registration"
+                component={RegistrationScreen}
+                options={{
+                  drawerItemStyle: {display: 'none'},
+                  headerShown: false,
+                  drawerIcon: RegistrationIcon,
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <Drawer.Screen
+                name="Ekran domowy"
+                component={MainScreen}
+                options={{
+                  drawerIcon: HomeIcon,
+                }}
+              />
+              <Drawer.Screen
+                name="Urządzenia"
+                component={DevicesScreen}
+                options={{
+                  drawerIcon: DevicesIcon,
+                }}
+              />
+              <Drawer.Screen
+                name="Statystyki"
+                component={StatisticsScreen}
+                options={{
+                  drawerIcon: StatisticsIcon,
+                }}
+              />
+              <Drawer.Screen
+                name="Ustawienia"
+                component={SettingsScreen}
+                options={{
+                  drawerIcon: SettingsIcon,
+                }}
+              />
+              <Drawer.Screen
+                name="O nas"
+                component={AboutUsScreen}
+                options={{
+                  drawerIcon: AboutIcon,
+                }}
+              />
+            </>
+          )}
         </Drawer.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>

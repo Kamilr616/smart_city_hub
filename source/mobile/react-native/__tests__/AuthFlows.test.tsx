@@ -13,6 +13,7 @@ import RegistrationScreen from '../screens/RegistrationScreen';
 import CustomDrawerContent from '../screens/CustomDrawerContent';
 
 const mockNavigate = jest.fn();
+const mockAuthenticated = jest.fn();
 
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({navigate: mockNavigate}),
@@ -35,7 +36,9 @@ it('logs in and opens the home screen', async () => {
   jest.mocked(signInWithEmailAndPassword).mockResolvedValue({} as never);
   let screen!: renderer.ReactTestRenderer;
   await act(async () => {
-    screen = renderer.create(<LoginScreen />);
+    screen = renderer.create(
+      <LoginScreen onAuthenticated={mockAuthenticated} />,
+    );
   });
   act(() => {
     screen.root
@@ -53,7 +56,22 @@ it('logs in and opens the home screen', async () => {
     'user@example.test',
     'password',
   );
-  expect(mockNavigate).toHaveBeenCalledWith('Ekran domowy', {refresh: true});
+  expect(mockAuthenticated).toHaveBeenCalledTimes(1);
+  act(() => screen.unmount());
+});
+
+it('reports authentication only after Firebase accepts the credentials', async () => {
+  jest.mocked(signInWithEmailAndPassword).mockResolvedValue({} as never);
+  let screen!: renderer.ReactTestRenderer;
+  await act(async () => {
+    screen = renderer.create(
+      <LoginScreen onAuthenticated={mockAuthenticated} />,
+    );
+  });
+  await act(async () => {
+    await screen.root.findAllByType(TouchableOpacity)[0].props.onPress();
+  });
+  expect(mockAuthenticated).toHaveBeenCalledTimes(1);
   act(() => screen.unmount());
 });
 
@@ -93,6 +111,7 @@ it('signs out before returning to login', async () => {
       <CustomDrawerContent
         {...({
           navigation: {navigate: mockNavigate},
+          onSignedOut: mockAuthenticated,
         } as unknown as React.ComponentProps<typeof CustomDrawerContent>)}
       />,
     );
@@ -101,6 +120,6 @@ it('signs out before returning to login', async () => {
     await screen.root.findByType(TouchableOpacity).props.onPress();
   });
   expect(signOut).toHaveBeenCalledTimes(1);
-  expect(mockNavigate).toHaveBeenCalledWith('Login');
+  expect(mockAuthenticated).toHaveBeenCalledTimes(1);
   act(() => screen.unmount());
 });
