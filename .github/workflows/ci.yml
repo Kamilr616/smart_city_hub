@@ -1,0 +1,195 @@
+name: CI
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+  workflow_dispatch:
+  schedule:
+    - cron: '20 4 * * 1'
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: source/server/api
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 26.13.1
+          cache: npm
+          cache-dependency-path: source/server/api/package-lock.json
+      - run: npm ci
+      - run: npm ls --all
+        if: ${{ !cancelled() }}
+      - run: npm audit --audit-level=low
+        if: ${{ !cancelled() }}
+      - run: npm test
+        if: ${{ !cancelled() }}
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: source/web/react
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 26.13.1
+          cache: npm
+          cache-dependency-path: source/web/react/package-lock.json
+      - run: npm ci
+      - run: npm ls --all
+        if: ${{ !cancelled() }}
+      - run: npm audit --audit-level=low
+        if: ${{ !cancelled() }}
+      - run: npm test
+        if: ${{ !cancelled() }}
+      - run: npm run lint
+        if: ${{ !cancelled() }}
+      - run: npm run build
+        if: ${{ !cancelled() }}
+      - run: npx playwright install --with-deps chromium
+        if: ${{ !cancelled() }}
+      - run: npm run test:e2e
+        if: ${{ !cancelled() }}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: failure()
+        with:
+          name: playwright-results
+          path: source/web/react/test-results
+          if-no-files-found: ignore
+  mobile-js:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: source/mobile/react-native
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 26.13.1
+          cache: npm
+          cache-dependency-path: source/mobile/react-native/package-lock.json
+      - run: npm ci
+      - run: npm ls --all
+        if: ${{ !cancelled() }}
+      - run: npm audit --audit-level=low
+        if: ${{ !cancelled() }}
+      - run: npm run lint
+        if: ${{ !cancelled() }}
+      - run: npm run typecheck
+        if: ${{ !cancelled() }}
+      - run: npm test -- --runInBand
+        if: ${{ !cancelled() }}
+  firebase-emulator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: source/mobile/react-native
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24.22.3
+      - name: Install emulator CLI in isolated directory
+        run: |
+          echo "FIREBASE_NODE=$(command -v node)" >> "$GITHUB_ENV"
+          npm ci --prefix "$GITHUB_WORKSPACE/.github/tools/firebase-cli"
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 26.13.1
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: npm ci
+      - name: Exercise Auth and Firestore emulators
+        run: |
+          "$FIREBASE_NODE" "$GITHUB_WORKSPACE/.github/tools/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" emulators:exec --config firebase.emulator.json --project demo-smart-city-hub --only auth,firestore "node scripts/firebase-emulator-smoke.js"
+      - name: Audit emulator CLI dependencies
+        if: ${{ !cancelled() }}
+        run: npm audit --prefix "$GITHUB_WORKSPACE/.github/tools/firebase-cli" --audit-level=low
+  mobile-ios:
+    env:
+      BUNDLE_FROZEN: "true"
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+    runs-on: macos-26
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: source/mobile/react-native
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24.22.3
+      - name: Install emulator CLI in isolated directory
+        run: |
+          echo "FIREBASE_NODE=$(command -v node)" >> "$GITHUB_ENV"
+          npm ci --prefix "$GITHUB_WORKSPACE/.github/tools/firebase-cli"
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 26.13.1
+          cache: npm
+          cache-dependency-path: source/mobile/react-native/package-lock.json
+      - uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1.338.0
+        with:
+          ruby-version: '3.3.13'
+          bundler-cache: true
+          working-directory: source/mobile/react-native
+      - run: npm ci
+      - run: bundle exec pod install --deployment
+        working-directory: source/mobile/react-native/ios
+      - run: xcodebuild -list -workspace ios/expennsesapp.xcworkspace
+      - run: xcodebuild -showdestinations -workspace ios/expennsesapp.xcworkspace -scheme expennsesapp
+      - name: Test authenticated simulator flows
+        timeout-minutes: 40
+        run: |
+          DEVICE_ID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for k,v in d["devices"].items() if "iOS" in k for x in v if x["name"].startswith("iPhone")))')
+          xcrun simctl bootstatus "$DEVICE_ID" -b
+          SCH_E2E_FIREBASE=1 "$FIREBASE_NODE" "$GITHUB_WORKSPACE/.github/tools/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" emulators:exec --config firebase.emulator.json --project demo-smart-city-hub --only auth "xcodebuild test -parallel-testing-enabled NO -resultBundlePath '$RUNNER_TEMP/sch-ui.xcresult' -configuration Release -workspace ios/expennsesapp.xcworkspace -scheme expennsesappUITests -destination 'platform=iOS Simulator,id=$DEVICE_ID' -derivedDataPath '$RUNNER_TEMP/sch-ui-derived' CODE_SIGNING_ALLOWED=NO"
+      - name: Save iOS UI test results
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ios-ui-results
+          path: ${{ runner.temp }}/sch-ui.xcresult
+          if-no-files-found: ignore
+      - name: Audit Ruby dependencies
+        if: ${{ !cancelled() }}
+        run: bundle exec bundle-audit check --update
+  firmware:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: arduino/setup-arduino-cli@7ef629dcdf0f458ab7ae83149d629443deac6eac # v2.0.0
+        with:
+          version: 1.6.0
+      - name: Compile with placeholder credentials
+        run: |
+          mkdir -p "$RUNNER_TEMP/smart_city_iot"
+          cp source/embedded/esp32_arduino/smart_city_iot/{smart_city_iot.ino,sketch.yaml} "$RUNNER_TEMP/smart_city_iot/"
+          cp source/embedded/esp32_arduino/smart_city_iot/secrets.example.h "$RUNNER_TEMP/smart_city_iot/secrets.h"
+          arduino-cli compile --profile ci "$RUNNER_TEMP/smart_city_iot"
+  ci:
+    if: always()
+    runs-on: ubuntu-latest
+    needs: [api, web, mobile-js, firebase-emulator, mobile-ios, firmware]
+    steps:
+      - name: Require every job to succeed
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          python3 -c 'import json,os,sys; results=json.loads(os.environ["RESULTS"]); print({k:v["result"] for k,v in results.items()}); sys.exit(any(v["result"] != "success" for v in results.values()))'
