@@ -82,9 +82,8 @@ const App: React.FC = () => {
   );
   return (
     <GestureHandlerRootView style={styles.root}>
-      <NavigationContainer>
+      <NavigationContainer key={authenticated ? 'authenticated' : 'anonymous'}>
         <Drawer.Navigator
-          key={authenticated ? 'authenticated' : 'anonymous'}
           drawerContent={renderDrawerContent}
           screenOptions={{
             swipeEnabled: authenticated,

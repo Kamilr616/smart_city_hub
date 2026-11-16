@@ -8,8 +8,9 @@ import {Text, TouchableOpacity} from 'react-native';
 import App from '../App';
 
 // Note: import explicitly to use the types shipped with jest.
-import {expect, it, jest} from '@jest/globals';
+import {afterEach, expect, it, jest} from '@jest/globals';
 import {NavigationContainer} from '@react-navigation/native';
+import {getDrawerStatusFromState} from '@react-navigation/drawer';
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -17,9 +18,14 @@ import {
 } from 'firebase/auth';
 import type {User} from 'firebase/auth';
 import {FIREBASE_AUTH} from '../FirebaseConfig';
+import CustomDrawerContent from '../screens/CustomDrawerContent';
 
 // Note: test renderer must be required after react-native.
 import renderer, {act} from 'react-test-renderer';
+
+afterEach(() => {
+  jest.useRealTimers();
+});
 
 it('renders correctly', async () => {
   let app!: renderer.ReactTestRenderer;
@@ -50,6 +56,7 @@ it('opens registration from the login screen through the real navigator', async 
 });
 
 it('only exposes authenticated drawer routes after login and removes them after logout', async () => {
+  jest.useFakeTimers();
   let emit: (user: User | null) => void = () => {};
   jest.mocked(onAuthStateChanged).mockImplementation((_auth, observer) => {
     emit = observer as (user: User | null) => void;
@@ -89,6 +96,11 @@ it('only exposes authenticated drawer routes after login and removes them after 
   });
   expect(routeNames()).toContain('Statystyki');
   expect(routeNames()).not.toContain('Login');
+  const drawer = app.root.findByType(CustomDrawerContent).props.navigation;
+  act(() => {
+    drawer.openDrawer();
+  });
+  expect(getDrawerStatusFromState(drawer.getState())).toBe('open');
   const logout = app.root
     .findAllByType(TouchableOpacity)
     .find(button =>
@@ -101,6 +113,9 @@ it('only exposes authenticated drawer routes after login and removes them after 
     await logout!.props.onPress();
   });
   expect(routeNames()).toEqual(['Login', 'Registration']);
+  const anonymousDrawer =
+    app.root.findByType(CustomDrawerContent).props.navigation;
+  expect(getDrawerStatusFromState(anonymousDrawer.getState())).toBe('closed');
   act(() => app.unmount());
 });
 
