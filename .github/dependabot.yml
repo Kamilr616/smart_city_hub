@@ -26,3 +26,7 @@ updates:
     directory: /
     schedule: { interval: weekly }
     target-branch: develop
+  - package-ecosystem: npm
+    directory: /.github/tools/firebase-cli
+    schedule: { interval: weekly }
+    target-branch: develop

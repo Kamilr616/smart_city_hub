@@ -105,7 +105,7 @@ jobs:
       - name: Install emulator CLI in isolated directory
         run: |
           echo "FIREBASE_NODE=$(command -v node)" >> "$GITHUB_ENV"
-          npm install --prefix "$RUNNER_TEMP/firebase-cli" firebase-tools@15.36.0
+          npm ci --prefix "$GITHUB_WORKSPACE/.github/tools/firebase-cli"
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 26.13.1
@@ -116,7 +116,10 @@ jobs:
       - run: npm ci
       - name: Exercise Auth and Firestore emulators
         run: |
-          "$FIREBASE_NODE" "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" emulators:exec --config firebase.emulator.json --project demo-smart-city-hub --only auth,firestore "node scripts/firebase-emulator-smoke.js"
+          "$FIREBASE_NODE" "$GITHUB_WORKSPACE/.github/tools/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" emulators:exec --config firebase.emulator.json --project demo-smart-city-hub --only auth,firestore "node scripts/firebase-emulator-smoke.js"
+      - name: Audit emulator CLI dependencies
+        if: ${{ !cancelled() }}
+        run: npm audit --prefix "$GITHUB_WORKSPACE/.github/tools/firebase-cli" --audit-level=low
   mobile-ios:
     env:
       BUNDLE_FROZEN: "true"
@@ -134,7 +137,7 @@ jobs:
       - name: Install emulator CLI in isolated directory
         run: |
           echo "FIREBASE_NODE=$(command -v node)" >> "$GITHUB_ENV"
-          npm install --prefix "$RUNNER_TEMP/firebase-cli" firebase-tools@15.36.0
+          npm ci --prefix "$GITHUB_WORKSPACE/.github/tools/firebase-cli"
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 26.13.1
@@ -155,7 +158,7 @@ jobs:
         run: |
           DEVICE_ID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for k,v in d["devices"].items() if "iOS" in k for x in v if x["name"].startswith("iPhone")))')
           xcrun simctl bootstatus "$DEVICE_ID" -b
-          SCH_E2E_FIREBASE=1 "$FIREBASE_NODE" "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" emulators:exec --config firebase.emulator.json --project demo-smart-city-hub --only auth "xcodebuild test -parallel-testing-enabled NO -resultBundlePath '$RUNNER_TEMP/sch-ui.xcresult' -configuration Release -workspace ios/expennsesapp.xcworkspace -scheme expennsesappUITests -destination 'platform=iOS Simulator,id=$DEVICE_ID' -derivedDataPath '$RUNNER_TEMP/sch-ui-derived' CODE_SIGNING_ALLOWED=NO"
+          SCH_E2E_FIREBASE=1 "$FIREBASE_NODE" "$GITHUB_WORKSPACE/.github/tools/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" emulators:exec --config firebase.emulator.json --project demo-smart-city-hub --only auth "xcodebuild test -parallel-testing-enabled NO -resultBundlePath '$RUNNER_TEMP/sch-ui.xcresult' -configuration Release -workspace ios/expennsesapp.xcworkspace -scheme expennsesappUITests -destination 'platform=iOS Simulator,id=$DEVICE_ID' -derivedDataPath '$RUNNER_TEMP/sch-ui-derived' CODE_SIGNING_ALLOWED=NO"
       - name: Save iOS UI test results
         if: ${{ failure() }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
