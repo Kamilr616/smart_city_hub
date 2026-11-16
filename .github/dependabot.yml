@@ -12,21 +12,7 @@ updates:
     target-branch: develop
     groups:
       non-major: { update-types: [minor, patch] }
-  - package-ecosystem: npm
-    directory: /source/mobile/react-native
-    schedule: { interval: weekly }
-    target-branch: develop
-    groups:
-      non-major: { update-types: [minor, patch] }
-  - package-ecosystem: bundler
-    directory: /source/mobile/react-native
-    schedule: { interval: weekly }
-    target-branch: develop
   - package-ecosystem: github-actions
     directory: /
-    schedule: { interval: weekly }
-    target-branch: develop
-  - package-ecosystem: npm
-    directory: /.github/tools/firebase-cli
     schedule: { interval: weekly }
     target-branch: develop

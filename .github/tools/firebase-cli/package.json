@@ -1,8 +1,0 @@
-{
-  "name": "smart-city-ci-firebase-tools",
-  "private": true,
-  "version": "1.0.0",
-  "dependencies": {
-    "firebase-tools": "15.36.0"
-  }
-}
