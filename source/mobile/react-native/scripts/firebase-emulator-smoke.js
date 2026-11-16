@@ -96,7 +96,7 @@ async function main() {
     await deleteDoc(ref);
     await deleteUser(signedIn.user);
     console.log(
-      `Auth and Firestore emulator smoke passed using grpc-js ${grpcVersion}`,
+      `Auth and Firestore emulator smoke passed using grpc-js ${grpcVersion} on Node ${process.version}`,
     );
   } finally {
     await terminate(db);
