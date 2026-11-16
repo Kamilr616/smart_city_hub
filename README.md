@@ -250,7 +250,7 @@ in the browser. Sensor IDs 0 and 1 are accepted by the authenticated bulk ingest
 
 ## Continuous integration
 
-GitHub Actions checks the API, web client, mobile JavaScript, iOS simulator and firmware on pull requests and pushes to `develop` and `main`. The `ci` job requires all five jobs to succeed. Run `npm ci`, `npm ls --all` and `npm audit --audit-level=low` in each npm project; see the component sections for tests. iOS requires macOS, Xcode and the checked-in Ruby and CocoaPods locks.
+GitHub Actions checks the API, web client, mobile JavaScript, iOS simulator and firmware on pull requests and pushes to `develop` and `main`. The `ci` job requires all jobs to succeed. Run `npm ci`, `npm ls --all` and `npm audit --audit-level=low` in each npm project; see the component sections for tests. iOS requires macOS, Xcode and the checked-in Ruby and CocoaPods locks.
 
 The firmware CI profile targets a generic ESP32 using Arduino core 3.3.12 and ArduinoJson 7.4.3. It compiles a temporary copy with placeholder credentials; this is not a hardware test.
 

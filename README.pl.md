@@ -253,7 +253,7 @@ Chroniona trasa zbiorczego zapisu pomiarów przyjmuje ID czujników 0 i 1.
 
 ## Integracja ciągła
 
-GitHub Actions sprawdza API, klienta web, JavaScript mobile, symulator iOS i firmware dla PR oraz push do `develop` i `main`. Zadanie `ci` wymaga powodzenia wszystkich pięciu zadań. W każdym projekcie npm uruchom `npm ci`, `npm ls --all` i `npm audit --audit-level=low`; testy opisano w sekcjach komponentów. iOS wymaga macOS, Xcode oraz wersjonowanych lockfile Ruby i CocoaPods.
+GitHub Actions sprawdza API, klienta web, JavaScript mobile, symulator iOS i firmware dla PR oraz push do `develop` i `main`. Zadanie `ci` wymaga powodzenia wszystkich zadań. W każdym projekcie npm uruchom `npm ci`, `npm ls --all` i `npm audit --audit-level=low`; testy opisano w sekcjach komponentów. iOS wymaga macOS, Xcode oraz wersjonowanych lockfile Ruby i CocoaPods.
 
 Profil firmware CI celuje w ogólny ESP32 z Arduino core 3.3.12 i ArduinoJson 7.4.3. Kompiluje tymczasową kopię z przykładowymi danymi; nie jest to test sprzętu.
 
