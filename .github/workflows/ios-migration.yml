@@ -22,7 +22,6 @@ jobs:
           working-directory: source/mobile/react-native
       - run: npm ci
       - run: bundle install
-      - run: bundle exec bundle-audit check --update
       - run: bundle exec pod install
         working-directory: source/mobile/react-native/ios
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -33,6 +32,7 @@ jobs:
             source/mobile/react-native/Gemfile.lock
             source/mobile/react-native/ios/Podfile.lock
           if-no-files-found: error
+      - run: bundle exec bundle-audit check --update
       - run: bundle exec pod install --deployment
         working-directory: source/mobile/react-native/ios
       - run: xcodebuild -list -workspace ios/expennsesapp.xcworkspace
