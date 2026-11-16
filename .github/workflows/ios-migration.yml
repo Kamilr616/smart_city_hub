@@ -67,4 +67,5 @@ jobs:
           java-version: '21'
       - run: npm ci
       - name: Exercise Auth and Firestore emulators
-        run: "$FIREBASE_NODE" "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" emulators:exec --config firebase.emulator.json --project demo-smart-city-hub --only auth,firestore "node scripts/firebase-emulator-smoke.js"
+        run: |
+          "$FIREBASE_NODE" "$RUNNER_TEMP/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js" emulators:exec --config firebase.emulator.json --project demo-smart-city-hub --only auth,firestore "node scripts/firebase-emulator-smoke.js"
