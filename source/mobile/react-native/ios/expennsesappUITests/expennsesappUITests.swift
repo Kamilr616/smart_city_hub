@@ -5,7 +5,7 @@ final class expennsesappUITests: XCTestCase {
   private let password = "simulator-test-password"
 
   private func createEmulatorUser() -> String {
-    let email = "ios-\(UUID().uuidString)@example.test"
+    let email = "ui\(UUID().uuidString.prefix(12).lowercased())@e.test"
     let url = URL(string: "http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=demo-key")!
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
@@ -25,6 +25,12 @@ final class expennsesappUITests: XCTestCase {
     XCTAssertNil(requestError, "Auth emulator must be available on localhost")
     XCTAssertEqual(status, 200, "Could not create the local test account")
     return email
+  }
+
+  private func typeCharacters(_ text: String, into field: XCUIElement) {
+    for character in text {
+      field.typeText(String(character))
+    }
   }
 
   private func assertChartIsRendered(_ chart: XCUIElement, file: StaticString = #filePath, line: UInt = #line) {
@@ -75,10 +81,11 @@ final class expennsesappUITests: XCTestCase {
     XCTAssertTrue(emailField.exists)
 
     emailField.tap()
-    emailField.typeText(email)
+    typeCharacters(email, into: emailField)
+    XCTAssertEqual(emailField.value as? String, email, "Email entry did not match the emulator account")
     let passwordField = app.secureTextFields["Hasło"]
     passwordField.tap()
-    passwordField.typeText(password)
+    typeCharacters(password, into: passwordField)
     passwordField.typeText("\n")
     XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 5), "Keyboard did not close")
     app.buttons["Zaloguj"].tap()
