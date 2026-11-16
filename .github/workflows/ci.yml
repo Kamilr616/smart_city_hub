@@ -1,0 +1,132 @@
+name: CI
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+  workflow_dispatch:
+  schedule:
+    - cron: '20 4 * * 1'
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: source/server/api
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 26.13.1
+          cache: npm
+          cache-dependency-path: source/server/api/package-lock.json
+      - run: npm ci
+      - run: npm ls --all
+      - run: npm audit --audit-level=low
+      - run: npm test
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: source/web/react
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 26.13.1
+          cache: npm
+          cache-dependency-path: source/web/react/package-lock.json
+      - run: npm ci
+      - run: npm ls --all
+      - run: npm audit --audit-level=low
+      - run: npm test
+      - run: npm run lint
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: failure()
+        with:
+          name: playwright-results
+          path: source/web/react/test-results
+          if-no-files-found: ignore
+  mobile-js:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: source/mobile/react-native
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 26.13.1
+          cache: npm
+          cache-dependency-path: source/mobile/react-native/package-lock.json
+      - run: npm ci
+      - run: npm ls --all
+      - run: npm audit --audit-level=low
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test -- --runInBand
+  mobile-ios:
+    env:
+      BUNDLE_FROZEN: "true"
+    runs-on: macos-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: source/mobile/react-native
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 26.13.1
+          cache: npm
+          cache-dependency-path: source/mobile/react-native/package-lock.json
+      - uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199 # v1.338.0
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: source/mobile/react-native
+      - run: npm ci
+      - run: bundle exec bundle-audit check --update
+      - run: bundle exec pod install --deployment
+        working-directory: source/mobile/react-native/ios
+      - run: xcodebuild -list -workspace ios/expennsesapp.xcworkspace
+      - run: xcodebuild -showdestinations -workspace ios/expennsesapp.xcworkspace -scheme expennsesapp
+      - name: Build and test simulator
+        run: |
+          DEVICE_ID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for k,v in d["devices"].items() if "iOS" in k for x in v if x["name"].startswith("iPhone")))')
+          xcodebuild test -configuration Release -workspace ios/expennsesapp.xcworkspace -scheme expennsesapp -destination "platform=iOS Simulator,id=$DEVICE_ID" CODE_SIGNING_ALLOWED=NO
+  firmware:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: arduino/setup-arduino-cli@7ef629dcdf0f458ab7ae83149d629443deac6eac # v2.0.0
+        with:
+          version: 1.6.0
+      - name: Compile with placeholder credentials
+        run: |
+          mkdir -p "$RUNNER_TEMP/smart_city_iot"
+          cp source/embedded/esp32_arduino/smart_city_iot/{smart_city_iot.ino,sketch.yaml} "$RUNNER_TEMP/smart_city_iot/"
+          cp source/embedded/esp32_arduino/smart_city_iot/secrets.example.h "$RUNNER_TEMP/smart_city_iot/secrets.h"
+          arduino-cli compile --profile ci "$RUNNER_TEMP/smart_city_iot"
+  ci:
+    if: always()
+    runs-on: ubuntu-latest
+    needs: [api, web, mobile-js, mobile-ios, firmware]
+    steps:
+      - name: Require every job to succeed
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          python3 -c 'import json,os,sys; results=json.loads(os.environ["RESULTS"]); print({k:v["result"] for k,v in results.items()}); sys.exit(any(v["result"] != "success" for v in results.values()))'

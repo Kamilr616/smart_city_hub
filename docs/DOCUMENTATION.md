@@ -223,13 +223,13 @@ A Vercel platform 404 means the function was not detected or the rewrite did not
 ## 9. Known limitations / notes
 
 - The hardware supports IDs 0–95 (6 expanders × 16 outputs). The API enforces that range and unique device IDs, and returns a deterministic 96-element ESP32 payload.
-- API regression tests cover routes, authorization, history validation, the ESP32 payload, database connection reuse/retry, and serverless behavior. In `source/web/react`, `npm test` covers URL/session and chart-data helpers, while `npm run test:e2e` exercises the dashboard with Playwright and a mocked API; these browser tests do not write to a real backend. The mobile project retains one React Native render smoke test. There is no Docker/CI configuration.
+- API regression tests cover routes, authorization, history validation, the ESP32 payload, database connection reuse/retry, and serverless behavior. In `source/web/react`, `npm test` covers URL/session and chart-data helpers, while `npm run test:e2e` exercises the dashboard with Playwright and a mocked API; these browser tests do not write to a real backend. GitHub Actions runs API, web, mobile JavaScript, iOS simulator and firmware checks; the aggregate `ci` job requires all of them to succeed. The mobile backend remains independent. There is no Docker configuration.
 - The web and mobile projects pass their ESLint tasks; the mobile TypeScript check also passes.
 - Firmware credentials are supplied through the ignored `secrets.h`; changing them still requires recompilation.
 - Planned integration of the mobile app with the Node.js API was not completed. The retained prototype uses Firebase, and the two backends are not synchronized.
 - Only an iOS native project is retained for the mobile prototype; building it requires macOS with Xcode. There is no Android native project in this repository.
 - `npm audit` still reports a moderate advisory in the legacy React Native 0.73 CLI dependency tree. npm's proposed automatic fix is a breaking React Native upgrade and should be handled as a separate migration.
-- GraphQL client/core packages are installed, but there is no active GraphQL schema or endpoint; REST is the implemented interface.
+- The implemented interface is REST; there is no active GraphQL schema or endpoint.
 
 ## 10. Licenses
 

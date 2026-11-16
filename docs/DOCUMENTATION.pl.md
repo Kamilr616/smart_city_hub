@@ -223,13 +223,13 @@ Polecenia CLI Vercela uruchamiaj z katalogu głównego repozytorium: CLI sam uwz
 ## 9. Znane ograniczenia / uwagi
 
 - Sprzęt obsługuje identyfikatory 0–95 (6 ekspanderów × 16 wyjść). API wymusza ten zakres i unikalność identyfikatorów oraz zwraca deterministyczną, 96-elementową odpowiedź dla ESP32.
-- Testy regresji API obejmują trasy, autoryzację, walidację historii, odpowiedź dla ESP32, współdzielenie i ponawianie połączenia z bazą oraz zachowanie serverless. W `source/web/react` polecenie `npm test` sprawdza pomocniczą obsługę URL-i, sesji i danych wykresów, a `npm run test:e2e` testuje panel w Playwright z mockowanym API; te testy przeglądarkowe nie zapisują danych w prawdziwym backendzie. Projekt mobilny zachowuje jeden test dymny renderowania React Native. Brak konfiguracji Docker/CI.
+- Testy regresji API obejmują trasy, autoryzację, walidację historii, odpowiedź dla ESP32, współdzielenie i ponawianie połączenia z bazą oraz zachowanie serverless. W `source/web/react` polecenie `npm test` sprawdza pomocniczą obsługę URL-i, sesji i danych wykresów, a `npm run test:e2e` testuje panel w Playwright z mockowanym API; te testy przeglądarkowe nie zapisują danych w prawdziwym backendzie. GitHub Actions uruchamia kontrole API, web, JavaScript mobile, symulatora iOS i firmware; zadanie zbiorcze `ci` wymaga powodzenia wszystkich. Backend mobilny pozostaje niezależny. Brak konfiguracji Docker.
 - Projekty webowy i mobilny przechodzą zadania ESLint; przechodzi również sprawdzenie TypeScript aplikacji mobilnej.
 - Dane konfiguracyjne firmware są dostarczane przez ignorowany plik `secrets.h`; ich zmiana nadal wymaga rekompilacji.
 - Planowana integracja aplikacji mobilnej z API Node.js nie została ukończona. Zachowany prototyp używa Firebase, a oba backendy nie są zsynchronizowane.
 - Dla prototypu mobilnego zachowano tylko natywny projekt iOS; jego zbudowanie wymaga macOS z Xcode. Repozytorium nie zawiera natywnego projektu Android.
 - `npm audit` nadal zgłasza ostrzeżenie poziomu moderate w drzewie zależności starszego CLI React Native 0.73. Automatyczna poprawka proponowana przez npm wymaga niekompatybilnej aktualizacji React Native i powinna być osobną migracją.
-- Zainstalowano pakiety klienta/core GraphQL, ale nie ma aktywnego schematu ani endpointu GraphQL; zaimplementowanym interfejsem jest REST.
+- Zaimplementowanym interfejsem jest REST; nie ma aktywnego schematu ani endpointu GraphQL.
 
 ## 10. Licencje
 
