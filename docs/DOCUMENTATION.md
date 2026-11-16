@@ -228,7 +228,7 @@ A Vercel platform 404 means the function was not detected or the rewrite did not
 - Firmware credentials are supplied through the ignored `secrets.h`; changing them still requires recompilation.
 - Planned integration of the mobile app with the Node.js API was not completed. The retained prototype uses Firebase, and the two backends are not synchronized.
 - Only an iOS native project is retained for the mobile prototype; building it requires macOS with Xcode. There is no Android native project in this repository.
-- The mobile dependency tree uses scoped replacements for deepmerge, grpc-js and minimatch; review their compatibility and upstream fixes when updating. Ruby advisory checks are separate from npm. The example firmware URL uses HTTP, and the current HTTPS path does not validate a certificate; protect tokens and configure a verified TLS client before untrusted-network use.
+- The mobile dependency tree uses scoped replacements for deepmerge, grpc-js and minimatch; review their compatibility and upstream fixes when updating. Ruby advisory checks are separate from npm: the current CocoaPods lock includes ActiveSupport 7.2.4, affected by GHSA-8474-xrp6-wh69. CocoaPods Core currently requires ActiveSupport below 8, while the fixed releases start at 8.0.5.2. The example firmware URL uses HTTP, and the current HTTPS path does not validate a certificate; protect tokens and configure a verified TLS client before untrusted-network use.
 - The implemented interface is REST; there is no active GraphQL schema or endpoint.
 
 ## 10. Licenses
