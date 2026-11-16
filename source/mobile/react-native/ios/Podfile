@@ -24,7 +24,7 @@ target 'expennsesapp' do
   )
 
   target 'expennsesappTests' do
-    inherit! :complete
+    inherit! :search_paths
     # Pods for testing
   end
 
