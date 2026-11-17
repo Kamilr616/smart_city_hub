@@ -11,7 +11,7 @@
     "dev": "ts-node ./lib/index.ts",
     "build": "tsc",
     "postbuild": "node scripts/copy-public.mjs",
-    "watch": "nodemon",
+    "watch": "node --watch --require ts-node/register ./lib/index.ts",
     "seed:admin": "ts-node ./lib/scripts/seedAdmin.ts"
   },
   "author": "Kamil Rataj",
@@ -40,7 +40,6 @@
     "@types/morgan": "1.9.3",
     "@types/node": "^26.6.6",
     "mingo": "^7.2.4",
-    "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "5.9.3"
   }

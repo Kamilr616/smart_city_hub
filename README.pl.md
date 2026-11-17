@@ -126,12 +126,12 @@ Uruchom API:
 
 ```bash
 npm run dev     # tryb deweloperski (ts-node)
-npm run watch   # tryb deweloperski z auto-restartem (nodemon)
+npm run watch   # tryb deweloperski z automatycznym restartem Node.js
 npm run build   # kompilacja TypeScript do dist/
 npm test        # build i testy regresji API, serverless oraz uwierzytelniania
 ```
 
-API domyślnie nasłuchuje na `http://localhost:4200`.
+Tryb watch restartuje API po zmianie punktu wejścia lub importowanych modułów. API domyślnie nasłuchuje na `http://localhost:4200`.
 
 #### Wdrożenie API na Vercelu
 

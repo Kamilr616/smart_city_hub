@@ -123,12 +123,12 @@ Run the API:
 
 ```bash
 npm run dev     # development mode (ts-node)
-npm run watch   # development mode with auto-restart (nodemon)
+npm run watch   # development mode with Node.js auto-restart
 npm run build   # compile TypeScript to dist/
 npm test        # build and run API, serverless, and authentication regression tests
 ```
 
-The API listens on `http://localhost:4200` by default.
+Watch mode restarts the API when its entry point or imported modules change. The API listens on `http://localhost:4200` by default.
 
 #### Deploy the API to Vercel
 
