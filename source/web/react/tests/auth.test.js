@@ -61,6 +61,28 @@ test('session derives administrator access from either supported claim', () => {
   );
 });
 
+test('session excludes untrusted redirect targets from the response and JWT claims', () => {
+  for (const redirect of [
+    'https://outside.invalid/devices',
+    '//outside.invalid/devices',
+    String.raw`\\outside.invalid/devices`,
+    String.raw`/\outside.invalid/devices`,
+  ]) {
+    const jwt = token({ exp: 200, role: 'house1', redirect, returnTo: redirect });
+    assert.deepEqual(
+      parseSession({ token: jwt, redirect, returnTo: redirect }, 100_000),
+      {
+        token: jwt,
+        name: undefined,
+        role: 'house1',
+        userId: undefined,
+        exp: 200,
+        isAdmin: false,
+      },
+    );
+  }
+});
+
 test('invalid persisted sessions are removed and unavailable storage is tolerated', () => {
   let value = '{';
   const storage = {
